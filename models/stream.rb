@@ -1,6 +1,20 @@
 require 'ruby_llm'
 require 'redcarpet'
 
+# Custom renderer for better code formatting
+class CustomHTMLRenderer < Redcarpet::Render::HTML
+    def block_code(code, language)
+        # Clean up the code formatting
+        formatted_code = code.strip.gsub(/\s+$/, '') # Remove trailing whitespace
+        language_class = language ? " class=\"language-#{language}\"" : ""
+        "<pre><code#{language_class}>#{formatted_code}</code></pre>"
+    end
+    
+    def codespan(code)
+        "<code>#{code}</code>"
+    end
+end
+
 
 
 class ChatStreamService
@@ -11,8 +25,8 @@ class ChatStreamService
                 config.openrouter_api_key = ENV['OPENROUTER_API']
         end
         @chat = RubyLLM.chat(model: 'google/gemini-2.0-flash-001')
-        renderer = Redcarpet::Render::HTML.new(filter_html: true, no_styles: true, safe_links_only: true)
-        @markdown = Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true)
+        renderer = CustomHTMLRenderer.new(filter_html: false, no_styles: false, safe_links_only: true)
+        @markdown = Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, space_after_headers: true)
     end
 
     def call(user_message, sinatra_out)

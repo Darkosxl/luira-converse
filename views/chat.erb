@@ -1,15 +1,100 @@
 <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 
+<style>
+/* Loading animations */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.ai-loading .ai-avatar {
+  animation: bounce 2s infinite;
+  position: relative;
+}
+
+.ai-loading .ai-avatar::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid transparent;
+  border-top: 2px solid #1f2937;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  pointer-events: none;
+}
+
+.ai-avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Styled code blocks */
+pre {
+  background-color: #f6f8fa !important;
+  border: 1px solid #d1d9e0 !important;
+  border-radius: 6px !important;
+  padding: 16px !important;
+  margin: 16px 0 !important;
+  white-space: pre !important;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', 'Source Code Pro', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.45 !important;
+  color: #24292f !important;
+  overflow-x: auto !important;
+  max-width: 100% !important;
+}
+
+pre code {
+  background: none !important;
+  padding: 0 !important;
+  border: none !important;
+  font-size: inherit !important;
+}
+
+/* Inline code */
+code {
+  background-color: #f1f3f4 !important;
+  color: #333 !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+  font-size: 13px !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+</style>
+
 <script>
 function startAIStream(message, aiId) {
   const eventSource = new EventSource('/chat/stream?message=' + encodeURIComponent(message));
-  const aiContent = document.getElementById(aiId).querySelector('.bg-gray-50 div');
+  const aiContent = document.getElementById(aiId).querySelector('.text-gray-900 div');
+  const avatarContainer = document.getElementById(aiId).querySelector('.ai-avatar-container');
   aiContent.innerHTML = '';
   
   let htmlContent = '';
   let charQueue = [];
   let isTyping = false;
+  let streamingStarted = false;
   
   function typeNextChar() {
     if (charQueue.length > 0 && !isTyping) {
@@ -24,6 +109,12 @@ function startAIStream(message, aiId) {
   }
   
   eventSource.onmessage = function(event) {
+    // Remove loading animation when first character arrives
+    if (!streamingStarted) {
+      streamingStarted = true;
+      avatarContainer.classList.remove('ai-loading');
+    }
+    
     charQueue.push(event.data);
     typeNextChar();
   };
@@ -33,78 +124,57 @@ function startAIStream(message, aiId) {
   });
   
   eventSource.onerror = function() {
+    avatarContainer.classList.remove('ai-loading');
     aiContent.textContent = 'Error loading response';
     eventSource.close();
   };
 }
 
-// Sidebar toggle functions
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const overlay = document.getElementById('sidebarOverlay');
-  
-  if (sidebar.classList.contains('-translate-x-full')) {
-    sidebar.classList.remove('-translate-x-full');
-    overlay.classList.remove('hidden');
-  } else {
-    sidebar.classList.add('-translate-x-full');
-    overlay.classList.add('hidden');
-  }
-}
 
-function closeSidebar() {
-  document.getElementById('sidebar').classList.add('-translate-x-full');
-  document.getElementById('sidebarOverlay').classList.add('hidden');
-}
 
-function hideWelcome() {
-  document.getElementById('welcome-section').style.display = 'none';
-}
+
 </script>
 
 <body class="min-h-screen bg-white flex">
 
 <%= erb :sidebar, layout: false %>
+<%= erb :_agent_sidebar, layout: false %>
 
 <!-- Main content -->
 <div class="flex-1 flex flex-col">
 
 <!-- Header with sidebar toggle -->
-<div class="bg-white border-b border-gray-200 px-4 py-3">
-  <div class="flex items-center">
-    <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg mr-3">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
+<div class="bg-white px-4 py-4">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center">
+      <button class="p-2 hover:bg-gray-100 rounded-lg mr-2" 
+              hx-post="/toggle-left-sidebar" 
+              hx-target="#sidebar"
+              hx-swap="outerHTML">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </div>
+    <button class="p-2 hover:bg-gray-100 rounded-lg" 
+            hx-post="/toggle-right-sidebar" 
+            hx-target="#agent-sidebar"
+            hx-swap="outerHTML">
+      <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
+        <span style="filter: brightness(0) invert(1);">✨</span>
+      </div>
     </button>
-    <h1 class="text-lg font-semibold text-gray-900">Chat</h1>
   </div>
 </div>
 
 <!-- Message Container -->
 <div class="flex-1 overflow-y-auto px-4 py-6">
   <div class="container max-w-3xl mx-auto space-y-4">
-    <!-- Welcome Message -->
-    <div id="welcome-section" class="text-center mt-20">
-      <h1 class="text-2xl font-bold text-gray-900 mb-2">Hello there!</h1>
-      <p class="text-gray-600 mb-8">How can I help you today?</p>
-      
-      <!-- Suggested Prompts -->
-      <div class="grid grid-cols-2 gap-3 max-w-2xl mx-auto mb-8">
-        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
-          What are the advantages of using Next.js?
-        </button>
-        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
-          Write code to demonstrate Dijkstra's algorithm
-        </button>
-        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
-          Help me write an essay about Silicon Valley
-        </button>
-        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
-          What is the weather in San Francisco?
-        </button>
+    <% if @show_welcome %>
+      <div id="welcome-section">
+        <%= erb :_welcome, layout: false %>
       </div>
-    </div>
+    <% end %>
     <!-- Messages will be inserted here -->
   </div>
 </div>
@@ -116,7 +186,7 @@ function hideWelcome() {
           hx-post="/chat/messages"
           hx-target=".container"
           hx-swap="beforeend"
-          onsubmit="hideWelcome()">
+          hx-on::after-request="document.getElementById('welcome-section')?.remove()">
       <input class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent" 
              name="message" 
              type="text" 
