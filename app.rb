@@ -3,6 +3,8 @@ require 'erb'
 require 'ruby_llm'
 require 'dotenv'
 require 'sinatra/sse'
+require 'date'
+require 'redcarpet'
 require_relative 'models/stream'
 require_relative 'models/database'
 
@@ -82,6 +84,74 @@ class SinatraRouter < Sinatra::Base
     post '/set-message' do
         # Just return empty - this is for the HTMX buttons to work
         ""
+    end
+
+    # Chat history routes
+    get '/chat/history' do
+        chats = @database.get_chats
+        grouped_chats = group_chats_by_date(chats)
+        
+        content_type 'text/html'
+        erb :chat_history, layout: false, locals: { grouped_chats: grouped_chats }
+    end
+
+    delete '/chat/:id' do
+        chat_id = params[:id]
+        @database.delete_chat_by_id(chat_id)
+        
+        # Return updated chat history
+        chats = @database.get_chats
+        grouped_chats = group_chats_by_date(chats)
+        
+        content_type 'text/html'
+        erb :chat_history, layout: false, locals: { grouped_chats: grouped_chats }
+    end
+
+    get '/chat/:id' do
+        chat_id = params[:id]
+        @current_chat = @database.get_chat_by_id(chat_id)
+        messages = @database.get_messages_by_chat_id(chat_id)
+        
+        # Set up session variables that the chat template expects
+        @show_welcome = false
+        @left_sidebar_open = session[:left_sidebar_open] || false
+        @right_sidebar_open = session[:right_sidebar_open] || false
+        @expanded_sections = session[:expanded_sections] || {}
+        
+        erb :chat, locals: { messages: messages }
+    end
+
+    private
+
+    def group_chats_by_date(chats)
+        now = Date.today
+        
+        grouped = {
+            today: [],
+            yesterday: [],
+            last_week: [],
+            last_month: [],
+            older: []
+        }
+        
+        chats.each do |chat|
+            chat_date = Date.parse(chat[:createdAt].to_s)
+            days_ago = (now - chat_date).to_i
+            
+            if days_ago == 0
+                grouped[:today] << chat
+            elsif days_ago == 1
+                grouped[:yesterday] << chat
+            elsif days_ago <= 7
+                grouped[:last_week] << chat
+            elsif days_ago <= 30
+                grouped[:last_month] << chat
+            else
+                grouped[:older] << chat
+            end
+        end
+        
+        grouped
     end
     
 end

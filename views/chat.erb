@@ -82,6 +82,34 @@ code {
   white-space: pre-wrap !important;
   word-wrap: break-word !important;
 }
+
+/* Table styling */
+table {
+  border-collapse: collapse !important;
+  width: 100% !important;
+  margin: 16px 0 !important;
+  font-size: 14px !important;
+}
+
+table th, table td {
+  border: 1px solid #d1d5db !important;
+  padding: 8px 12px !important;
+  text-align: left !important;
+}
+
+table th {
+  background-color: #f9fafb !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
+}
+
+table tr:nth-child(even) {
+  background-color: #f9fafb !important;
+}
+
+table tr:hover {
+  background-color: #f3f4f6 !important;
+}
 </style>
 
 <script>
@@ -175,7 +203,55 @@ function startAIStream(message, aiId) {
         <%= erb :_welcome, layout: false %>
       </div>
     <% end %>
-    <!-- Messages will be inserted here -->
+    
+    <!-- Existing Messages -->
+    <% if locals[:messages] && locals[:messages].any? %>
+      <% locals[:messages].each do |message| %>
+        <% if message[:role] == 'user' %>
+          <div class="flex justify-end mb-4">
+            <div class="bg-black text-white p-4 rounded-2xl rounded-br-md max-w-2xl">
+              <% 
+                parts = JSON.parse(message[:parts])
+                text_content = parts.map { |part| part['text'] }.compact.join(' ')
+                # Only convert newlines that aren't part of tables
+                unless text_content.include?('|')
+                  text_content = text_content.gsub("\n", "\n\n")
+                end
+                renderer = Redcarpet::Render::HTML.new(filter_html: true, no_styles: true, safe_links_only: true)
+                markdown = Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, space_after_headers: true)
+                rendered_html = markdown.render(text_content)
+              %>
+              <%= rendered_html.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&amp;', '&') %>
+            </div>
+          </div>
+        <% elsif message[:role] == 'assistant' %>
+          <div class="flex justify-start mb-6">
+            <div class="flex items-start gap-3 max-w-2xl">
+              <div class="ai-avatar-container">
+                <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 ai-avatar">✨</div>
+              </div>
+              <div class="text-gray-900 flex-1 min-w-0 break-words">
+                <div>
+                  <% 
+                    parts = JSON.parse(message[:parts])
+                    text_content = parts.map { |part| part['text'] }.compact.join(' ')
+                    # Only convert newlines that aren't part of tables
+                    unless text_content.include?('|')
+                      text_content = text_content.gsub("\n", "\n\n")
+                    end
+                    renderer = Redcarpet::Render::HTML.new(filter_html: true, no_styles: true, safe_links_only: true)
+                    markdown = Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, space_after_headers: true)
+                    rendered_html = markdown.render(text_content)
+                  %>
+                  <%= rendered_html.gsub('&lt;', '<').gsub('&gt;', '>').gsub('&amp;', '&') %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    <% end %>
+    <!-- New messages will be inserted here -->
   </div>
 </div>
 

@@ -14,17 +14,12 @@
   </div>
   
   <div class="overflow-y-auto h-full pb-20">
-    <div class="p-2">
-      <div class="text-xs text-gray-500 mb-2 px-2">Yesterday</div>
-      <div class="space-y-1">
-        <div class="p-2 hover:bg-gray-100 rounded cursor-pointer text-sm text-gray-700">
-          Dijkstra's Algorithm Code De...
-        </div>
-        <div class="p-2 hover:bg-gray-100 rounded cursor-pointer text-sm text-gray-700">
-          Advantages of Next.js
-        </div>
-      </div>
-      <div class="text-xs text-gray-500 mt-4 mb-2 px-2">You have reached the end of your chat history.</div>
+    <div class="p-2" 
+         hx-get="/chat/history" 
+         hx-trigger="load" 
+         hx-target="this" 
+         hx-swap="innerHTML">
+      <div class="text-center text-gray-500 text-sm">Loading chats...</div>
     </div>
   </div>
 </div>
