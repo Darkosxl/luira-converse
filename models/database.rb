@@ -1,32 +1,34 @@
+require 'sequel'
+require 'pg'
+
 class Database
-  # Initialize with empty data structures
+  
   def initialize
-    @sectors = []
+    @db = Sequel.connect(ENV['POSTGRES_URL'])
+    @sectors = [] 
+    @subsectors = []
+    @subsector_metrics = []
     @metrics = []
     @chat_history = []
     @vc_firms = []
     @startups = []
   end
 
-  # Sectors for ranking model
   def get_sectors
-    @sectors
+    @sectors = db["SELECT DISTINCT trim(unnest(string_to_array(categories, ','))) AS sector FROM funding_rounds_v2 ORDER BY sector"]
+  end
+  
+  def get_subsectors
+    @subsectors = db["SELECT DISTINCT trim(unnest(string_to_array(categories, ','))) AS subsector FROM funding_rounds_v2 ORDER BY subsector"]
   end
 
-  def add_sector(sector)
-    @sectors << sector unless @sectors.include?(sector)
-  end
-
-  # Metrics for ranking model
   def get_metrics
-    @metrics
+    @metrics = ['Current Market Size', 'CAGR', 'Total Exits / Total Investments', 'AUM', 'Ticket Size', ' Follow on Index', 'Exit Multiple']
+  end
+  def get_subsector_metrics
+    @subsector_metrics = ['Series #', 'subsector specific exit / investment']
   end
 
-  def add_metric(metric)
-    @metrics << metric unless @metrics.include?(metric)
-  end
-
-  # Chat history management
   def get_chat_history
     @chat_history
   end
@@ -43,7 +45,6 @@ class Database
     @chat_history = []
   end
 
-  # VC firms for prediction models
   def get_vc_firms
     @vc_firms
   end
@@ -52,7 +53,6 @@ class Database
     @vc_firms << firm unless @vc_firms.include?(firm)
   end
 
-  # Startups for prediction models
   def get_startups
     @startups
   end
@@ -61,9 +61,10 @@ class Database
     @startups << startup unless @startups.include?(startup)
   end
 
-  # General utility methods
   def reset_all_data
     @sectors = []
+    @subsectors = []
+    @subsector_metrics = []
     @metrics = []
     @chat_history = []
     @vc_firms = []

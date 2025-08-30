@@ -1,6 +1,7 @@
 require 'ruby_llm'
 require 'redcarpet'
 
+
 # Custom renderer for better code formatting
 class CustomHTMLRenderer < Redcarpet::Render::HTML
     def block_code(code, language)
