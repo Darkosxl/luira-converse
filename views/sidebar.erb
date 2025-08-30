@@ -1,0 +1,29 @@
+<div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 transform -translate-x-full transition-transform duration-300 ease-in-out z-50">
+  <div class="p-4 border-b border-gray-200">
+    <div class="flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-gray-900">Chatbot</h2>
+      <button onclick="closeSidebar()" class="p-1 hover:bg-gray-100 rounded">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  
+  <div class="overflow-y-auto h-full pb-20">
+    <div class="p-2">
+      <div class="text-xs text-gray-500 mb-2 px-2">Yesterday</div>
+      <div class="space-y-1">
+        <div class="p-2 hover:bg-gray-100 rounded cursor-pointer text-sm text-gray-700">
+          Dijkstra's Algorithm Code De...
+        </div>
+        <div class="p-2 hover:bg-gray-100 rounded cursor-pointer text-sm text-gray-700">
+          Advantages of Next.js
+        </div>
+      </div>
+      <div class="text-xs text-gray-500 mt-4 mb-2 px-2">You have reached the end of your chat history.</div>
+    </div>
+  </div>
+</div>
+
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" onclick="closeSidebar()"></div>

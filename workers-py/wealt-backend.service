@@ -1,0 +1,19 @@
+[Unit]
+Description=Wealt AI Backend Flask App
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/path/to/your/Wealt_AI_Project/workers-py
+Environment=PATH=/path/to/your/venv/bin
+Environment=FLASK_SECRET_KEY=your-super-secret-key-here
+Environment=GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/service-account.json
+ExecStart=/path/to/your/venv/bin/gunicorn --config gunicorn.conf.py application:application
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

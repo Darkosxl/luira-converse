@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VC Assistant</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <!-- Add other head elements like charset, viewport -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+    <!-- Basic CSP: Allow self, scripts from self and CDN, inline styles -->
+</head>
+<body>
+    <h1>VC Assistant</h1>
+    <div id="chatbox">
+        <!-- Initial greeting can be placed here or added via JS -->
+         <div class="message assistant">Hi! Ask me about Venture Capital firms.</div>
+    </div>
+    <div id="input-area">
+        <input type="text" id="userInput" placeholder="Type your message...">
+        <button id="sendButton">Send</button>
+    </div>
+
+    <!-- Remove marked.js -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
+
+    <!-- Include markdown-it library -->
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+
+    <!-- Include DOMPurify library -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.0/dist/purify.min.js"></script>
+
+    <!-- Include your custom script -->
+    <script src="/static/script.js"></script>
+</body>
+</html>

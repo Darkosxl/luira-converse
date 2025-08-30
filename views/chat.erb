@@ -1,0 +1,135 @@
+<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+function startAIStream(message, aiId) {
+  const eventSource = new EventSource('/chat/stream?message=' + encodeURIComponent(message));
+  const aiContent = document.getElementById(aiId).querySelector('.bg-gray-50 div');
+  aiContent.innerHTML = '';
+  
+  let htmlContent = '';
+  let charQueue = [];
+  let isTyping = false;
+  
+  function typeNextChar() {
+    if (charQueue.length > 0 && !isTyping) {
+      isTyping = true;
+      htmlContent += charQueue.shift();
+      aiContent.innerHTML = htmlContent;
+      setTimeout(() => {
+        isTyping = false;
+        typeNextChar();
+      }, 7);
+    }
+  }
+  
+  eventSource.onmessage = function(event) {
+    charQueue.push(event.data);
+    typeNextChar();
+  };
+  
+  eventSource.addEventListener('complete', function(event) {
+    eventSource.close();
+  });
+  
+  eventSource.onerror = function() {
+    aiContent.textContent = 'Error loading response';
+    eventSource.close();
+  };
+}
+
+// Sidebar toggle functions
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  
+  if (sidebar.classList.contains('-translate-x-full')) {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+  } else {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+  }
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.add('-translate-x-full');
+  document.getElementById('sidebarOverlay').classList.add('hidden');
+}
+
+function hideWelcome() {
+  document.getElementById('welcome-section').style.display = 'none';
+}
+</script>
+
+<body class="min-h-screen bg-white flex">
+
+<%= erb :sidebar, layout: false %>
+
+<!-- Main content -->
+<div class="flex-1 flex flex-col">
+
+<!-- Header with sidebar toggle -->
+<div class="bg-white border-b border-gray-200 px-4 py-3">
+  <div class="flex items-center">
+    <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg mr-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+    <h1 class="text-lg font-semibold text-gray-900">Chat</h1>
+  </div>
+</div>
+
+<!-- Message Container -->
+<div class="flex-1 overflow-y-auto px-4 py-6">
+  <div class="container max-w-3xl mx-auto space-y-4">
+    <!-- Welcome Message -->
+    <div id="welcome-section" class="text-center mt-20">
+      <h1 class="text-2xl font-bold text-gray-900 mb-2">Hello there!</h1>
+      <p class="text-gray-600 mb-8">How can I help you today?</p>
+      
+      <!-- Suggested Prompts -->
+      <div class="grid grid-cols-2 gap-3 max-w-2xl mx-auto mb-8">
+        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
+          What are the advantages of using Next.js?
+        </button>
+        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
+          Write code to demonstrate Dijkstra's algorithm
+        </button>
+        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
+          Help me write an essay about Silicon Valley
+        </button>
+        <button class="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 text-sm text-gray-700">
+          What is the weather in San Francisco?
+        </button>
+      </div>
+    </div>
+    <!-- Messages will be inserted here -->
+  </div>
+</div>
+
+<!-- Input Form - Sticky at bottom -->
+<div class="sticky bottom-0 bg-white px-4 py-4">
+  <div class="max-w-3xl mx-auto">
+    <form class="relative"
+          hx-post="/chat/messages"
+          hx-target=".container"
+          hx-swap="beforeend"
+          onsubmit="hideWelcome()">
+      <input class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent" 
+             name="message" 
+             type="text" 
+             placeholder="Send a message..."/>
+      <button class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-lg transition-colors" type="submit">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+</div>
+
+</body>

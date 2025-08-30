@@ -1,0 +1,255 @@
+/* static/style.css */
+
+/* --- Basic Layout & Page Styles --- */
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 95vh; /* Use most of the viewport height */
+    margin: 10px;
+    background-color: #f0f0f0; /* Light background for the page */
+    box-sizing: border-box; /* Include padding/border in element's total width/height */
+}
+
+*, *:before, *:after {
+  box-sizing: inherit; /* Apply box-sizing to all elements */
+}
+
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-top: 0; /* Remove default top margin */
+    margin-bottom: 10px; /* Added some bottom margin */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+#chatbox {
+    flex-grow: 1; /* Allow chatbox to fill available vertical space */
+    border: 1px solid #ccc;
+    padding: 15px; /* More padding */
+    overflow-y: auto; /* Changed to auto - scrollbar only when needed */
+    margin-bottom: 10px;
+    background-color: #ffffff; /* White background for chat area */
+    border-radius: 5px; /* Slightly rounded corners */
+    display: flex; /* Use flexbox for messages */
+    flex-direction: column; /* Stack messages vertically */
+}
+
+#input-area {
+    display: flex;
+    border-top: 1px solid #ccc;
+    padding: 10px; /* Reduced padding slightly */
+    background-color: #f9f9f9; /* Slight background for input area */
+    border-radius: 0 0 5px 5px; /* Round bottom corners */
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+#userInput {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 15px; /* More rounded input */
+    margin-right: 10px; /* Space between input and button */
+}
+
+#sendButton {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 15px; /* Match input rounding */
+    cursor: pointer;
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+#sendButton:hover {
+    background-color: #0056b3;
+}
+
+#sendButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* --- Message Bubble Styles --- */
+.message {
+    margin-bottom: 10px; /* Increased space between messages */
+    padding: 10px 15px; /* More padding inside bubbles */
+    border-radius: 18px; /* Rounded bubbles */
+    max-width: 85%; /* Slightly increased max width */
+    word-wrap: break-word; /* Wrap long words */
+    line-height: 1.4; /* Improve readability */
+    /* Add user-select for easier text copying from bubbles */
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+.user {
+    background-color: #dcf8c6; /* Light green for user */
+    align-self: flex-end; /* Align user messages to the right */
+    margin-left: auto; /* Push to the right */
+}
+
+.assistant {
+    background-color: #e5e5ea; /* Light grey for assistant */
+    align-self: flex-start; /* Align assistant messages to the left */
+    margin-right: auto; /* Push to the left */
+}
+
+
+/* --- NEW: SCROLLABLE TABLE CONTAINER --- */
+.scrollable-table-container {
+    max-width: 100%;        /* Prevent container from exceeding parent width */
+    max-height: 400px;       /* <<< SET MAX HEIGHT for vertical scrolling */
+    overflow: auto;         /* <<< ADD SCROLLBARS (horizontal/vertical) when needed */
+    border: 1px solid #dcdcdc; /* Optional: border around the scrollable area */
+    margin-top: 10px;       /* Space above the container */
+    margin-bottom: 10px;    /* Space below the container */
+    border-radius: 5px;    /* Match message bubble rounding */
+    background-color: #fff; /* Ensure background is white */
+}
+
+/* --- Styles for Tables WITHIN the Scrollable Container --- */
+.scrollable-table-container table {
+    border-collapse: collapse; /* Removes double borders */
+    width: 100%; /* Make table fill the container */
+    font-size: 0.9em; /* Slightly smaller font for table data */
+    /* Removed border here, container has border */
+    color: #333; /* Ensure table text is readable */
+    /* Removed background-color, container has it */
+    /* min-width: 600px; */ /* Optional: Uncomment if you want a minimum width before horizontal scroll */
+}
+
+.scrollable-table-container th,
+.scrollable-table-container td {
+    border: 1px solid #ddd; /* Light borders for cells */
+    padding: 8px;          /* Padding inside cells */
+    text-align: left;      /* Align text to the left */
+    word-wrap: break-word; /* Wrap text within cells */
+    white-space: normal;   /* Allow text wrapping (default but good to be explicit) */
+}
+
+.scrollable-table-container th {
+    background-color: #f2f2f2; /* Light grey background for header cells */
+    font-weight: bold;       /* Make header text bold */
+    color: #333;
+    position: sticky;        /* <<< Make header sticky */
+    top: 0;                  /* <<< Stick to the top of the container */
+    z-index: 1;              /* Ensure header stays above table content */
+    /* Add a border below sticky header for visual separation */
+    border-bottom: 2px solid #ccc;
+}
+
+/* Optional: zebra-striping for table rows */
+.scrollable-table-container tbody tr:nth-child(even) {
+    background-color: #f9f9f9; /* Slightly different background for even rows */
+}
+/* Add this block to static/style.css */
+
+/* --- Copy Button Styles --- */
+.copy-button {
+    display: block; /* Display button below the table */
+    margin-left: auto; /* Align button to the right */
+    margin-top: 8px; /* Space above the button */
+    padding: 4px 8px;
+    font-size: 0.8em;
+    background-color: #6c757d; /* Grey background */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.8; /* Slightly transparent */
+    transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.copy-button:hover {
+    background-color: #5a6268;
+    opacity: 1; /* Fully opaque on hover */
+}
+
+.copy-button.copied {
+    background-color: #28a745; /* Green background when copied */
+    cursor: default;
+}
+
+/* --- Styles for Paginated Options List --- */
+.options-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    color: #333;
+}
+
+.options-table-container { /* Style for the container holding the paginated table */
+    max-width: 100%;
+    max-height: 300px; /* Adjust height for paged view */
+    overflow-y: auto;  /* Vertical scroll for the *page* if needed, but often not */
+    border: 1px solid #e0e0e0;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.options-table-container table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9em;
+}
+
+.options-table-container th,
+.options-table-container td {
+    border: 1px solid #eee;
+    padding: 6px 8px;
+    text-align: left;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.options-table-container th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    /* No longer need sticky header for paginated view */
+}
+
+/* --- Pagination Controls --- */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    margin-top: 5px;
+}
+
+.pagination-button {
+    padding: 4px 10px;
+    font-size: 0.9em;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.pagination-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.page-info {
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* --- Ensure original scrollable table styles still work for non-paginated tables --- */
+
+/* --- END TABLE STYLES --- */
