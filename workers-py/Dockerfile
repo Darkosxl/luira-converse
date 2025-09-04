@@ -1,5 +1,5 @@
 # Python backend (Flask + Gunicorn)
-FROM python:3.12-slim AS base
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -12,16 +12,16 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends build-essential libpq-dev \
  && rm -rf /var/lib/apt/lists/*
 
-COPY workers-py/requirements.txt ./requirements.txt
+# Copy requirements and install Python dependencies
+COPY requirements.txt ./
 RUN pip install --upgrade pip \
  && pip install -r requirements.txt
 
-COPY workers-py/ .
+# Copy all Python backend files
+COPY . .
 
 # Gunicorn binds to 0.0.0.0:5000 inside container
 ENV PORT=5000
 EXPOSE 5000
 
 CMD ["gunicorn", "-c", "gunicorn.conf.py", "application:application"]
-
-
