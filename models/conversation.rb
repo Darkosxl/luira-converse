@@ -19,6 +19,13 @@ class CustomHTMLRenderer < Redcarpet::Render::HTML
 end
 
 class ConversationHost
+    # Use class variable for shared storage across instances
+    @@completed_responses = {}
+    
+    def self.completed_responses
+        @@completed_responses
+    end
+    
     def initialize()
         Dotenv.load
         RubyLLM.configure do |config|
@@ -29,51 +36,30 @@ class ConversationHost
         @markdown = Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, space_after_headers: true)
     end
 
-    def call_capmap(user_message, ai_id, chat_id)
+    def call_capmap(user_message, ai_id, chat_id, database)
         require 'http'
-        puts "🚀 Calling Flask backend..."
         response = HTTP.post(ENV['VC_COPILOT_FLASK_URL'], 
-            json: { message: user_message,
-        general_agent_check: false }
-        )
+            json: { message: user_message, general_agent_check: false })
         
-        
-        
-        # Parse the Flask response to get the AI message
         flask_response = JSON.parse(response.body.to_s)
         ai_message = flask_response['reply'] || response.body.to_s
+        rendered_html = @markdown.render(ai_message)
         
-        # Post the AI response back to Sinatra
-
-        result = Rack::MockRequest.new(SinatraRouter).post('/chat/ai_response', 
-            input: { 
-                content: ai_message,
-                ai_id: ai_id,
-                chat_id: chat_id
-            }.to_json,
-            'CONTENT_TYPE' => 'application/json'
-        )
-        puts "📨 Rack::MockRequest response: #{result.status} - #{result.body[0..100]}..."
-        
+        database.update_or_create_chat("private", ai_message, chat_id, "assistant")
+        @@completed_responses[ai_id] = rendered_html
     end
 
-    def call_luira(user_message, sinatra_out)
+    def call_luira(user_message, ai_id, chat_id, database)
         full_response = ""
         
-        # Collect the complete response first
         @chat.ask(user_message) do |chunk|
             full_response += chunk.content
         end
         
-        # Convert to markdown HTML
-        rendered_markdown = @markdown.render(full_response)
-        
-        # Stream the HTML character by character
-        rendered_markdown.each_char do |char|
-            sinatra_out << "data: #{char}\n\n"
-        end
-        
-        # Signal completion
-        sinatra_out << "event: complete\ndata: done\n\n"
+        rendered_html = @markdown.render(full_response)
+        database.update_or_create_chat("private", full_response, chat_id, "assistant")
+        @@completed_responses[ai_id] = rendered_html
     end
+
+    
 end

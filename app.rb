@@ -41,7 +41,8 @@ class SinatraRouter < Sinatra::Base
     end
     #USER INITITATES CHAT, OR SENDS MESSAGES, THOSE GET SAVED, AND THEY CALL THE BACKEND TO GET THE AI RESPONSE
     post '/chat/messages' do
-        user_message = params[:message]  
+        user_message = params[:message]
+        use_luira = params[:use_luira] == 'true'
         chat_id = @database.update_or_create_chat("private", user_message, session[:current_chat_id])
         session[:current_chat_id] = chat_id
         session[:first_visit] = false
@@ -49,27 +50,45 @@ class SinatraRouter < Sinatra::Base
         ai_id = "ai-response-#{Time.now.to_f.to_s.gsub('.', '')}"
         
         Thread.new do
-            @conversation.call_capmap(user_message, ai_id, chat_id)
+            if use_luira
+                @conversation.call_luira(user_message, ai_id, chat_id, @database)
+            else
+                @conversation.call_capmap(user_message, ai_id, chat_id, @database)
+            end
         end
 
         user_html = erb :user_message, layout: false, locals: {message: user_message}
-        ai_placeholder = "<div id=\"#{ai_id}\" class=\"flex justify-start mb-6\"><div class=\"flex items-start gap-3 max-w-2xl\"><div class=\"ai-avatar-container ai-loading\"><div class=\"w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 ai-avatar\">✨</div></div><div class=\"text-gray-900 flex-1 min-w-0 break-words\"><div class=\"typing-indicator\">AI is thinking...</div></div></div></div>"
+        logo_src = use_luira ? "/logo_luira.svg" : "/logo.svg"
+        ai_placeholder = "<div id=\"#{ai_id}\" class=\"flex justify-start mb-6\"><div class=\"flex items-start gap-3 max-w-2xl\"><div class=\"ai-avatar-container ai-loading\"><img src=\"#{logo_src}\" class=\"logo-loading\" alt=\"Loading\"></div><div class=\"text-gray-900 flex-1 min-w-0 break-words\"><div class=\"typing-indicator\">AI is thinking...</div></div></div></div>"
         
-        "#{user_html}#{ai_placeholder}"
+        # Start SSE connection immediately
+        sse_script = "<script>startAIStream('', '#{ai_id}');</script>"
+        
+        "#{user_html}#{ai_placeholder}#{sse_script}"
     end
-    # AI RESPONSE sent from backend TAKEN HERE, IT IS SAVED AND THEN STREAMED TO THE FRONTEND
-    post '/chat/ai_response' do
-        data = JSON.parse(request.body.read)
-        ai_content = data['content']
-        ai_id = data['ai_id'] 
-        chat_id = data['chat_id']
+    
+    # SSE endpoint to stream AI responses
+    get '/chat/stream/:ai_id' do
+        content_type 'text/event-stream'
+        cache_control 'no-cache'
         
-        # Save AI message to database
-        @database.update_or_create_chat("private", ai_content, chat_id, "assistant")
+        ai_id = params[:ai_id]
         
-        # Return the script to start AI streaming with the pre-created response
-        content_type 'text/html'
-        "<script>startAIStream('#{ai_content.gsub("'", "\\'")}', '#{ai_id}')</script>"
+        stream do |out|
+            while !ConversationHost.completed_responses[ai_id]
+                sleep 0.1
+            end
+            
+            ai_message = ConversationHost.completed_responses[ai_id]
+            ConversationHost.completed_responses.delete(ai_id)
+            
+            ai_message.each_char do |char|
+                out << "data: #{char}\n\n"
+                sleep 0.003
+            end
+            
+            out << "event: complete\ndata: done\n\n"
+        end
     end
     
     # Sidebar toggle routes

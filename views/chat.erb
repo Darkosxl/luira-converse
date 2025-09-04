@@ -24,28 +24,18 @@
   }
 }
 
-.ai-loading .ai-avatar {
-  animation: bounce 2s infinite;
-  position: relative;
-}
-
-.ai-loading .ai-avatar::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border: 2px solid transparent;
-  border-top: 2px solid #1f2937;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  pointer-events: none;
+.ai-loading img, .logo-loading {
+  width: 32px;
+  height: 32px;
 }
 
 .ai-avatar-container {
   position: relative;
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
 }
 
 /* Styled code blocks */
@@ -110,35 +100,129 @@ table tr:nth-child(even) {
 table tr:hover {
   background-color: #f3f4f6 !important;
 }
+
+/* Button hold animation */
+#send-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(to top, #2563eb, #3b82f6);
+  transition: height 0.5s ease-in-out;
+  border-radius: 50%;
+}
+
+#send-button.hold-active::after {
+  height: 100%;
+}
+
+/* Logo rotation animation */
+@keyframes logoRotate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(180deg); }
+  50% { transform: rotate(180deg); }
+  75% { transform: rotate(-180deg); }
+  100% { transform: rotate(-180deg); }
+}
+
+.logo-loading {
+  animation: logoRotate 3s infinite;
+}
 </style>
 
 <script>
+let holdTimeout;
+let isCapmapMode = true; // Start in capmap mode (black button)
+let justToggled = false;
+
+function updateButtonMode() {
+  const button = document.getElementById('send-button');
+  const luiraInput = document.getElementById('use-luira-input');
+  
+  if (isCapmapMode) {
+    button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+    button.classList.add('bg-black', 'hover:bg-gray-800');
+    luiraInput.value = 'false';
+  } else {
+    button.classList.remove('bg-black', 'hover:bg-gray-800');
+    button.classList.add('bg-blue-600', 'hover:bg-blue-700');
+    luiraInput.value = 'true';
+  }
+}
+
+function getCurrentLogo() {
+  return isCapmapMode ? '/logo.svg' : '/logo_luira.svg';
+}
+
+function handleSendButtonDown() {
+  const button = document.getElementById('send-button');
+  button.classList.add('hold-active');
+  
+  holdTimeout = setTimeout(() => {
+    // Toggle mode on hold
+    isCapmapMode = !isCapmapMode;
+    updateButtonMode();
+    justToggled = true;
+  }, 500); // 500ms hold time
+}
+
+function handleSendButtonUp() {
+  const button = document.getElementById('send-button');
+  button.classList.remove('hold-active');
+  clearTimeout(holdTimeout);
+  
+  // Reset toggle flag after a short delay
+  if (justToggled) {
+    setTimeout(() => {
+      justToggled = false;
+    }, 100);
+  }
+}
+
+// Initialize button mode on page load
+document.addEventListener('DOMContentLoaded', function() {
+  updateButtonMode();
+});
+
+// Prevent form submission if we just toggled
+document.querySelector('form').addEventListener('submit', function(e) {
+  if (justToggled) {
+    e.preventDefault();
+    return false;
+  }
+});
+
 function startAIStream(aiResponse, aiId) {
   const aiContent = document.getElementById(aiId).querySelector('.text-gray-900 div');
   const avatarContainer = document.getElementById(aiId).querySelector('.ai-avatar-container');
+  
+  const eventSource = new EventSource('/chat/stream/' + aiId);
+  let accumulatedContent = '';
   aiContent.innerHTML = '';
   
-  let htmlContent = '';
-  let charQueue = aiResponse.split('');
-  let isTyping = false;
-  
-  // Remove loading animation immediately
-  avatarContainer.classList.remove('ai-loading');
-  
-  function typeNextChar() {
-    if (charQueue.length > 0 && !isTyping) {
-      isTyping = true;
-      htmlContent += charQueue.shift();
-      aiContent.innerHTML = htmlContent;
-      setTimeout(() => {
-        isTyping = false;
-        typeNextChar();
-      }, 3);
+  eventSource.onmessage = function(event) {
+    if (avatarContainer.classList.contains('ai-loading')) {
+      avatarContainer.classList.remove('ai-loading');
     }
-  }
+    accumulatedContent += event.data;
+    // Show accumulated content as HTML
+    aiContent.innerHTML = accumulatedContent;
+  };
   
-  // Start typing immediately
-  typeNextChar();
+  eventSource.addEventListener('complete', function(event) {
+    // Final render to ensure proper HTML
+    aiContent.innerHTML = accumulatedContent;
+    eventSource.close();
+  });
+  
+  eventSource.onerror = function(error) {
+    console.error('SSE error:', error);
+    avatarContainer.classList.remove('ai-loading');
+    aiContent.textContent = 'Error loading response';
+    eventSource.close();
+  };
 }
 
 
@@ -171,9 +255,7 @@ function startAIStream(aiResponse, aiId) {
             hx-post="/toggle-right-sidebar" 
             hx-target="#agent-sidebar"
             hx-swap="outerHTML">
-      <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0">
-        <span style="filter: brightness(0) invert(1);">✨</span>
-      </div>
+      <img src="/logo.svg" style="width: 32px; height: 32px;" alt="AI">
     </button>
   </div>
 </div>
@@ -210,8 +292,8 @@ function startAIStream(aiResponse, aiId) {
         <% elsif message[:role] == 'assistant' %>
           <div class="flex justify-start mb-6">
             <div class="flex items-start gap-3 max-w-2xl">
-              <div class="ai-avatar-container">
-                <div class="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 ai-avatar">✨</div>
+              <div class="ai-avatar-container ai-loading">
+                <img src="/logo.svg" class="logo-loading" alt="Loading">
               </div>
               <div class="text-gray-900 flex-1 min-w-0 break-words">
                 <div>
@@ -246,13 +328,22 @@ function startAIStream(aiResponse, aiId) {
           hx-target=".container"
           hx-swap="beforeend"
           hx-on::after-request="document.getElementById('welcome-section')?.remove()">
-      <input class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent" 
+      <input class="w-full px-4 py-3 pr-14 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent" 
              name="message" 
              type="text" 
-             placeholder="Send a message..."/>
-      <button class="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-lg transition-colors" type="submit">
+             placeholder="Send a message..."
+             id="message-input"/>
+      <input type="hidden" name="use_luira" id="use-luira-input" value="false"/>
+      <button class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black hover:bg-gray-800 text-white rounded-full flex items-center justify-center transition-all duration-200 overflow-hidden" 
+              type="submit" 
+              id="send-button"
+              onmousedown="handleSendButtonDown()" 
+              onmouseup="handleSendButtonUp()" 
+              onmouseleave="handleSendButtonUp()"
+              ontouchstart="handleSendButtonDown()" 
+              ontouchend="handleSendButtonUp()">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l0-16m-4 4l4-4 4 4"/>
         </svg>
       </button>
     </form>

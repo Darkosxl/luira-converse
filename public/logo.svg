@@ -1,0 +1,26 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <g stroke-linecap="round">
+    <!-- Primary rays (8 major directions) - thicker and darker -->
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(0 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(45 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(90 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(135 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(180 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(225 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(270 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="10" stroke="#444444" stroke-width="1.5" transform="rotate(315 100 100)"/>
+    
+    <!-- Secondary rays (8 intermediate directions) - thinner and lighter -->
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(22.5 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(67.5 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(112.5 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(157.5 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(202.5 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(247.5 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(292.5 100 100)"/>
+    <line x1="100" y1="100" x2="100" y2="20" stroke="#777777" stroke-width="0.8" transform="rotate(337.5 100 100)"/>
+  </g>
+  
+  <!-- Small center dot -->
+  <circle cx="100" cy="100" r="1" fill="#333333"/>
+</svg>

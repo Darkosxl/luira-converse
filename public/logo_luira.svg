@@ -1,0 +1,40 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#555555">
+    <!-- Center circle -->
+    <circle cx="100" cy="100" r="11"/>
+    
+    <!-- 32 very thin radiating rays extending 45 units from center -->
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(0 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(11.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(22.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(33.75 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(45 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(56.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(67.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(78.75 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(90 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(101.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(112.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(123.75 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(135 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(146.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(157.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(168.75 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(180 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(191.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(202.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(213.75 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(225 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(236.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(247.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(258.75 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(270 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(281.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(292.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(303.75 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(315 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(326.25 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(337.5 100 100)"/>
+    <polygon points="100,100 99,55 100,55 101,55" transform="rotate(348.75 100 100)"/>
+  </g>
+</svg>
