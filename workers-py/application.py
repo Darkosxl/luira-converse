@@ -274,6 +274,7 @@ def api_sectors():
 # Configure CORS for production
 ALLOWED_ORIGINS = [
     "https://capmapai.com",
+    "https://ai.capmapai.com",
     "https://www.capmapai.com",
     "http://localhost:4567",  # Development
 ]
