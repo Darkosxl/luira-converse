@@ -29,7 +29,6 @@ class SinatraRouter < Sinatra::Base
         @show_welcome = session[:first_visit] != false
         @left_sidebar_open = session[:left_sidebar_open] || false
         @right_sidebar_open = session[:right_sidebar_open] || false
-        @expanded_sections = session[:expanded_sections] || {}
         erb :'chat'
     end
     get '/chat/available_sectors' do
@@ -114,23 +113,20 @@ class SinatraRouter < Sinatra::Base
     post '/toggle-right-sidebar' do
         session[:right_sidebar_open] = !session[:right_sidebar_open]
         @right_sidebar_open = session[:right_sidebar_open]
-        @expanded_sections = session[:expanded_sections] || {}
         
         content_type 'text/html'
         erb :_agent_sidebar, layout: false
     end
     
-    post '/toggle-section/:section' do
-        session[:expanded_sections] ||= {}
-        section = params[:section]
-        session[:expanded_sections][section] = !session[:expanded_sections][section]
-        redirect '/chat'
+    post '/close-right-sidebar' do
+        session[:right_sidebar_open] = false
+        @right_sidebar_open = false
+        
+        content_type 'text/html'
+        erb :_agent_sidebar, layout: false
     end
     
-    post '/set-message' do
-        # Just return empty - this is for the HTMX buttons to work
-        ""
-    end
+    
 
     # Chat history routes
     get '/chat/history' do
@@ -162,7 +158,6 @@ class SinatraRouter < Sinatra::Base
         @show_welcome = false
         @left_sidebar_open = session[:left_sidebar_open] || false
         @right_sidebar_open = session[:right_sidebar_open] || false
-        @expanded_sections = session[:expanded_sections] || {}
         
         erb :chat, locals: { messages: messages }
     end

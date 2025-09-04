@@ -38,6 +38,10 @@
   height: 100px;
 }
 
+.ai-avatar-container img {
+  transition: all 0.3s ease-in-out;
+}
+
 /* Styled code blocks */
 pre {
   background-color: #f6f8fa !important;
@@ -214,9 +218,32 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         return false;
       }
+      
+      // Clear loading states from all previous AI messages
+      clearPreviousLoadingStates();
+      
+      // Clear the input field after sending
+      setTimeout(() => {
+        const messageInput = document.getElementById('message-input');
+        if (messageInput) {
+          messageInput.value = '';
+        }
+      }, 100);
     });
   }
 });
+
+function clearPreviousLoadingStates() {
+  // Remove loading classes from all existing AI avatars
+  const existingAvatars = document.querySelectorAll('.ai-avatar-container.ai-loading');
+  existingAvatars.forEach(avatar => {
+    avatar.classList.remove('ai-loading');
+    const img = avatar.querySelector('img');
+    if (img && img.classList.contains('logo-loading')) {
+      img.classList.remove('logo-loading');
+    }
+  });
+}
 
 function startAIStream(aiResponse, aiId) {
   const aiContent = document.getElementById(aiId).querySelector('.text-gray-900 div');
@@ -229,6 +256,11 @@ function startAIStream(aiResponse, aiId) {
   eventSource.onmessage = function(event) {
     if (avatarContainer.classList.contains('ai-loading')) {
       avatarContainer.classList.remove('ai-loading');
+      // Keep the logo but remove loading animation
+      const img = avatarContainer.querySelector('img');
+      if (img && img.classList.contains('logo-loading')) {
+        img.classList.remove('logo-loading');
+      }
     }
     accumulatedContent += event.data;
     // Show accumulated content as HTML
@@ -244,6 +276,11 @@ function startAIStream(aiResponse, aiId) {
   eventSource.onerror = function(error) {
     console.error('SSE error:', error);
     avatarContainer.classList.remove('ai-loading');
+    // Remove loading animation on error
+    const img = avatarContainer.querySelector('img');
+    if (img && img.classList.contains('logo-loading')) {
+      img.classList.remove('logo-loading');
+    }
     aiContent.textContent = 'Error loading response';
     eventSource.close();
   };
@@ -316,8 +353,8 @@ function startAIStream(aiResponse, aiId) {
         <% elsif message[:role] == 'assistant' %>
           <div class="flex justify-start mb-6">
             <div class="flex items-start gap-3 max-w-2xl">
-              <div class="ai-avatar-container ai-loading">
-                <img src="/logo.svg" class="logo-loading" alt="Loading">
+              <div class="ai-avatar-container">
+                <img src="/logo.svg" alt="AI">
               </div>
               <div class="text-gray-900 flex-1 min-w-0 break-words">
                 <div>

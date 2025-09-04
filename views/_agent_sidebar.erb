@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between">
       <h2 class="text-lg font-semibold text-gray-900">Agent Models (VC Copilot)</h2>
       <button class="p-1 hover:bg-gray-100 rounded" 
-              hx-post="/toggle-right-sidebar" 
+              hx-post="/close-right-sidebar" 
               hx-target="#agent-sidebar"
               hx-swap="outerHTML">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,15 +19,13 @@
       
       <!-- Ranking Model --> 
       <div class="border border-gray-200 rounded-lg">
-        <form method="post" action="/toggle-section/ranking">
-          <button type="submit" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
-            <div class="flex items-center gap-2">
-              <span style="filter: brightness(0) saturate(100%) invert(0.3) sepia(1) saturate(5) hue-rotate(180deg);">✨</span>
-              <span class="text-gray-900">Ranking</span>
-            </div>
-          </button>
-        </form>
-        <% if @expanded_sections['ranking'] %>
+        <button onclick="toggleSection('ranking')" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
+          <div class="flex items-center gap-2">
+            <img src="/logo.svg" style="width: 20px; height: 20px;" alt="Ranking">
+            <span class="text-gray-900">Ranking</span>
+          </div>
+        </button>
+        <div id="ranking-content" style="display: none;">
         <div class="p-3 border-t border-gray-200">
           <p class="text-sm text-gray-600 mb-3">This agent will ensure that one consistent metric of rank/venture capital firms against each other for a metric in a given sector.</p>
           
@@ -168,103 +166,67 @@
           });
         </script>
 
-        <% end %>
+        </div>
       </div>
 
       <!-- Reasoning Model -->
       <div class="border border-gray-200 rounded-lg">
-        <form method="post" action="/toggle-section/reasoning">
-          <button type="submit" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
-            <div class="flex items-center gap-2">
-              <span style="filter: brightness(0) saturate(100%) invert(0.4) sepia(1) saturate(5) hue-rotate(120deg);">✨</span>
-              <span class="text-gray-900">Reasoning</span>
-            </div>
-          </button>
-        </form>
-        <% if @expanded_sections['reasoning'] %>
+        <button onclick="toggleSection('reasoning')" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
+          <div class="flex items-center gap-2">
+            <img src="/logo.svg" style="width: 20px; height: 20px;" alt="Reasoning">
+            <span class="text-gray-900">Reasoning</span>
+          </div>
+        </button>
+        <div id="reasoning-content" style="display: none;">
         <div class="p-3 border-t border-gray-200">
           <p class="text-sm text-gray-600 mb-3">This one is a generalist model, it can perform general database queries in the FinTech tables available at its disposal, here are some prompts one can try:</p>
           <div class="space-y-2">
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "All Series B investments made by Sequoia Capital"}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'All Series B investments made by Sequoia Capital'">
               All Series B investments made by Sequoia Capital
             </button>
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "Show startups in AI with over $10M funding and in..."}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'Show startups in AI with over $10M funding and in...'">
               Show startups in AI with over $10M funding and in...
             </button>
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "Which VCs invested in both HealthTech and FinTech..."}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'Which VCs invested in both HealthTech and FinTech...'">
               Which VCs invested in both HealthTech and FinTech...
             </button>
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "List the series B or later-stage investments of Accel"}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'List the series B or later-stage investments of Accel'">
               List the series B or later-stage investments of Accel
             </button>
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "Sort startups according to number of follow-on inv..."}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'Sort startups according to number of follow-on inv...'">
               Sort startups according to number of follow-on inv...
             </button>
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "List the startups that Sequoia Capital and GV have invested in together"}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'List the startups that Sequoia Capital and GV have invested in together'">
               List the startups that Sequoia Capital and GV have...
             </button>
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "CAP table of OpenAI"}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'CAP table of OpenAI'">
               CAP table of OpenAI
             </button>
             <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    hx-get="/set-message" 
-                    hx-vals='{"message": "Which VCs can invest in the next round of Stripe?"}' 
-                    hx-target="#temp-target" 
-                    hx-swap="none"
                     onclick="document.querySelector('input[name=message]').value = 'Which VCs can invest in the next round of Stripe?'">
               Which VCs can invest in the next round of Stripe?
             </button>
           </div>
         </div>
-        <% end %>
+        </div>
       </div>
 
       <!-- Prediction Model -->
       <div class="border border-gray-200 rounded-lg">
-        <form method="post" action="/toggle-section/prediction">
-          <button type="submit" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
-            <div class="flex items-center gap-2">
-              <span style="filter: brightness(0) saturate(100%) invert(0.4) sepia(1) saturate(5) hue-rotate(220deg);">✨</span>
-              <span class="text-gray-900">Prediction</span>
-            </div>
-          </button>
-        </form>
-        <% if @expanded_sections['prediction'] %>
+        <button onclick="toggleSection('prediction')" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
+          <div class="flex items-center gap-2">
+            <img src="/logo.svg" style="width: 20px; height: 20px;" alt="Prediction">
+            <span class="text-gray-900">Prediction</span>
+          </div>
+        </button>
+        <div id="prediction-content" style="display: none;">
         <div class="p-3 border-t border-gray-200">
           <p class="text-sm text-gray-600 mb-3">This agent is able to draw conclusions from repeating venture capital investments. You have two main types of prompts:</p>
           <div class="space-y-3">
@@ -286,7 +248,7 @@
             </div>
           </div>
         </div>
-        <% end %>
+        </div>
       </div>
 
     </div>
@@ -295,5 +257,12 @@
 
 
 
-<!-- Hidden temp target for HTMX -->
-<div id="temp-target" style="display: none;"></div>
+
+<script>
+function toggleSection(sectionName) {
+  const content = document.getElementById(sectionName + '-content');
+  if (content) {
+    content.style.display = content.style.display === 'none' ? 'block' : 'none';
+  }
+}
+</script>
