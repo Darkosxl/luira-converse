@@ -13,6 +13,9 @@ require_relative 'models/conversation'
 
 
 class SinatraRouter < Sinatra::Base
+    set :bind, '0.0.0.0'
+    set :port, 4567
+    set :server, 'puma'
     enable :sessions
     
     before do
