@@ -272,14 +272,13 @@ def api_sectors():
 # ===========================================================
 
 # Configure CORS for production
-# Add your domain here when deploying
 ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Development
-    "https://capmap-frontend.onrender.com",  # Production frontend
-    "http://your-server-ip",    # Replace with your server IP
+    "https://capmapai.com",
+    "https://www.capmapai.com",
+    "http://localhost:4567",  # Development
 ]
 
-CORS(application)#, origins=ALLOWED_ORIGINS)
+CORS(application, origins=ALLOWED_ORIGINS, supports_credentials=True)
 
 if __name__ == '__main__':
     # This is only used for development
