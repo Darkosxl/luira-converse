@@ -5,17 +5,19 @@ require 'dotenv'
 require 'sinatra/sse'
 require 'date'
 require 'redcarpet'
+require 'json'
+require 'net/http'
 require_relative 'models/stream'
 require_relative 'models/database'
-
+require_relative 'models/conversation'
 
 
 class SinatraRouter < Sinatra::Base
     enable :sessions
     
     before do
-        @chat_stream_service = ChatStreamService.new()
         @database = Database.new()
+        @conversation = ConversationHost.new()
     end
     get '/' do
        erb :'landing-page'
@@ -27,33 +29,47 @@ class SinatraRouter < Sinatra::Base
         @expanded_sections = session[:expanded_sections] || {}
         erb :'chat'
     end
+    get '/chat/available_sectors' do
+        content_type :json
+        sectors = @database.get_available_sectors
+        { sectors: sectors }.to_json
+    end
+    get '/chat/available_subsectors' do
+        content_type :json
+        subsectors = @database.get_available_subsectors
+        { subsectors: subsectors }.to_json
+    end
+    #USER INITITATES CHAT, OR SENDS MESSAGES, THOSE GET SAVED, AND THEY CALL THE BACKEND TO GET THE AI RESPONSE
     post '/chat/messages' do
-        user_message = params[:message]
-        
-        # Mark that user has sent first message
+        user_message = params[:message]  
+        chat_id = @database.update_or_create_chat("private", user_message, session[:current_chat_id])
+        session[:current_chat_id] = chat_id
         session[:first_visit] = false
-        
-        # Generate unique ID for this AI response
+
         ai_id = "ai-response-#{Time.now.to_f.to_s.gsub('.', '')}"
         
-        # Return immediate user message display + start AI streaming
+        Thread.new do
+            @conversation.call_capmap(user_message, ai_id, chat_id)
+        end
+
         user_html = erb :user_message, layout: false, locals: {message: user_message}
         ai_placeholder = "<div id=\"#{ai_id}\" class=\"flex justify-start mb-6\"><div class=\"flex items-start gap-3 max-w-2xl\"><div class=\"ai-avatar-container ai-loading\"><div class=\"w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0 ai-avatar\">✨</div></div><div class=\"text-gray-900 flex-1 min-w-0 break-words\"><div class=\"typing-indicator\">AI is thinking...</div></div></div></div>"
         
-        response.headers['Content-Type'] = 'text/html'
-        "#{user_html}#{ai_placeholder}<script>startAIStream('#{user_message.gsub("'", "\\'")}', '#{ai_id}')</script>"
+        "#{user_html}#{ai_placeholder}"
     end
-    
-    get '/chat/stream' do
-        content_type 'text/event-stream'
-        cache_control 'no-cache'
+    # AI RESPONSE sent from backend TAKEN HERE, IT IS SAVED AND THEN STREAMED TO THE FRONTEND
+    post '/chat/ai_response' do
+        data = JSON.parse(request.body.read)
+        ai_content = data['content']
+        ai_id = data['ai_id'] 
+        chat_id = data['chat_id']
         
-        user_message = params[:message]
+        # Save AI message to database
+        @database.update_or_create_chat("private", ai_content, chat_id, "assistant")
         
-        stream do |out|
-            @chat_stream_service.call(user_message, out)
-            out << "event: end\ndata: \n\n"
-        end
+        # Return the script to start AI streaming with the pre-created response
+        content_type 'text/html'
+        "<script>startAIStream('#{ai_content.gsub("'", "\\'")}', '#{ai_id}')</script>"
     end
     
     # Sidebar toggle routes

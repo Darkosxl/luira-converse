@@ -7,9 +7,11 @@ gem 'sinatra-contrib'
 gem 'puma'          # or thin/unicorn
 gem 'sequel'        # if you use it
 gem 'pg'            # or sqlite3/mysql2
+gem 'sqlite3'
 gem 'dotenv'
 gem 'rack'
 gem 'ruby_llm'
 gem 'redcarpet'
 gem 'redcarpet-diff'
 gem 'sinatra-sse'
+gem 'http'

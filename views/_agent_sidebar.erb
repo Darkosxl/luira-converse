@@ -30,24 +30,144 @@
         <% if @expanded_sections['ranking'] %>
         <div class="p-3 border-t border-gray-200">
           <p class="text-sm text-gray-600 mb-3">This agent will ensure that one consistent metric of rank/venture capital firms against each other for a metric in a given sector.</p>
-          <div class="space-y-3">
+          
+          <div class="space-y-4">
             <div>
-              <label class="block text-sm text-gray-700 mb-1">Your input should include "Rank top N (any number) of VCs in the "Sector" using "metric"</label>
+              <label class="block text-sm text-gray-700 mb-2">Choose Ranking Type:</label>
+              <div class="flex items-center space-x-4">
+                <label class="inline-flex items-center">
+                  <input type="radio" name="ranking_type" value="sector" class="form-radio" checked>
+                  <span class="ml-2">Sector Rank</span>
+                </label>
+                <label class="inline-flex items-center">
+                  <input type="radio" name="ranking_type" value="subsector" class="form-radio">
+                  <span class="ml-2">Subsector Rank</span>
+                </label>
+              </div>
             </div>
-            <div>
-              <label class="block text-sm text-gray-700 mb-1">Available Metrics:</label>
-              <select class="w-full border border-gray-300 rounded p-2 text-sm">
-                <!-- Will be populated from database -->
-              </select>
+
+            <!-- Sector Ranking Section -->
+            <div id="sector-ranking-section">
+              <div>
+                <label for="sector-metrics" class="block text-sm text-gray-700 mb-1">Available Sector Metrics:</label>
+                <select id="sector-metrics" class="w-full border border-gray-300 rounded p-2 text-sm">
+                  <option>Current Market Size</option>
+                  <option>CAGR</option>
+                  <option>Total Exits / Total Investments</option>
+                  <option>AUM</option>
+                  <option>Ticket Size</option>
+                  <option>Follow on Index</option>
+                  <option>Sector specific investment</option>
+                  <option>Sector specific exit</option>
+                  <option>Sector specific exit/investment</option>
+                </select>
+              </div>
+              <div>
+                <label for="sector-select" class="block text-sm text-gray-700 mb-1">Available Sectors:</label>
+                <select id="sector-select" class="w-full border border-gray-300 rounded p-2 text-sm">
+                  <option>Loading sectors...</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label class="block text-sm text-gray-700 mb-1">Sector specific Investment Available Sectors:</label>
-              <select class="w-full border border-gray-300 rounded p-2 text-sm">
-                <!-- Will be populated from database -->
-              </select>
+
+            <!-- Subsector Ranking Section (hidden by default) -->
+            <div id="subsector-ranking-section" style="display: none;">
+              <div>
+                <label for="subsector-metrics" class="block text-sm text-gray-700 mb-1">Available Subsector Metrics:</label>
+                <select id="subsector-metrics" class="w-full border border-gray-300 rounded p-2 text-sm">
+                  <option>series_#</option>
+                </select>
+              </div>
+              <div>
+                <label for="subsector-select" class="block text-sm text-gray-700 mb-1">Available Subsectors:</label>
+                <select id="subsector-select" class="w-full border border-gray-300 rounded p-2 text-sm">
+                  <option>Loading subsectors...</option>
+                </select>
+              </div>
             </div>
+
+            <button id="generate-prompt-btn" class="w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm">
+              Generate Prompt
+            </button>
           </div>
         </div>
+
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+            const rankingTypeRadios = document.querySelectorAll('input[name="ranking_type"]');
+            const sectorSection = document.getElementById('sector-ranking-section');
+            const subsectorSection = document.getElementById('subsector-ranking-section');
+            const sectorSelect = document.getElementById('sector-select');
+            const subsectorSelect = document.getElementById('subsector-select');
+            const generatePromptBtn = document.getElementById('generate-prompt-btn');
+            const chatInput = document.querySelector('input[name="message"]');
+
+            // --- Function to fetch and populate a dropdown ---
+            function populateDropdown(selectElement, url, dataKey) {
+              fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                  selectElement.innerHTML = ''; // Clear loading message
+                  const items = data[dataKey] || [];
+                  if (items.length === 0) {
+                    selectElement.innerHTML = '<option>No data available</option>';
+                    return;
+                  }
+                  items.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    selectElement.appendChild(option);
+                  });
+                })
+                .catch(error => {
+                  console.error(`Error fetching ${dataKey}:`, error);
+                  selectElement.innerHTML = `<option>Error loading ${dataKey}</option>`;
+                });
+            }
+
+            // --- Populate dropdowns on page load ---
+            populateDropdown(sectorSelect, '/chat/available_sectors', 'sectors');
+            populateDropdown(subsectorSelect, '/chat/available_subsectors', 'subsectors');
+            
+            // --- Handle radio button changes ---
+            rankingTypeRadios.forEach(radio => {
+              radio.addEventListener('change', function() {
+                if (this.value === 'sector') {
+                  sectorSection.style.display = 'block';
+                  subsectorSection.style.display = 'none';
+                } else {
+                  sectorSection.style.display = 'none';
+                  subsectorSection.style.display = 'block';
+                }
+              });
+            });
+
+            // --- Handle Generate Prompt button click ---
+            generatePromptBtn.addEventListener('click', function() {
+              const rankingType = document.querySelector('input[name="ranking_type"]:checked').value;
+              let topic = '';
+              let metric = '';
+
+              if (rankingType === 'sector') {
+                topic = document.getElementById('sector-select').value;
+                metric = document.getElementById('sector-metrics').value;
+              } else {
+                topic = document.getElementById('subsector-select').value;
+                metric = document.getElementById('subsector-metrics').value;
+              }
+
+              if (topic && metric && chatInput) {
+                const prompt = `top 5 VCs in "${topic}" using "${metric}"`;
+                chatInput.value = prompt;
+                chatInput.focus();
+              } else {
+                if (!chatInput) console.error('Chat input not found');
+              }
+            });
+          });
+        </script>
+
         <% end %>
       </div>
 

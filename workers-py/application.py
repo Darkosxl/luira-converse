@@ -8,7 +8,7 @@ from datetime import datetime
 from flask_cors import CORS
 from VC_chain_logic import (get_assistant_response) 
 from flask import Flask, render_template, request, jsonify, session
-from VC_chain_database import engine
+from VC_chain_database import get_chat_history
 from sqlalchemy import text
 from VC_chain_tools import get_available_sectors, get_available_subsectors
 
@@ -31,40 +31,6 @@ app = application
 
 log.info("Flask app initialized.")
 
-
-
-# ===========================================================
-#                 Helper Functions
-# ===========================================================
-
-def get_chat_history(session_id: str, limit: int = 20):
-    """Fetch chat history from the database for a given session."""
-    try:
-        with engine.begin() as conn:
-            query = text("""
-                SELECT user_input, assistant_reply, timestamp, markdown_table
-                FROM interactions 
-                WHERE session_id = :session_id 
-                ORDER BY timestamp DESC 
-                LIMIT :limit
-            """)
-            result = conn.execute(query, {"session_id": session_id, "limit": limit})
-            rows = result.fetchall()
-            
-            # Convert to list of dictionaries for JSON serialization
-            history = []
-            for row in rows:
-                history.append({
-                    "user_input": row[0],
-                    "assistant_reply": row[1],
-                    "timestamp": row[2].isoformat() if row[2] else None,
-                    "markdown_table": row[3]
-                })
-            
-            return history
-    except Exception as e:
-        log.error(f"Error fetching chat history for session {session_id}: {e}")
-        return []
 
 # ===========================================================
 #                 Flask Routes
@@ -95,16 +61,11 @@ def health_check():
 
 
 # TODO SIMPLIFY THIS + MOVE THE LOGIC TO HANDLE THE RESPONSE TO THE FRONTEND
-@application.route('/chat', methods=['POST'])
+@application.route('/chat_capmap', methods=['POST'])
 def chat():
     """Handle incoming chat messages from the user."""
-    # Ensure session exists. If not, create one and proceed.
-    if 'session_id' not in session:
-        log.warning("Chat request received without a Flask session_id; creating new session.")
-        session['session_id'] = str(uuid.uuid4())
-    
-    session_id = session['session_id']
-    request_id = str(uuid.uuid4()) # Unique ID for this specific request for easier log tracing
+    session_id = session.setdefault('session_id', str(uuid.uuid4()))
+    request_id = str(uuid.uuid4())
     log.info(f"[ReqID: {request_id}] Received chat request for session {session_id}")
     
     try:
@@ -112,39 +73,26 @@ def chat():
         if not data or 'message' not in data:
             return jsonify({"reply": "Invalid request format. 'message' key is missing.", "options_data": None}), 400
 
-        # ------ extract user message safely -------------------
+        # Safely extract user message from either a string or a rich object
         raw_msg = data.get("message", "")
-
-        if isinstance(raw_msg, dict):           # frontend sends rich object
-            user_message = (
-                raw_msg.get("content")
-                or raw_msg.get("text")
-                or ""
-            )
-        else:                                   # simple string (dev / curl)
+        if isinstance(raw_msg, dict):
+            user_message = raw_msg.get("content") or raw_msg.get("text") or ""
+        else:
             user_message = str(raw_msg)
 
         user_message = user_message.strip()
         if not user_message:
-            return jsonify(
-                {"reply": "Please type a message!", "options_data": None}
-            )
-        general_agent_check = data.get('general_agent_check', False)
-
-        chat_history = data.get('chat_history', [])
-        if not isinstance(chat_history, list):
-            chat_history = []                 # guard against bad payloads
-        if not user_message:
             return jsonify({"reply": "Please type a message!", "options_data": None})
 
+        general_agent_check = data.get('general_agent_check', False)
+        chat_history = get_chat_history(session_id, 20)
+        
         log.info(f"[ReqID: {request_id}] Processing message for session {session_id}: '{user_message}'")
         response_text = get_assistant_response(user_message, session_id, general_agent_check, chat_history)
         return jsonify({"reply": response_text, "options_data": None}), 200
 
-
     except Exception as e:
-        log.exception(f"!!! [ReqID: {request_id}] Unhandled ERROR during /chat for session {session_id}: {e}") # Log full traceback
-        # Return a generic error in JSON format, matching expected structure
+        log.exception(f"!!! [ReqID: {request_id}] Unhandled ERROR during /chat for session {session_id}: {e}")
         return jsonify({"reply": "Sorry, an unexpected internal error occurred while processing your request.", "options_data": None}), 500
 
 @application.route('/chat-stream', methods=['POST'])
@@ -242,52 +190,6 @@ def history():
         log.error(f"Error in /api/history endpoint: {e}")
         return jsonify([]), 500
 
-@application.route('/get_available_sectors', methods=['GET'])
-def api_get_available_sectors():
-    """Endpoint to fetch available sectors from the database."""
-    try:
-        log.info("Fetching available sectors")
-        # Direct SQL query like get_available_sectors but simplified
-        query = text("""SELECT DISTINCT "Sector" FROM vc_sector_based_raw WHERE "Sector" IS NOT NULL ORDER BY "Sector" """)
-        with engine.connect() as conn:
-            result = conn.execute(query)
-            rows = result.fetchall()
-            sector_list = [row[0] for row in rows if row[0]]  # Extract first column value
-        
-        return jsonify({"sectors": sector_list}), 200
-    except Exception as e:
-        log.error(f"Error fetching sectors: {e}")
-        return jsonify({"error": "Failed to fetch sectors"}), 500
-
-@application.route('/get_available_subsectors', methods=['GET'])
-def api_get_available_subsectors():
-    """Endpoint to fetch available subsectors from the database."""
-    try:
-        log.info("Fetching available subsectors")
-        # Pull subsectors from funding_rounds_v2.categories
-        query = text("""
-        WITH sectors_exploded AS (
-            SELECT TRIM(cat.value) AS sector
-            FROM funding_rounds_v2 fr
-            CROSS JOIN LATERAL string_to_array(COALESCE(fr.categories, ''), ',') AS cat(value)
-            WHERE TRIM(cat.value) <> ''
-              AND TRIM(cat.value) <> '#NAME? ()'
-        )
-        SELECT DISTINCT sector
-        FROM sectors_exploded
-        WHERE sector IS NOT NULL
-        ORDER BY sector
-        LIMIT 100
-        """)
-        with engine.connect() as conn:
-            result = conn.execute(query)
-            rows = result.fetchall()
-            subsector_list = [row[0] for row in rows if row[0]]  # Extract first column value
-        
-        return jsonify({"subsectors": subsector_list}), 200
-    except Exception as e:
-        log.error(f"Error fetching subsectors: {e}")
-        return jsonify({"error": "Failed to fetch subsectors"}), 500
 
 @application.route('/api/vote', methods=['GET', 'PATCH'])
 def api_vote():
@@ -377,7 +279,7 @@ ALLOWED_ORIGINS = [
     "http://your-server-ip",    # Replace with your server IP
 ]
 
-CORS(application, origins=ALLOWED_ORIGINS)
+CORS(application)#, origins=ALLOWED_ORIGINS)
 
 if __name__ == '__main__':
     # This is only used for development

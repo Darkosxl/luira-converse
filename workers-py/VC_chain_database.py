@@ -222,3 +222,14 @@ def get_session_memory(state: MessagesState, session_id: str):
     else:
         memory[session_id] = state["messages"]
     return {"messages": memory[session_id]}
+
+def get_chat_history(session_id: str, limit: int = 20):
+    query = """
+        SELECT parts
+        FROM "Message_v2"
+        WHERE "chatId" = :session_id
+        ORDER BY "createdAt" DESC
+        LIMIT :limit
+    """
+    with engine.begin() as con:
+        return con.execute(text(query), {"session_id": session_id, "limit": limit}).fetchall()

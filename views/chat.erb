@@ -113,16 +113,17 @@ table tr:hover {
 </style>
 
 <script>
-function startAIStream(message, aiId) {
-  const eventSource = new EventSource('/chat/stream?message=' + encodeURIComponent(message));
+function startAIStream(aiResponse, aiId) {
   const aiContent = document.getElementById(aiId).querySelector('.text-gray-900 div');
   const avatarContainer = document.getElementById(aiId).querySelector('.ai-avatar-container');
   aiContent.innerHTML = '';
   
   let htmlContent = '';
-  let charQueue = [];
+  let charQueue = aiResponse.split('');
   let isTyping = false;
-  let streamingStarted = false;
+  
+  // Remove loading animation immediately
+  avatarContainer.classList.remove('ai-loading');
   
   function typeNextChar() {
     if (charQueue.length > 0 && !isTyping) {
@@ -132,30 +133,12 @@ function startAIStream(message, aiId) {
       setTimeout(() => {
         isTyping = false;
         typeNextChar();
-      }, 7);
+      }, 3);
     }
   }
   
-  eventSource.onmessage = function(event) {
-    // Remove loading animation when first character arrives
-    if (!streamingStarted) {
-      streamingStarted = true;
-      avatarContainer.classList.remove('ai-loading');
-    }
-    
-    charQueue.push(event.data);
-    typeNextChar();
-  };
-  
-  eventSource.addEventListener('complete', function(event) {
-    eventSource.close();
-  });
-  
-  eventSource.onerror = function() {
-    avatarContainer.classList.remove('ai-loading');
-    aiContent.textContent = 'Error loading response';
-    eventSource.close();
-  };
+  // Start typing immediately
+  typeNextChar();
 }
 
 

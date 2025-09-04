@@ -3,6 +3,7 @@ from typing import (
     Annotated,
     Sequence,
     TypedDict,
+    Optional,
 )
 from langchain_core.prompts.chat import SystemMessagePromptTemplate
 from langchain_core.messages import BaseMessage
@@ -15,7 +16,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 import logging
 import os
-from langchain_google_vertexai import ChatVertexAI
+from langchain_openai import ChatOpenAI
 from pydantic_core.core_schema import TypedDictSchema
 import VC_chain_tools as vc_tools
 import VC_chain_systemprompts as vc_systemprompts
@@ -36,9 +37,20 @@ load_dotenv()
 keyfile_path = os.getenv("SERVICE_ACCOUNT_FILE")
 GOOGLE_DOC_ID = os.getenv("GOOGLE_DOC_ID")
 
+# OpenRouter LLM class
+class ChatOpenRouter(ChatOpenAI):
+    @property
+    def lc_secrets(self) -> dict[str, str]:
+        return {"openai_api_key": "OPENROUTER_API"}
+
+    def __init__(self,
+                 openai_api_key: Optional[str] = None,
+                 **kwargs):
+        openai_api_key = openai_api_key or os.environ.get("OPENROUTER_API")
+        super().__init__(base_url="https://openrouter.ai/api/v1", openai_api_key=openai_api_key, **kwargs)
 
 print("Defining LLMs...")
-llm_main = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
+llm_main = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 
 ####### Router output parser #######
 class RouterOutput(TypedDict):
@@ -80,7 +92,7 @@ def run_summarizer(state: AgentState, config: RunnableConfig):
 # -------------- ROUTER AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-router_llm = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
+router_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 router_llm = router_llm.with_structured_output(RouterOutput)
 #router_agent = create_react_agent(router_llm, tools=, prompt=vc_systemprompts.ROUTER_SYSTEM_PROMPT)
 def run_router_model(state: AgentState, config: RunnableConfig):
@@ -94,7 +106,7 @@ def run_router_model(state: AgentState, config: RunnableConfig):
 # -------------- GENERAL AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-general_llm = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
+general_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 general_agent = create_react_agent(general_llm, vc_tools.general_tools)
 
 def run_general_model(state: AgentState, config: RunnableConfig):
@@ -108,7 +120,7 @@ def run_general_model(state: AgentState, config: RunnableConfig):
 # -------------- RANKING AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-ranking_llm = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
+ranking_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 ranking_agent = create_react_agent(ranking_llm, vc_tools.ranking_tools)
 
 def run_ranking_model(state: AgentState, config: RunnableConfig):
@@ -123,7 +135,7 @@ print(type(vc_tools.ranking_tools))
 # -------------- REASONING AGENT CHAIN -----------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-reasoning_llm = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
+reasoning_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 reasoning_agent = create_react_agent(reasoning_llm, vc_tools.reasoning_tools, prompt=vc_systemprompts.REASONING_SYSTEM_PROMPT)
 
 def run_reasoning_model(state: AgentState, config: RunnableConfig):
@@ -133,7 +145,7 @@ def run_reasoning_model(state: AgentState, config: RunnableConfig):
     return {"output": response["messages"][-1]} 
 
 
-reasoning_validator_llm = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
+reasoning_validator_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 reasoning_validator = create_react_agent(reasoning_validator_llm, vc_tools.reasoning_tools)
 
 def run_reasoning_validator(state: AgentState, config: RunnableConfig):
@@ -147,7 +159,7 @@ def run_reasoning_validator(state: AgentState, config: RunnableConfig):
 # -------------- PREDICTION AGENT CHAIN ----------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-prediction_llm = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
+prediction_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 prediction_agent = create_react_agent(prediction_llm, vc_tools.prediction_tools)
 
 def run_prediction_model(state: AgentState, config: RunnableConfig):
