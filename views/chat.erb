@@ -118,7 +118,7 @@ table tr:hover {
   height: 100%;
 }
 
-/* Logo rotation animation */
+/* Logo rotation animation (for non-loading state) */
 @keyframes logoRotate {
   0% { transform: rotate(0deg); }
   25% { transform: rotate(180deg); }
@@ -127,6 +127,25 @@ table tr:hover {
   100% { transform: rotate(-180deg); }
 }
 
+/* Logo loading animation (shrink to grow + rotation) */
+@keyframes logoLoadingAnimation {
+  0% { transform: rotate(0deg) scale(1); }
+  12.5% { transform: rotate(45deg) scale(0); }
+  25% { transform: rotate(180deg) scale(1); }
+  37.5% { transform: rotate(225deg) scale(0); }
+  50% { transform: rotate(180deg) scale(1); }
+  62.5% { transform: rotate(-135deg) scale(0); }
+  75% { transform: rotate(-180deg) scale(1); }
+  87.5% { transform: rotate(-225deg) scale(0); }
+  100% { transform: rotate(-180deg) scale(1); }
+}
+
+/* Active loading: shrink/grow + rotation */
+.ai-loading .logo-loading {
+  animation: logoLoadingAnimation 2s infinite;
+}
+
+/* Not actively loading: just rotation */
 .logo-loading {
   animation: logoRotate 3s infinite;
 }

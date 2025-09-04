@@ -103,6 +103,14 @@ class SinatraRouter < Sinatra::Base
         erb :sidebar, layout: false
     end
     
+    post '/close-left-sidebar' do
+        session[:left_sidebar_open] = false
+        @left_sidebar_open = false
+        
+        content_type 'text/html'
+        erb :sidebar, layout: false
+    end
+    
     post '/toggle-right-sidebar' do
         session[:right_sidebar_open] = !session[:right_sidebar_open]
         @right_sidebar_open = session[:right_sidebar_open]
