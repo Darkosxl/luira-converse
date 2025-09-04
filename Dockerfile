@@ -19,8 +19,15 @@ RUN gem install bundler && bundle install
 # Copy all application code
 COPY . .
 
+# Create startup script
+RUN echo '#!/bin/bash\n\
+echo "Starting Flask backend..."\n\
+python workers-py/application.py &\n\
+echo "Starting Ruby frontend..."\n\
+bundle exec ruby app.rb -o 0.0.0.0 -p 4567' > start.sh && chmod +x start.sh
+
 # Expose both ports
 EXPOSE 4567 5000
 
-# Start both services
-CMD python workers-py/application.py & bundle exec ruby app.rb -o 0.0.0.0 -p 4567
+# Start both services properly
+CMD ["bash", "./start.sh"]
