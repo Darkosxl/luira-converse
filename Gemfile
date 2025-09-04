@@ -1,17 +1,32 @@
 source 'https://rubygems.org'
-gem 'nokogiri'
-gem 'rack', '~> 2.2.4'
-gem 'rspec'
+
+# Core framework
 gem 'sinatra'
-gem 'sinatra-contrib'
-gem 'puma'          # or thin/unicorn
-gem 'sequel'        # if you use it
-gem 'pg'            # or sqlite3/mysql2
+gem 'rack', '~> 2.2.4'
+
+# Web server
+gem 'puma'
+
+# Database
+gem 'sequel'
+gem 'pg'
 gem 'sqlite3'
+
+# Environment & configuration
 gem 'dotenv'
-gem 'rack'
+
+# AI & LLM
 gem 'ruby_llm'
+
+# Text processing
 gem 'redcarpet'
-gem 'redcarpet-diff'
-gem 'sinatra-sse'
+
+# HTTP client
 gem 'http'
+
+# Server-Sent Events
+gem 'sinatra-sse'
+
+# Development/Testing (only if needed)
+gem 'rspec', group: :development
+gem 'nokogiri' # For HTML parsing if needed

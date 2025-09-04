@@ -1,15 +1,62 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    addressable (2.8.7)
+      public_suffix (>= 2.0.2, < 7.0)
+    base64 (0.3.0)
+    bigdecimal (3.2.3)
     diff-lcs (1.6.2)
-    mini_portile2 (2.8.9)
-    nokogiri (1.18.9)
-      mini_portile2 (~> 2.8.2)
-      racc (~> 1.4)
+    domain_name (0.6.20240107)
+    dotenv (3.1.8)
+    event_stream_parser (1.0.0)
+    expectation (1.1.5)
+    faraday (2.13.4)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-multipart (1.1.1)
+      multipart-post (~> 2.0)
+    faraday-net_http (3.4.1)
+      net-http (>= 0.5.0)
+    faraday-retry (2.3.2)
+      faraday (~> 2.0)
+    ffi (1.17.2-x86_64-linux-gnu)
+    ffi-compiler (1.3.2)
+      ffi (>= 1.15.5)
+      rake
+    http (5.3.1)
+      addressable (~> 2.8)
+      http-cookie (~> 1.0)
+      http-form_data (~> 2.2)
+      llhttp-ffi (~> 0.5.0)
+    http-cookie (1.0.8)
+      domain_name (~> 0.5)
+    http-form_data (2.3.0)
+    json (2.13.2)
+    llhttp-ffi (0.5.1)
+      ffi-compiler (~> 1.0)
+      rake (~> 13.0)
+    logger (1.7.0)
+    marcel (1.0.4)
+    multipart-post (2.4.1)
+    mustermann (3.0.4)
+      ruby2_keywords (~> 0.0.1)
+    net-http (0.6.0)
+      uri
+    nio4r (2.7.4)
     nokogiri (1.18.9-x86_64-linux-gnu)
       racc (~> 1.4)
+    pg (1.6.2-x86_64-linux)
+    public_suffix (6.0.2)
+    puma (7.0.0)
+      nio4r (~> 2.0)
     racc (1.8.1)
     rack (2.2.17)
+    rack-protection (3.2.0)
+      base64 (>= 0.1.0)
+      rack (~> 2.2, >= 2.2.4)
+    rake (13.3.0)
+    redcarpet (3.6.1)
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -23,15 +70,48 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-support (3.13.5)
+    ruby2_keywords (0.0.5)
+    ruby_llm (1.6.4)
+      base64
+      event_stream_parser (~> 1)
+      faraday (>= 1.10.0)
+      faraday-multipart (>= 1)
+      faraday-net_http (>= 1)
+      faraday-retry (>= 1)
+      marcel (~> 1.0)
+      zeitwerk (~> 2)
+    sequel (5.96.0)
+      bigdecimal
+    sinatra (3.2.0)
+      mustermann (~> 3.0)
+      rack (~> 2.2, >= 2.2.4)
+      rack-protection (= 3.2.0)
+      tilt (~> 2.0)
+    sinatra-sse (0.1)
+      expectation
+      sinatra
+    sqlite3 (2.7.3-x86_64-linux-gnu)
+    tilt (2.6.1)
+    uri (1.0.3)
+    zeitwerk (2.7.3)
 
 PLATFORMS
-  ruby
   x86_64-linux
 
 DEPENDENCIES
+  dotenv
+  http
   nokogiri
+  pg
+  puma
   rack (~> 2.2.4)
+  redcarpet
   rspec
+  ruby_llm
+  sequel
+  sinatra
+  sinatra-sse
+  sqlite3
 
 BUNDLED WITH
    2.7.1
