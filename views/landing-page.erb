@@ -1,5 +1,249 @@
-<body class="viewport-centered">
-    <button hx-get="/layout" hx-swap="innerHTML">
-        <span>random button</span>
-    </button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luira - AI-Powered Private Capital Copilot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-navy': '#050a30',
+                        'brand-purple': '#7910ff',
+                        'brand-cyan': '#00d2ff',
+                        'brand-dark': '#0f1547',
+                        'brand-darker': '#020614',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 1s ease-out',
+                        'fade-in': 'fadeIn 1.5s ease-out',
+                        'slide-in-down': 'slideInDown 1.2s ease-out',
+                        'slide-in-left': 'slideInLeft 0.8s ease-out',
+                        'fade-in-left': 'fadeInLeft 0.8s ease-out',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            from: { opacity: '0', transform: 'translateY(30px)' },
+                            to: { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        fadeIn: {
+                            from: { opacity: '0' },
+                            to: { opacity: '1' }
+                        },
+                        slideInDown: {
+                            from: { opacity: '0', transform: 'translateY(-30px)' },
+                            to: { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideInLeft: {
+                            from: { opacity: '0', transform: 'translateX(-30px)' },
+                            to: { opacity: '1', transform: 'translateX(0)' }
+                        },
+                        fadeInLeft: {
+                            from: { opacity: '0', transform: 'translateX(-20px)' },
+                            to: { opacity: '1', transform: 'translateX(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-navy text-white overflow-x-hidden">
+    <!-- Hero Section -->
+    <section class="min-h-screen flex flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-brand-navy to-blue-900 animate-fade-in-up">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-brand-cyan bg-clip-text text-transparent animate-slide-in-down">
+            Empowering Private Capital Investors with AI-Driven Insights
+        </h1>
+        <p class="text-lg md:text-xl mb-12 max-w-2xl opacity-90 animate-fade-in">
+            Our LLM-powered platform acts as a copilot for private capital investors — helping you explore, assess, and prioritize startup opportunities through conversation and interactive reasoning.
+        </p>
+        <div class="flex gap-6 flex-wrap justify-center animate-fade-in-up" style="animation-delay: 0.3s;">
+            <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 no-underline">
+                Request Early Access
+            </a>
+            <a href="https://wealt.co" target="_blank" class="px-8 py-4 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-cyan/40 no-underline">
+                Join the Pilot
+            </a>
+            <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 no-underline">
+                Book a Demo
+            </a>
+        </div>
+    </section>
+
+    <!-- What It Does Section -->
+    <section class="bg-brand-navy text-white py-20 px-8 text-center animate-fade-in-up">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold mb-12">🧠 What It Does (LLM Copilot Concept)</h2>
+            
+            <div class="w-full max-w-2xl h-72 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-dashed border-brand-purple rounded-2xl flex items-center justify-center mx-auto my-8 text-brand-purple text-xl">
+                📹 Video Coming Soon
+            </div>
+            
+            <div class="max-w-2xl mx-auto mt-12 bg-brand-dark rounded-2xl p-8 shadow-2xl">
+                <div class="mb-4 p-4 bg-brand-purple rounded-2xl ml-8 text-right animate-slide-in-left">
+                    "Which pre-seed AI startups align with our past investments in digital health?"
+                </div>
+                <div class="p-4 bg-brand-cyan text-brand-navy rounded-2xl mr-8 animate-slide-in-left" style="animation-delay: 0.5s;">
+                    "Here are 3 startups based on your co-investor history, sector preferences, and recent team growth indicators."
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trusted By Section -->
+    <section class="bg-brand-navy text-white py-12 px-8 text-center">
+        <h3 class="text-xl md:text-2xl font-semibold mb-8 opacity-80">🔒 Trusted by companies</h3>
+        <div class="flex justify-center gap-8 flex-wrap">
+            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
+                Company 1
+            </div>
+            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
+                Company 2
+            </div>
+            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
+                Company 3
+            </div>
+            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
+                Company 4
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="bg-brand-navy text-white py-20 px-8 animate-fade-in-up">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">📊 How It Works — Our 3 Intelligence Engines</h2>
+            <p class="text-center text-xl mb-12 text-brand-cyan">Three Engines. One Intelligent Copilot.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-10 rounded-2xl border border-brand-purple/20 transition-all duration-300 hover:-translate-y-2 hover:border-brand-purple hover:shadow-2xl hover:shadow-brand-purple/20 animate-fade-in-up">
+                    <div class="text-4xl mb-4 text-brand-purple">🔁</div>
+                    <h3 class="text-xl font-semibold mb-4 text-brand-cyan">1. Historical Investment Patterns</h3>
+                    <p class="text-gray-300">We analyze your past investments, their outcomes, and underlying attributes (sector, founder profile, deal stage) to learn what you're great at — and suggest aligned opportunities.</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-10 rounded-2xl border border-brand-purple/20 transition-all duration-300 hover:-translate-y-2 hover:border-brand-purple hover:shadow-2xl hover:shadow-brand-purple/20 animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="text-4xl mb-4 text-brand-purple">🤝</div>
+                    <h3 class="text-xl font-semibold mb-4 text-brand-cyan">2. Co-Investor Network Signals</h3>
+                    <p class="text-gray-300">Many successful deals include familiar co-investors. We map your co-investment history and discover which VCs you frequently align with — to surface unseen deal patterns and partner-led opportunities.</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-10 rounded-2xl border border-brand-purple/20 transition-all duration-300 hover:-translate-y-2 hover:border-brand-purple hover:shadow-2xl hover:shadow-brand-purple/20 animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="text-4xl mb-4 text-brand-purple">📈</div>
+                    <h3 class="text-xl font-semibold mb-4 text-brand-cyan">3. Talent Opportunity Signals</h3>
+                    <p class="text-gray-300">By monitoring LinkedIn data — hiring trends, leadership churn, layoffs — we detect team-driven inflection points in startups and help you catch momentum before others do.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="bg-brand-navy text-white py-20 px-8 animate-fade-in-up">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">🧭 Use Cases — Who It's For</h2>
+            <p class="text-center text-xl mb-12 text-brand-cyan">Built for the Entire Private Capital Ecosystem</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
+                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up">
+                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Venture Capital</h3>
+                    <p class="text-gray-300">Source and score startups aligned with your thesis</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up" style="animation-delay: 0.1s;">
+                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Corporate Venture Capitals</h3>
+                    <p class="text-gray-300">Track startups that support strategic innovation</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Growth & Private Equity</h3>
+                    <p class="text-gray-300">Spot teams with signals of scalable momentum</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Accelerators</h3>
+                    <p class="text-gray-300">Select and support high-potential startups with context-aware insights</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why We're Different Section -->
+    <section class="bg-brand-navy text-white py-20 px-8 animate-fade-in-up">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">💼 Why We're Different</h2>
+            <p class="text-center text-xl mb-12 text-brand-cyan">A Smarter, More Explainable Approach to Startup Discovery</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left">
+                    <div class="text-2xl text-brand-purple mt-1">✓</div>
+                    <div>
+                        <strong>LLM-powered reasoning</strong> — not just filtering
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left" style="animation-delay: 0.1s;">
+                    <div class="text-2xl text-brand-purple mt-1">✓</div>
+                    <div>
+                        <strong>Built specifically for private market workflows</strong>
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left" style="animation-delay: 0.2s;">
+                    <div class="text-2xl text-brand-purple mt-1">✓</div>
+                    <div>
+                        <strong>Explains why each startup is a good match</strong>
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left" style="animation-delay: 0.3s;">
+                    <div class="text-2xl text-brand-purple mt-1">✓</div>
+                    <div>
+                        <strong>Uses real investment, network, and team data</strong> — not just keywords
+                    </div>
+                </div>
+                
+                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left col-span-1 md:col-span-2 justify-center" style="animation-delay: 0.4s;">
+                    <div class="text-2xl text-brand-purple mt-1">✓</div>
+                    <div>
+                        <strong>Designed by experts in venture and AI</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="bg-gradient-to-br from-gray-800 to-brand-navy text-white text-center py-20 px-8">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-2xl md:text-4xl font-bold mb-8">📣 Join other forward-thinking investors using AI to sharpen their sourcing and decisions</h2>
+            <div class="flex gap-6 justify-center flex-wrap">
+                <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 no-underline">
+                    Request Early Access
+                </a>
+                <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-cyan/40 no-underline">
+                    Book a Demo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-darker text-white py-12 px-8 text-center">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h3 class="text-brand-purple text-lg font-semibold mb-4">📬 Contact</h3>
+                    <p class="mb-2"><a href="mailto:cem@capmapai.com" class="text-brand-cyan hover:opacity-80 transition-opacity no-underline">cem@capmapai.com</a></p>
+                    <p><a href="mailto:onur@capmapai.com" class="text-brand-cyan hover:opacity-80 transition-opacity no-underline">onur@capmapai.com</a></p>
+                </div>
+                <div>
+                    <h3 class="text-brand-purple text-lg font-semibold mb-4">Socials</h3>
+                    <p><a href="#" target="_blank" class="text-brand-cyan hover:opacity-80 transition-opacity no-underline">LinkedIn</a></p>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
+</html>
