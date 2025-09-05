@@ -22,7 +22,6 @@
                         'slide-in-down': 'slideInDown 1.2s ease-out',
                         'slide-in-left': 'slideInLeft 0.8s ease-out',
                         'fade-in-left': 'fadeInLeft 0.8s ease-out',
-                        'gradient-flow': 'gradientFlow 3s ease-in-out infinite',
                     },
                     keyframes: {
                         fadeInUp: {
@@ -44,22 +43,27 @@
                         fadeInLeft: {
                             from: { opacity: '0', transform: 'translateX(-20px)' },
                             to: { opacity: '1', transform: 'translateX(0)' }
-                        },
-                        gradientFlow: {
-                            '0%': { 'background-position': '0% 50%' },
-                            '50%': { 'background-position': '100% 50%' },
-                            '100%': { 'background-position': '0% 50%' }
                         }
                     }
                 }
             }
         }
     </script>
+    <style>
+        @keyframes gradientFlow {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .gradient-flow {
+            animation: gradientFlow 2s linear infinite;
+        }
+    </style>
 </head>
 <body class="bg-brand-navy text-white overflow-x-hidden">
     <!-- Hero Section -->
     <section class="min-h-screen flex flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-brand-navy to-blue-900 animate-fade-in-up">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-brand-cyan to-white bg-clip-text text-transparent animate-gradient-flow animate-slide-in-down" style="background-size: 200% 200%;">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-transparent via-white via-brand-cyan via-white to-transparent bg-clip-text text-transparent gradient-flow animate-slide-in-down" style="background-size: 400% 100%;">
             Empowering Private Capital Investors with AI-Driven Insights
         </h1>
         <p class="text-lg md:text-xl mb-12 max-w-2xl opacity-90 animate-fade-in">
