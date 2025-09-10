@@ -22,9 +22,17 @@ Dotenv.load
 # Configure Rack::Attack for rate limiting
 if ENV['REDIS_URL']
   require 'redis'
-  Rack::Attack.cache.store = Redis.new(url: ENV['REDIS_URL'])
+  redis_url = ENV['REDIS_URL']
+  redis_username = ENV['REDIS_USERNAME']
+  redis_password = ENV['REDIS_PASSWORD']
+  # Ensure Redis URL has proper scheme
+  redis_url = "redis://#{redis_username}:#{redis_password}@#{redis_url}"
+  Rack::Attack.cache.store = Redis.new(url: redis_url)
+else
+  # Use ActiveSupport memory store for fallback
+  #require 'active_support/cache/memory_store'
+  #Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
 end
-# If no Redis URL, Rack::Attack will use the default memory store automatically
 
 # Rate limiting rules (periods in seconds)
 Rack::Attack.throttle('req/ip', limit: 100, period: 60) { |req| req.ip }
