@@ -70,10 +70,27 @@ end
 
 # Authentication User class
 class User
+  attr_reader :id, :username, :role
+  
+  def initialize(id, username, role)
+    @id = id
+    @username = username
+    @role = role
+  end
+  
   def self.authenticate(password, *args)
     require 'bcrypt'
     password_hash = ENV['PASSWORD_HASH'] || BCrypt::Password.create('1qa3ed5tg', cost: 12)
-    BCrypt::Password.new(password_hash) == password ? :admin : nil
+    if BCrypt::Password.new(password_hash) == password
+      # Return admin user object with id method
+      new(1, 'admin', 'admin')
+    else
+      nil
+    end
+  end
+  
+  def admin?
+    @role == 'admin'
   end
 end
 
@@ -93,6 +110,16 @@ class SinatraRouter < Sinatra::Base
       httponly: true,
       secure: ENV['RACK_ENV'] == 'production'
     
+    # Helper method to get current user
+    def current_user
+      authenticated(User)
+    end
+    
+    # Helper method to check if current user is admin
+    def admin?
+      current_user&.admin?
+    end
+    
     before do
         # Security headers
         headers['X-Frame-Options'] = 'DENY'
@@ -109,6 +136,10 @@ class SinatraRouter < Sinatra::Base
             session[:return_to] = request.fullpath
             redirect '/login'
         end
+        
+        # Set up user context - admin can access everything
+        @current_user = current_user
+        @is_admin = admin?
         
         @database = Database.new()
         @conversation = ConversationHost.new()
