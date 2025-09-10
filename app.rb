@@ -136,8 +136,13 @@ class SinatraRouter < Sinatra::Base
         # Skip auth for login/health routes
         pass if request.path_info =~ /^\/(login|logout|health)$/
         
-        # Require authentication for everything else
-        unless authenticated(User)
+        # Clear any wonky sessions and force fresh login
+        auth_result = authenticated(User)
+        puts "DEBUG: authenticated(User) returned: #{auth_result.inspect}"
+        puts "DEBUG: session contents: #{session.inspect}"
+        
+        unless auth_result
+            session.clear  # Clear any existing session
             session[:return_to] = request.fullpath
             redirect '/login'
         end
