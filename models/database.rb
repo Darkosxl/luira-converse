@@ -7,7 +7,12 @@ class Database
   
   def initialize
     Dotenv.load
-    @db = Sequel.connect(ENV['POSTGRES_URL'])
+    @db = Sequel.connect(ENV['POSTGRES_URL'], 
+      max_connections: 10,
+      pool_timeout: 5,
+      single_threaded: false,
+      preconnect: true
+    )
   end
 
   def get_chat_by_id(id)

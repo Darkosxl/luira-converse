@@ -3,8 +3,11 @@ GEM
   specs:
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
+    armor (0.0.3)
     base64 (0.3.0)
+    bcrypt (3.1.20)
     bigdecimal (3.2.3)
+    connection_pool (2.5.4)
     diff-lcs (1.6.2)
     domain_name (0.6.20240107)
     dotenv (3.1.8)
@@ -52,11 +55,17 @@ GEM
       nio4r (~> 2.0)
     racc (1.8.1)
     rack (2.2.17)
+    rack-attack (6.7.0)
+      rack (>= 1.0, < 4)
     rack-protection (3.2.0)
       base64 (>= 0.1.0)
       rack (~> 2.2, >= 2.2.4)
     rake (13.3.0)
     redcarpet (3.6.1)
+    redis (5.4.1)
+      redis-client (>= 0.22.0)
+    redis-client (0.25.2)
+      connection_pool
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -82,6 +91,8 @@ GEM
       zeitwerk (~> 2)
     sequel (5.96.0)
       bigdecimal
+    shield (3.0.0)
+      armor
     sinatra (3.2.0)
       mustermann (~> 3.0)
       rack (~> 2.2, >= 2.2.4)
@@ -99,16 +110,21 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  bcrypt
+  connection_pool
   dotenv
   http
   nokogiri
   pg
   puma
   rack (~> 2.2.4)
+  rack-attack
   redcarpet
+  redis
   rspec
   ruby_llm
   sequel
+  shield
   sinatra
   sinatra-sse
   sqlite3

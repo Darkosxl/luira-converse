@@ -7,21 +7,127 @@ require 'date'
 require 'redcarpet'
 require 'json'
 require 'net/http'
+require 'shield'
+require 'rack/attack'
+
 require_relative 'models/stream'
 require_relative 'models/database'
 require_relative 'models/conversation'
 
+# ==========================================
+# SECURITY MIDDLEWARE CONFIGURATION
+# ==========================================
+Dotenv.load
+
+# Configure Rack::Attack for rate limiting
+if ENV['REDIS_URL']
+  require 'redis'
+  Rack::Attack.cache.store = Rack::Attack::StoreProxy::Redis.new(Redis.new(url: ENV['REDIS_URL']))
+else
+  Rack::Attack.cache.store = Rack::Attack::StoreProxy::Memory.new
+end
+
+# Rate limiting rules
+Rack::Attack.throttle('req/ip', limit: 100, period: 1.minute) { |req| req.ip }
+Rack::Attack.throttle('logins/ip', limit: 5, period: 15.minutes) do |req|
+  req.ip if req.path == '/login' && req.post?
+end
+Rack::Attack.throttle('api/ip', limit: 20, period: 1.minute) do |req|
+  req.ip if req.path.start_with?('/chat')
+end
+
+# Block malicious requests
+Rack::Attack.blocklist('bad-agents') do |req|
+  bad_agents = /nikto|sqlmap|havij|acunetix|nessus|metasploit|morfeus|brutus|hydra|nmap/i
+  req.user_agent =~ bad_agents if req.user_agent
+end
+
+Rack::Attack.blocklist('bad-requests') do |req|
+  req.query_string =~ /(\%27)|(\')|(\-\-)|(\%23)|(#)/i ||
+  req.query_string =~ /(union|select|insert|drop|delete|update|cast|declare|exec|script)/i ||
+  req.path_info =~ /\.\./
+end
+
+# Block repeated 404s
+Rack::Attack.blocklist('fail2ban') do |req|
+  Rack::Attack::Fail2Ban.filter("pentesters-#{req.ip}", maxretry: 10, findtime: 1.minute, bantime: 15.minutes) do
+    req.env['sinatra.error'] && req.env['sinatra.error'].class == Sinatra::NotFound
+  end
+end
+
+Rack::Attack.blocklisted_responder = lambda { |req| [403, {'Content-Type' => 'text/plain'}, ["Access denied.\n"]] }
+Rack::Attack.throttled_responder = lambda do |req|
+  retry_after = (req.env['rack.attack.match_data'] || {})[:period]
+  [429, {'Content-Type' => 'text/plain', 'Retry-After' => retry_after.to_s}, ["Rate limit exceeded.\n"]]
+end
+
+# Authentication User class
+class User
+  def self.authenticate(password)
+    require 'bcrypt'
+    password_hash = ENV['PASSWORD_HASH'] || BCrypt::Password.create('1qa3ed5tg', cost: 12)
+    BCrypt::Password.new(password_hash) == password ? :admin : nil
+  end
+end
 
 class SinatraRouter < Sinatra::Base
     set :bind, '0.0.0.0'
     set :port, 4567
     set :server, 'puma'
-    enable :sessions
+    
+    # Security middleware
+    use Rack::Attack
+    helpers Shield::Helpers
+    
+    use Rack::Session::Cookie,
+      key: 'app.session',
+      secret: ENV['SESSION_SECRET'] || 'change-this-in-production-' + SecureRandom.hex(16),
+      expire_after: 3600,
+      httponly: true,
+      secure: ENV['RACK_ENV'] == 'production'
     
     before do
+        # Security headers
+        headers['X-Frame-Options'] = 'DENY'
+        headers['X-Content-Type-Options'] = 'nosniff'
+        headers['X-XSS-Protection'] = '1; mode=block'
+        headers['Referrer-Policy'] = 'no-referrer'
+        headers['Access-Control-Allow-Origin'] = 'none'
+        
+        # Skip auth for login/health routes
+        pass if request.path_info =~ /^\/(login|logout|health)$/
+        
+        # Require authentication for everything else
+        unless authenticated(User)
+            session[:return_to] = request.fullpath
+            redirect '/login'
+        end
+        
         @database = Database.new()
         @conversation = ConversationHost.new()
     end
+    get '/health' do
+        'OK'
+    end
+    
+    get '/login' do
+        erb :'login'
+    end
+    
+    post '/login' do
+        if login(User, params[:password], session.delete(:return_to) || '/')
+            redirect session[:return_to] || '/'
+        else
+            @error = "Invalid password"
+            erb :login
+        end
+    end
+    
+    get '/logout' do
+        logout(User)
+        redirect '/login'
+    end
+
     get '/' do
        erb :'landing-page'
     end
@@ -160,6 +266,17 @@ class SinatraRouter < Sinatra::Base
         @right_sidebar_open = session[:right_sidebar_open] || false
         
         erb :chat, locals: { messages: messages }
+    end
+
+    # Error handlers
+    not_found do
+        status 404
+        'Not found'
+    end
+
+    error do
+        status 500
+        'Internal server error'
     end
 
     private

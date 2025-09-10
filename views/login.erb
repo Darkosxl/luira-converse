@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin: 100px auto; padding: 20px; }
+    input, button { display: block; width: 100%; padding: 10px; margin: 10px 0; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h2>Login Required</h2>
+  <% if @error %>
+    <p class="error"><%= @error %></p>
+  <% end %>
+  <form method="post">
+    <input type="password" name="password" placeholder="Password" required autofocus>
+    <button type="submit">Login</button>
+  </form>
+</body>
+</html>
