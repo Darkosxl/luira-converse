@@ -1,21 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
-  <style>
-    body { font-family: sans-serif; max-width: 400px; margin: 100px auto; padding: 20px; }
-    input, button { display: block; width: 100%; padding: 10px; margin: 10px 0; }
-    .error { color: red; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-navy': '#050a30',
+                        'brand-purple': '#7910ff',
+                        'brand-cyan': '#00d2ff',
+                        'brand-dark': '#0f1547',
+                        'brand-darker': '#020614',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 1s ease-out',
+                        'fade-in': 'fadeIn 1.5s ease-out',
+                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            from: { opacity: '0', transform: 'translateY(30px)' },
+                            to: { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        fadeIn: {
+                            from: { opacity: '0' },
+                            to: { opacity: '1' }
+                        },
+                        pulseGlow: {
+                            from: { boxShadow: '0 0 20px rgba(121, 16, 255, 0.3)' },
+                            to: { boxShadow: '0 0 40px rgba(121, 16, 255, 0.6)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes gradient-x {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        .animate-gradient-text {
+            background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
+            background-size: 400% 400%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-x 3s ease infinite;
+        }
+    </style>
 </head>
-<body>
-  <h2>Login Required</h2>
-  <% if @error %>
-    <p class="error"><%= @error %></p>
-  <% end %>
-  <form method="post">
-    <input type="password" name="password" placeholder="Password" required autofocus>
-    <button type="submit">Login</button>
-  </form>
+<body class="bg-brand-navy text-white min-h-screen flex items-center justify-center p-8">
+    <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-12 rounded-3xl border border-brand-purple/20 max-w-md w-full animate-fade-in-up shadow-2xl animate-pulse-glow">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold mb-2 animate-gradient-text">
+                Welcome Back
+            </h1>
+            <p class="text-brand-cyan opacity-80">
+                Enter your password to access
+            </p>
+        </div>
+        
+        <% if @error %>
+            <div class="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl mb-6 animate-fade-in">
+                <p class="text-sm font-medium"><%= @error %></p>
+            </div>
+        <% end %>
+        
+        <form method="post" class="space-y-6">
+            <div>
+                <input 
+                    type="password" 
+                    name="password" 
+                    placeholder="Enter your password" 
+                    required 
+                    autofocus
+                    class="w-full px-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300"
+                >
+            </div>
+            
+            <button 
+                type="submit" 
+                class="w-full px-6 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 focus:outline-none focus:ring-4 focus:ring-brand-purple/30"
+            >
+                Login to Dashboard
+            </button>
+        </form>
+        
+        <div class="text-center mt-8 text-sm text-gray-400">
+            <p>Secure authentication powered by BCrypt</p>
+        </div>
+    </div>
 </body>
 </html>
