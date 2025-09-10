@@ -26,12 +26,12 @@ if ENV['REDIS_URL']
 end
 # If no Redis URL, Rack::Attack will use the default memory store automatically
 
-# Rate limiting rules
-Rack::Attack.throttle('req/ip', limit: 100, period: 1.minute) { |req| req.ip }
-Rack::Attack.throttle('logins/ip', limit: 5, period: 15.minutes) do |req|
+# Rate limiting rules (periods in seconds)
+Rack::Attack.throttle('req/ip', limit: 100, period: 60) { |req| req.ip }
+Rack::Attack.throttle('logins/ip', limit: 5, period: 900) do |req|
   req.ip if req.path == '/login' && req.post?
 end
-Rack::Attack.throttle('api/ip', limit: 20, period: 1.minute) do |req|
+Rack::Attack.throttle('api/ip', limit: 20, period: 60) do |req|
   req.ip if req.path.start_with?('/chat')
 end
 
@@ -49,7 +49,7 @@ end
 
 # Block repeated 404s
 Rack::Attack.blocklist('fail2ban') do |req|
-  Rack::Attack::Fail2Ban.filter("pentesters-#{req.ip}", maxretry: 10, findtime: 1.minute, bantime: 15.minutes) do
+  Rack::Attack::Fail2Ban.filter("pentesters-#{req.ip}", maxretry: 10, findtime: 60, bantime: 900) do
     req.env['sinatra.error'] && req.env['sinatra.error'].class == Sinatra::NotFound
   end
 end
