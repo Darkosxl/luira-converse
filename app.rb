@@ -70,7 +70,7 @@ end
 
 # Authentication User class
 class User
-  def self.authenticate(password)
+  def self.authenticate(password, *args)
     require 'bcrypt'
     password_hash = ENV['PASSWORD_HASH'] || BCrypt::Password.create('1qa3ed5tg', cost: 12)
     BCrypt::Password.new(password_hash) == password ? :admin : nil
