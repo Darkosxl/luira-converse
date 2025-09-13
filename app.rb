@@ -193,28 +193,25 @@ class SinatraRouter < Sinatra::Base
     #USER INITITATES CHAT, OR SENDS MESSAGES, THOSE GET SAVED, AND THEY CALL THE BACKEND TO GET THE AI RESPONSE
     post '/chat/messages' do
         user_message = params[:message]
-        use_luira = params[:use_luira] == 'true'
+        model_key = params[:model] || 'capmap'
         chat_id = @database.update_or_create_chat("private", user_message, session[:current_chat_id])
         session[:current_chat_id] = chat_id
         session[:first_visit] = false
 
         ai_id = "ai-response-#{Time.now.to_f.to_s.gsub('.', '')}"
-        
+
         Thread.new do
-            if use_luira
-                @conversation.call_luira(user_message, ai_id, chat_id, @database)
-            else
-                @conversation.call_capmap(user_message, ai_id, chat_id, @database)
-            end
+            @conversation.call_model(user_message, ai_id, chat_id, @database, model_key)
         end
 
         user_html = erb :user_message, layout: false, locals: {message: user_message}
-        logo_src = use_luira ? "/logo_luira.svg" : "/logo.svg"
+        # Use appropriate logo based on model
+        logo_src = model_key == 'capmap' ? "/logo.svg" : "/logo_luira.svg"
         ai_placeholder = "<div id=\"#{ai_id}\" class=\"flex justify-start mb-6\"><div class=\"flex items-start gap-3 max-w-2xl\"><div class=\"ai-avatar-container ai-loading\"><img src=\"#{logo_src}\" class=\"logo-loading\" alt=\"Loading\"></div><div class=\"text-gray-900 flex-1 min-w-0 break-words\"><div class=\"typing-indicator\">AI is thinking...</div></div></div></div>"
-        
+
         # Start SSE connection immediately
         sse_script = "<script>startAIStream('', '#{ai_id}');</script>"
-        
+
         "#{user_html}#{ai_placeholder}#{sse_script}"
     end
     

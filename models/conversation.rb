@@ -21,19 +21,50 @@ end
 class ConversationHost
     # Use class variable for shared storage across instances
     @@completed_responses = {}
-    
+    @@chat_instances = {}
+
     def self.completed_responses
         @@completed_responses
     end
-    
+
+    # Model mapping for display names to actual model identifiers
+    MODEL_MAPPING = {
+        'claude-sonnet-4' => 'anthropic/claude-sonnet-4',
+        'deepseek-chat-v3.1' => 'deepseek/deepseek-chat-v3.1',
+        'gemini-2.5-pro' => 'google/gemini-2.5-pro',
+        'gemini-2.5-flash' => 'google/gemini-2.5-flash',
+        'gpt-4.1' => 'openai/gpt-4.1',
+        'gpt-5-chat' => 'openai/gpt-5-chat',
+        'r1-1776' => 'perplexity/r1-1776',
+        'sonar-reasoning-pro' => 'perplexity/sonar-reasoning-pro',
+        'qwen3-235b-thinking' => 'qwen/qwen3-235b-a22b-thinking-2507',
+        'grok-4' => 'x-ai/grok-4',
+        'o3-pro' => 'openai/o3-pro',
+        'kimi-k2' => 'moonshotai/kimi-k2',
+        'glm-4.5v' => 'z-ai/glm-4.5v'
+    }
+
     def initialize()
         Dotenv.load
         RubyLLM.configure do |config|
-                config.openrouter_api_key = ENV['OPENROUTER_API']
+            config.openrouter_api_key = ENV['OPENROUTER_API']
         end
-        @chat = RubyLLM.chat(model: 'google/gemini-2.0-flash-001')
         renderer = CustomHTMLRenderer.new(filter_html: false, no_styles: false, safe_links_only: true)
         @markdown = Redcarpet::Markdown.new(renderer, autolink: true, tables: true, fenced_code_blocks: true, space_after_headers: true)
+    end
+
+    def get_chat_instance(model_key, chat_id)
+        # Create a unique key for this chat and model combination
+        instance_key = "#{chat_id}_#{model_key}"
+
+        # Return existing chat instance if it exists
+        return @@chat_instances[instance_key] if @@chat_instances[instance_key]
+
+        # Create new chat instance for this model
+        model_name = MODEL_MAPPING[model_key] || 'google/gemini-2.0-flash-001'
+        @@chat_instances[instance_key] = RubyLLM.chat(model: model_name)
+
+        return @@chat_instances[instance_key]
     end
 
     def call_capmap(user_message, ai_id, chat_id, database)
@@ -49,16 +80,30 @@ class ConversationHost
         @@completed_responses[ai_id] = rendered_html
     end
 
-    def call_luira(user_message, ai_id, chat_id, database)
+    def call_model(user_message, ai_id, chat_id, database, model_key = 'gemini-2.5-flash')
+        if model_key == 'capmap'
+            call_capmap(user_message, ai_id, chat_id, database)
+        else
+            call_luira_model(user_message, ai_id, chat_id, database, model_key)
+        end
+    end
+
+    def call_luira_model(user_message, ai_id, chat_id, database, model_key)
         full_response = ""
-        
-        @chat.ask(user_message) do |chunk|
+        chat_instance = get_chat_instance(model_key, chat_id)
+
+        chat_instance.ask(user_message) do |chunk|
             full_response += chunk.content
         end
-        
+
         rendered_html = @markdown.render(full_response)
         database.update_or_create_chat("private", full_response, chat_id, "assistant")
         @@completed_responses[ai_id] = rendered_html
+    end
+
+    # Keep the old method for backward compatibility
+    def call_luira(user_message, ai_id, chat_id, database)
+        call_luira_model(user_message, ai_id, chat_id, database, 'gemini-2.5-flash')
     end
 
     
