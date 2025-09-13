@@ -342,14 +342,9 @@ function startAIStream(aiResponse, aiId) {
 <!-- Input Form - Sticky at bottom -->
 <div class="sticky bottom-0 bg-white px-4 py-4">
   <div class="max-w-3xl mx-auto">
-    <form class="relative"
-          hx-post="/chat/messages"
-          hx-target=".container"
-          hx-swap="beforeend"
-          hx-on::after-request="document.getElementById('welcome-section')?.remove()">
-
-      <!-- Model Selector Button -->
-      <div class="absolute left-2 top-1/2 transform -translate-y-1/2">
+    <div class="flex items-center gap-2">
+      <!-- Model Selector Button - Right next to chatbox -->
+      <div class="relative">
         <button type="button"
                 id="model-selector-btn"
                 class="flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg border text-gray-700"
@@ -427,20 +422,27 @@ function startAIStream(aiResponse, aiId) {
         </div>
       </div>
 
-      <input class="w-full pl-20 pr-14 py-3 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
-             name="message"
-             type="text"
-             placeholder="Send a message..."
-             id="message-input"/>
-      <input type="hidden" name="model" id="model-input" value="capmap"/>
-      <button class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black hover:bg-gray-800 text-white rounded-full flex items-center justify-center transition-all duration-200"
-              type="submit"
-              id="send-button">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l0-16m-4 4l4-4 4 4"/>
-        </svg>
-      </button>
-    </form>
+      <!-- Chat Form -->
+      <form class="relative flex-1"
+            hx-post="/chat/messages"
+            hx-target=".container"
+            hx-swap="beforeend"
+            hx-on::after-request="document.getElementById('welcome-section')?.remove()">
+        <input class="w-full px-4 py-3 pr-14 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
+               name="message"
+               type="text"
+               placeholder="Send a message..."
+               id="message-input"/>
+        <input type="hidden" name="model" id="model-input" value="capmap"/>
+        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black hover:bg-gray-800 text-white rounded-full flex items-center justify-center transition-all duration-200"
+                type="submit"
+                id="send-button">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l0-16m-4 4l4-4 4 4"/>
+          </svg>
+        </button>
+      </form>
+    </div>
   </div>
 </div>
 
