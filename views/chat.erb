@@ -192,13 +192,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function clearPreviousLoadingStates() {
-  // Remove loading classes from all existing AI avatars
-  const existingAvatars = document.querySelectorAll('.ai-avatar-container.ai-loading');
-  existingAvatars.forEach(avatar => {
+  // Hide all existing AI avatars (both loading and static ones)
+  const allAvatars = document.querySelectorAll('.ai-avatar-container');
+  allAvatars.forEach(avatar => {
+    // Remove loading classes
     avatar.classList.remove('ai-loading');
     const img = avatar.querySelector('img');
-    if (img && img.classList.contains('logo-loading')) {
+    if (img) {
       img.classList.remove('logo-loading');
+      // Hide the entire avatar container
+      avatar.style.display = 'none';
     }
   });
 }
@@ -206,11 +209,14 @@ function clearPreviousLoadingStates() {
 function startAIStream(aiResponse, aiId) {
   const aiContent = document.getElementById(aiId).querySelector('.text-gray-900 div');
   const avatarContainer = document.getElementById(aiId).querySelector('.ai-avatar-container');
-  
+
+  // Make sure current avatar is visible
+  avatarContainer.style.display = 'flex';
+
   const eventSource = new EventSource('/chat/stream/' + aiId);
   let accumulatedContent = '';
   aiContent.innerHTML = '';
-  
+
   eventSource.onmessage = function(event) {
     if (avatarContainer.classList.contains('ai-loading')) {
       avatarContainer.classList.remove('ai-loading');
@@ -224,13 +230,15 @@ function startAIStream(aiResponse, aiId) {
     // Show accumulated content as HTML
     aiContent.innerHTML = accumulatedContent;
   };
-  
+
   eventSource.addEventListener('complete', function(event) {
     // Final render to ensure proper HTML
     aiContent.innerHTML = accumulatedContent;
+    // Keep the avatar visible as this is now the latest response
+    // (Previous ones were already hidden by clearPreviousLoadingStates)
     eventSource.close();
   });
-  
+
   eventSource.onerror = function(error) {
     console.error('SSE error:', error);
     avatarContainer.classList.remove('ai-loading');
@@ -239,6 +247,7 @@ function startAIStream(aiResponse, aiId) {
     if (img && img.classList.contains('logo-loading')) {
       img.classList.remove('logo-loading');
     }
+    // Keep avatar visible even on error as this is the latest response
     aiContent.textContent = 'Error loading response';
     eventSource.close();
   };
@@ -311,7 +320,7 @@ function startAIStream(aiResponse, aiId) {
         <% elsif message[:role] == 'assistant' %>
           <div class="flex justify-start mb-6">
             <div class="flex items-start gap-3 max-w-2xl">
-              <div class="ai-avatar-container">
+              <div class="ai-avatar-container" style="display: none;">
                 <img src="/logo.svg" alt="AI">
               </div>
               <div class="text-gray-900 flex-1 min-w-0 break-words">
