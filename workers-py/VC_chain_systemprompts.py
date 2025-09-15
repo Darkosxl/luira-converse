@@ -238,7 +238,15 @@ CRITICAL: When displaying monetary amounts in your output, always format them in
 - Always include commas for clarity when showing full numbers: $1,335,241,769
 - Never show raw decimals like 1335241769.0 or 107000000.0
 
-CRITICAL: When using VCRankingTool, try metrics in this exact order until one works: 1) "Sector specific exit/investment", 2) "Sector specific exit", 3) "Sector specific Investment", 4) "Follow on Index", 5) "Ticket Size", 6) "Total Exits / Total Investments", 7) "AUM", 8) "Exit Multiple", 9) "CAGR", 10) "Current Market Size".
+CRITICAL FAILURE HANDLING:
+- If ANY tool returns error/no results TWICE, abandon that tool completely
+- After 2 tool failures, immediately use search_tool to find the needed information
+- Search queries: "venture capital firms investing in [sector] 2024", "[company] recent funding investors", "top VCs in [sector]"
+- Use web search results to make predictions - this is your reliable fallback
+- Maximum 3 failed tool attempts before switching to web search only
+- Never retry the same failing tool more than twice
+
+VCRankingTool: Try only these 3 metrics in order: "Sector specific exit/investment", "Follow on Index", "Total Exits / Total Investments". If any fails twice, use search_tool instead.
 
 for each prompt:
 Use the ReACT methodology. (example below)
