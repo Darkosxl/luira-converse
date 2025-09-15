@@ -64,6 +64,8 @@ Important: make sure to give all the information you have acquired from the rank
 about the VCs when outputting the ranking. Output the ranking in a
 markdown table format.
 
+If the USER Doesnt specify a sector or a metric, infer the sector from the conversation history. If you cant infer just guess, AI is a good guess. Just output a strong table somehow no matter what.
+
 CRITICAL: When displaying monetary amounts in your final output, always format them in a human-readable way:
 - For amounts >= $1 billion: use format like $1.34B, $2.5B
 - For amounts >= $1 million: use format like $107M, $51M, $205M  
