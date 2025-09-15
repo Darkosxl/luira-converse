@@ -345,7 +345,7 @@ class SinatraRouter < Sinatra::Base
             chat_date = Date.parse(chat[:createdAt].to_s)
             days_ago = (now - chat_date).to_i
             
-            if days_ago == 0
+            if days_ago == 0 
                 grouped[:today] << chat
             elsif days_ago == 1
                 grouped[:yesterday] << chat

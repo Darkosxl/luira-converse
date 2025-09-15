@@ -144,8 +144,29 @@ def run_reasoning_model(state: AgentState, config: RunnableConfig):
     try:
         # Add recursion limit for the reasoning agent specifically
         reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 25}}
+
+        print(f"🔍 REASONING AGENT - Input messages: {len(messages)}")
+        print(f"🔍 REASONING AGENT - User input: {state['input']}")
+
         response = reasoning_agent.invoke({"messages": messages}, reasoning_config)
-        return {"output": response["messages"][-1]}
+
+        print(f"🔍 REASONING AGENT - Response message count: {len(response['messages'])}")
+        print(f"🔍 REASONING AGENT - Response types: {[type(msg).__name__ for msg in response['messages']]}")
+
+        # Log all the intermediate messages to see the ReAct flow
+        for i, msg in enumerate(response["messages"]):
+            print(f"🔍 REASONING AGENT - Message {i}: {type(msg).__name__}")
+            if hasattr(msg, 'content'):
+                content_preview = str(msg.content)[:500] + "..." if len(str(msg.content)) > 500 else str(msg.content)
+                print(f"🔍 REASONING AGENT - Content preview: {content_preview}")
+            if hasattr(msg, 'tool_calls') and msg.tool_calls:
+                print(f"🔍 REASONING AGENT - Tool calls: {msg.tool_calls}")
+
+        final_message = response["messages"][-1]
+        print(f"🔍 REASONING AGENT - Final message type: {type(final_message).__name__}")
+        print(f"🔍 REASONING AGENT - Final content length: {len(str(final_message.content)) if hasattr(final_message, 'content') else 'No content'}")
+
+        return {"output": final_message}
     except Exception as e:
         print(f"Error in reasoning agent: {e}")
         return {"output": HumanMessage(content=f"Analysis encountered an error: {str(e)}")} 
