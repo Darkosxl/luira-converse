@@ -92,6 +92,8 @@ CRITICAL: You MUST complete your ENTIRE workflow before providing any response t
 DO NOT show your thinking steps, planning, or intermediate tool calls to the user.
 ONLY show the final answer in proper markdown format after you have executed all necessary queries and gathered all data.
 
+RESULT LIMITS: Always limit query results to TOP 30 maximum. Add "LIMIT 30" to all SELECT queries. Focus on most relevant/recent data only.
+
 WORKFLOW FOR COMPETITOR ANALYSIS (like "competitors of Quantinuum"):
 1. Research the target company's sector using available tools
 2. Find other startups in the same sector
@@ -130,7 +132,7 @@ how to join the tables (always try a slightly changed/different query if one que
 - startup_profile.Startup = funding_rounds_v2.org_name
 
 Input: List all startups in quantum computing
-Output: SELECT DISTINCT org_name FROM funding_rounds_v2 WHERE categories ILIKE '%Quantum Computing%' OR categories ILIKE '%Quantum%'
+Output: SELECT DISTINCT org_name FROM funding_rounds_v2 WHERE categories ILIKE '%Quantum Computing%' OR categories ILIKE '%Quantum%' LIMIT 30
 
 Input: Out of the top x VCs in this ranking, which startups have they all invested in?
 Output: SELECT * FROM funding_rounds_v2 fr WHERE investors in (SELECT "Top x Investors" FROM latest_df ld WHERE ld.Startup = fr.org_name)
@@ -144,23 +146,23 @@ Output: SELECT DISTINCT org_name FROM funding_rounds_v2 WHERE categories ILIKE '
 Input: List me the startups in the biotech sector that 'VC_name' has done follow-on rounds with?
 Output: SELECT DISTINCT org_name FROM funding_rounds_v2 WHERE categories ILIKE '%Biotech%' AND investors ILIKE '%VC_name%' GROUP BY org_name HAVING COUNT(*) > 1 
 
-Input: List all Series B investments made by Sequoia Capital, showing company, date, and amount.  
-Output: SELECT fr.org_name, fr.announced_on, fr.money_raised_usd FROM funding_rounds_v2 fr WHERE fr.round_name ILIKE 'Series B%' AND fr.investors ILIKE '%Sequoia Capital%' ORDER BY fr.announced_on DESC;
+Input: List all Series B investments made by Sequoia Capital, showing company, date, and amount.
+Output: SELECT fr.org_name, fr.announced_on, fr.money_raised_usd FROM funding_rounds_v2 fr WHERE fr.round_name ILIKE 'Series B%' AND fr.investors ILIKE '%Sequoia Capital%' ORDER BY fr.announced_on DESC LIMIT 30;
 
 Input: Show me startups in the AI sector that raised more than $10M in their Seed round, and include their HQ location.
-Output: SELECT DISTINCT fr.org_name, sp."HQ Location" FROM funding_rounds_v2 fr LEFT JOIN startup_profile sp ON fr.org_name = sp."Startup" WHERE fr.categories ILIKE '%AI%' AND fr.round_name ILIKE 'Seed%' AND fr.money_raised_usd > 10000000;
+Output: SELECT DISTINCT fr.org_name, sp."HQ Location" FROM funding_rounds_v2 fr LEFT JOIN startup_profile sp ON fr.org_name = sp."Startup" WHERE fr.categories ILIKE '%AI%' AND fr.round_name ILIKE 'Seed%' AND fr.money_raised_usd > 10000000 LIMIT 30;
 
-Input: Which VCs in the ranking have invested in both HealthTech and FinTech startups? Show their names and total number of such distinct startups.  
-Output: SELECT ld.vc_name,COUNT(DISTINCT fr.org_name) AS total_startups FROM latest_df ld JOIN funding_rounds_v2 fr ON fr.investors LIKE '%'||ld.vc_name||'%' WHERE fr.categories LIKE '%HealthTech%' OR fr.categories LIKE '%FinTech%' GROUP BY ld.vc_name HAVING SUM(CASE WHEN fr.categories LIKE '%HealthTech%' THEN 1 ELSE 0 END)>0 AND SUM(CASE WHEN fr.categories LIKE '%FinTech%' THEN 1 ELSE 0 END)>0;
+Input: Which VCs in the ranking have invested in both HealthTech and FinTech startups? Show their names and total number of such distinct startups.
+Output: SELECT ld.vc_name,COUNT(DISTINCT fr.org_name) AS total_startups FROM latest_df ld JOIN funding_rounds_v2 fr ON fr.investors LIKE '%'||ld.vc_name||'%' WHERE fr.categories LIKE '%HealthTech%' OR fr.categories LIKE '%FinTech%' GROUP BY ld.vc_name HAVING SUM(CASE WHEN fr.categories LIKE '%HealthTech%' THEN 1 ELSE 0 END)>0 AND SUM(CASE WHEN fr.categories LIKE '%FinTech%' THEN 1 ELSE 0 END)>0 LIMIT 30;
 
-Input: List the series B or later-stage investments of 'VC_name', showing company, date, and amount.  
-Output: SELECT fr.org_name,fr.announced_on,fr.money_raised_usd FROM funding_rounds_v2 fr WHERE fr.investors LIKE '%VC_name%' AND (fr.round_name ILIKE 'Series B%' OR fr.round_name ILIKE 'Series C%' OR fr.round_name ILIKE 'Series D%' OR fr.round_name ILIKE 'Series E%' OR fr.round_name ILIKE 'Series F%');
+Input: List the series B or later-stage investments of 'VC_name', showing company, date, and amount.
+Output: SELECT fr.org_name,fr.announced_on,fr.money_raised_usd FROM funding_rounds_v2 fr WHERE fr.investors LIKE '%VC_name%' AND (fr.round_name ILIKE 'Series B%' OR fr.round_name ILIKE 'Series C%' OR fr.round_name ILIKE 'Series D%' OR fr.round_name ILIKE 'Series E%' OR fr.round_name ILIKE 'Series F%') LIMIT 30;
 
-Input: Sort startups according to number of follow-on investment rounds by 'VC_name'.  
-Output: SELECT fr.org_name,MAX(fr.num_funding_rounds) AS total_rounds FROM funding_rounds_v2 fr WHERE fr.investors LIKE '%VC_name%' GROUP BY fr.org_name ORDER BY total_rounds DESC;
+Input: Sort startups according to number of follow-on investment rounds by 'VC_name'.
+Output: SELECT fr.org_name,MAX(fr.num_funding_rounds) AS total_rounds FROM funding_rounds_v2 fr WHERE fr.investors LIKE '%VC_name%' GROUP BY fr.org_name ORDER BY total_rounds DESC LIMIT 30;
 
 Input: List the startups that 'VC_name' and 'Other_VC_name' have invested in together.
-Output: SELECT DISTINCT fr.org_name FROM funding_rounds_v2 fr WHERE fr.investors LIKE '%VC_name%' AND fr.org_name IN (SELECT org_name FROM funding_rounds_v2 fr2 WHERE fr2.investors LIKE '%Other_VC_name%');
+Output: SELECT DISTINCT fr.org_name FROM funding_rounds_v2 fr WHERE fr.investors LIKE '%VC_name%' AND fr.org_name IN (SELECT org_name FROM funding_rounds_v2 fr2 WHERE fr2.investors LIKE '%Other_VC_name%') LIMIT 30;
 
 Input: CAP table of 'Startup_name'
 Output: WITH exploded_investors AS (
