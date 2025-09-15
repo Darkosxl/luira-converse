@@ -50,7 +50,7 @@ class ChatOpenRouter(ChatOpenAI):
         super().__init__(base_url="https://openrouter.ai/api/v1", openai_api_key=openai_api_key, **kwargs)
 
 print("Defining LLMs...")
-llm_main = ChatOpenRouter(model="deepseek/deepseek-chat-v3.1", temperature=0)
+llm_main = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
 
 ####### Router output parser #######
 class RouterOutput(TypedDict):
@@ -92,7 +92,7 @@ def run_summarizer(state: AgentState, config: RunnableConfig):
 # -------------- ROUTER AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-router_llm = ChatOpenRouter(model="deepseek/deepseek-chat-v3.1", temperature=0)
+router_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
 router_llm = router_llm.with_structured_output(RouterOutput)
 #router_agent = create_react_agent(router_llm, tools=, prompt=vc_systemprompts.ROUTER_SYSTEM_PROMPT)
 def run_router_model(state: AgentState, config: RunnableConfig):
@@ -106,7 +106,7 @@ def run_router_model(state: AgentState, config: RunnableConfig):
 # -------------- GENERAL AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-general_llm = ChatOpenRouter(model="deepseek/deepseek-chat-v3.1", temperature=0)
+general_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
 general_agent = create_react_agent(general_llm, vc_tools.general_tools)
 
 def run_general_model(state: AgentState, config: RunnableConfig):
@@ -120,7 +120,7 @@ def run_general_model(state: AgentState, config: RunnableConfig):
 # -------------- RANKING AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-ranking_llm = ChatOpenRouter(model="deepseek/deepseek-chat-v3.1", temperature=0)
+ranking_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
 ranking_agent = create_react_agent(ranking_llm, vc_tools.ranking_tools)
 
 def run_ranking_model(state: AgentState, config: RunnableConfig):
@@ -135,7 +135,7 @@ print(type(vc_tools.ranking_tools))
 # -------------- REASONING AGENT CHAIN -----------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-reasoning_llm = ChatOpenRouter(model="deepseek/deepseek-chat-v3.1", temperature=0)
+reasoning_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
 reasoning_agent = create_react_agent(reasoning_llm, vc_tools.reasoning_tools, prompt=vc_systemprompts.REASONING_SYSTEM_PROMPT)
 
 def run_reasoning_model(state: AgentState, config: RunnableConfig):
@@ -172,7 +172,7 @@ def run_reasoning_model(state: AgentState, config: RunnableConfig):
         return {"output": HumanMessage(content=f"Analysis encountered an error: {str(e)}")} 
 
 
-reasoning_validator_llm = ChatOpenRouter(model="deepseek/deepseek-chat-v3.1", temperature=0)
+reasoning_validator_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
 reasoning_validator = create_react_agent(reasoning_validator_llm, vc_tools.reasoning_tools)
 
 def run_reasoning_validator(state: AgentState, config: RunnableConfig):
@@ -186,7 +186,7 @@ def run_reasoning_validator(state: AgentState, config: RunnableConfig):
 # -------------- PREDICTION AGENT CHAIN ----------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-prediction_llm = ChatOpenRouter(model="deepseek/deepseek-chat-v3.1", temperature=0)
+prediction_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
 prediction_agent = create_react_agent(prediction_llm, vc_tools.prediction_tools, prompt=vc_systemprompts.PREDICTION_SYSTEM_PROMPT)
 
 def run_prediction_model(state: AgentState, config: RunnableConfig):
