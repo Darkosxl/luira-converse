@@ -165,8 +165,14 @@ prediction_agent = create_react_agent(prediction_llm, vc_tools.prediction_tools)
 def run_prediction_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🔮 Running PREDICTION agent\033[0m")
     messages = [vc_systemprompts.PREDICTION_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
-    response = prediction_agent.invoke({"messages": messages}, config)
-    return {"output": response["messages"][-1]}
+    try:
+        # Add recursion limit for the prediction agent specifically
+        prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 15}}
+        response = prediction_agent.invoke({"messages": messages}, prediction_config)
+        return {"output": response["messages"][-1]}
+    except Exception as e:
+        print(f"Error in prediction agent: {e}")
+        return {"output": HumanMessage(content=f"Prediction analysis encountered an error: {str(e)}")}
 
 # ------------------------------------------------------------
 # -------------- NEW FULL CHAIN ------------------------------
@@ -239,10 +245,14 @@ except Exception:
 
 def get_assistant_response(user_input: str, session_id: str, general_agent_check: bool, chat_history: list[BaseMessage]):
     state = {"input": user_input, "chat_history": chat_history, "general_agent_check": general_agent_check}
-    response = graph.invoke(state, {"configurable": {"thread_id": session_id, "recursion_limit": 10}})
-    print(response)
-    ai_message = response["output"]
-    return ai_message.content if hasattr(ai_message, 'content') else str(ai_message)
+    try:
+        response = graph.invoke(state, {"configurable": {"thread_id": session_id, "recursion_limit": 50}})
+        print(response)
+        ai_message = response["output"]
+        return ai_message.content if hasattr(ai_message, 'content') else str(ai_message)
+    except Exception as e:
+        print(f"Error in get_assistant_response: {e}")
+        return "I apologize, but I encountered an error processing your request. Please try again."
 
 
 

@@ -19,7 +19,21 @@ load_dotenv()
 
 llm_main = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_budget=1024)
 
-engine = create_engine(os.environ["POSTGRES_URL"], pool_size=10, max_overflow=20, connect_args={"prepare_threshold": None})
+engine = create_engine(
+    os.environ["POSTGRES_URL"],
+    pool_size=10,
+    max_overflow=20,
+    connect_args={
+        "prepare_threshold": None,
+        "sslmode": "require",
+        "sslcert": None,
+        "sslkey": None,
+        "sslrootcert": None,
+        "sslcrl": None
+    },
+    pool_pre_ping=True,
+    pool_recycle=3600
+)
 
 db_pool = SQLDatabase(engine)
 
@@ -231,5 +245,17 @@ def get_chat_history(session_id: str, limit: int = 20):
         ORDER BY "createdAt" DESC
         LIMIT :limit
     """
-    with engine.begin() as con:
-        return con.execute(text(query), {"session_id": session_id, "limit": limit}).fetchall()
+    max_retries = 3
+    retry_delay = 1
+
+    for attempt in range(max_retries):
+        try:
+            with engine.begin() as con:
+                return con.execute(text(query), {"session_id": session_id, "limit": limit}).fetchall()
+        except Exception as e:
+            print(f"Database connection attempt {attempt + 1} failed: {e}")
+            if attempt + 1 == max_retries:
+                print(f"Failed to get chat history after {max_retries} attempts")
+                return []
+            time.sleep(retry_delay)
+            retry_delay *= 2
