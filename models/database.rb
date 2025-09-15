@@ -7,11 +7,12 @@ class Database
   
   def initialize
     Dotenv.load
-    @db = Sequel.connect(ENV['POSTGRES_URL'], 
-      max_connections: 10,
-      pool_timeout: 5,
+    @db = Sequel.connect(ENV['POSTGRES_URL'],
+      max_connections: 20,
+      pool_timeout: 10,
       single_threaded: false,
-      preconnect: true
+      preconnect: true,
+      test: true
     )
   end
 

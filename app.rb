@@ -103,6 +103,12 @@ class SinatraRouter < Sinatra::Base
     set :bind, '0.0.0.0'
     set :port, 4567
     set :server, 'puma'
+
+    # Initialize shared database and conversation instances at startup
+    configure do
+        @@database = Database.new()
+        @@conversation = ConversationHost.new()
+    end
     
     # Security middleware
     use Rack::Attack
@@ -145,9 +151,10 @@ class SinatraRouter < Sinatra::Base
         # Set up user context - admin can access everything
         @current_user = current_user
         @is_admin = admin?
-        
-        @database = Database.new()
-        @conversation = ConversationHost.new()
+
+        # Use shared instances instead of creating new ones per request
+        @database = @@database
+        @conversation = @@conversation
     end
     get '/health' do
         'OK'
