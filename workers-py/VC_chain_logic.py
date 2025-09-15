@@ -141,8 +141,14 @@ reasoning_agent = create_react_agent(reasoning_llm, vc_tools.reasoning_tools, pr
 def run_reasoning_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🧠 Running REASONING agent\033[0m")
     messages = [HumanMessage(content=state["input"])] + state["chat_history"]
-    response = reasoning_agent.invoke({"messages": messages}, config)
-    return {"output": response["messages"][-1]} 
+    try:
+        # Add recursion limit for the reasoning agent specifically
+        reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 25}}
+        response = reasoning_agent.invoke({"messages": messages}, reasoning_config)
+        return {"output": response["messages"][-1]}
+    except Exception as e:
+        print(f"Error in reasoning agent: {e}")
+        return {"output": HumanMessage(content=f"Analysis encountered an error: {str(e)}")} 
 
 
 reasoning_validator_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
@@ -160,11 +166,12 @@ def run_reasoning_validator(state: AgentState, config: RunnableConfig):
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
 prediction_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
-prediction_agent = create_react_agent(prediction_llm, vc_tools.prediction_tools)
+prediction_agent = create_react_agent(prediction_llm, vc_tools.prediction_tools, prompt=vc_systemprompts.PREDICTION_SYSTEM_PROMPT)
 
 def run_prediction_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🔮 Running PREDICTION agent\033[0m")
-    messages = [vc_systemprompts.PREDICTION_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
+    # Don't add system prompt here since it's already in the agent
+    messages = [HumanMessage(content=state["input"])] + state["chat_history"]
     try:
         # Add recursion limit for the prediction agent specifically
         prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 15}}
