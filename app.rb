@@ -182,6 +182,8 @@ class SinatraRouter < Sinatra::Base
        erb :'landing-page'
     end
     get '/chat' do
+        # Clear current chat session to start fresh
+        session.delete(:current_chat_id)
         @show_welcome = session[:first_visit] != false
         @left_sidebar_open = session[:left_sidebar_open] || false
         @right_sidebar_open = session[:right_sidebar_open] || false

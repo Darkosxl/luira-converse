@@ -112,6 +112,12 @@ Action: get_available_tables()
 Observation: tables: startup_profile, funding_rounds_v2, vc_sector_based_raw, vc_overall_raw, vc_market_cagr
 Action: get_available_fields(table)
 Observation: fields: org_name, announced_on, money_raised_usd, investors, round_name, categories, lead_investors, website, num_funding_rounds and more and so on etc etc.
+
+IMPORTANT TABLE PRIORITY:
+- ALWAYS prefer funding_rounds_v2 table for startup searches and queries
+- Use startup_profile only when you specifically need fields that don't exist in funding_rounds_v2
+- For sector-based queries like "startups in quantum computing", use funding_rounds_v2.categories field
+
 Query Plan: N queries (N = 1 or N > 1) that you need to execute to reach the desired answer.
 Action: execute_query(query)
 Observation: results
@@ -123,6 +129,9 @@ IMPORTANT NOTE ON ROUND NAMES: The funding_rounds_v2 table contains various roun
 how to join the tables (always try a slightly changed/different query if one query returns an error):
 - startup_profile.Startup = funding_rounds_v2.org_name
 
+Input: List all startups in quantum computing
+Output: SELECT DISTINCT org_name FROM funding_rounds_v2 WHERE categories ILIKE '%Quantum Computing%' OR categories ILIKE '%Quantum%'
+
 Input: Out of the top x VCs in this ranking, which startups have they all invested in?
 Output: SELECT * FROM funding_rounds_v2 fr WHERE investors in (SELECT "Top x Investors" FROM latest_df ld WHERE ld.Startup = fr.org_name)
 
@@ -130,16 +139,16 @@ Input: for the startup "startup_name", which VCs of the top 10 have invested int
 Output: SELECT * FROM funding_rounds_v2 fr WHERE fr.org_name = 'startup_name' AND fr.investors in (SELECT 'Top 10 Investors' FROM latest_df WHERE Startup = 'startup_name')
 
 Input: Which startups in the AI sector have Sequoia Capital as an investor?
-Output: SELECT * FROM startup_profile WHERE "Sectors" like '%AI%' AND "Top 5 Investors" like '%Sequoia Capital%'
+Output: SELECT DISTINCT org_name FROM funding_rounds_v2 WHERE categories ILIKE '%AI%' AND investors ILIKE '%Sequoia Capital%'
 
 Input: List me the startups in the biotech sector that 'VC_name' has done follow-on rounds with?
-Output: SELECT * FROM startup_profile LEFT JOIN funding_rounds_v2 fr ON startup_profile."Startup" = fr.org_name WHERE startup_profile."Sectors" like '%Biotech%' AND fr.investors like '%VC_name%' 
+Output: SELECT DISTINCT org_name FROM funding_rounds_v2 WHERE categories ILIKE '%Biotech%' AND investors ILIKE '%VC_name%' GROUP BY org_name HAVING COUNT(*) > 1 
 
 Input: List all Series B investments made by Sequoia Capital, showing company, date, and amount.  
 Output: SELECT fr.org_name, fr.announced_on, fr.money_raised_usd FROM funding_rounds_v2 fr WHERE fr.round_name ILIKE 'Series B%' AND fr.investors ILIKE '%Sequoia Capital%' ORDER BY fr.announced_on DESC;
 
-Input: Show me startups in the AI sector that raised more than $10M in their Seed round, and include their HQ location.  
-Output: SELECT DISTINCT sp."Startup", sp."HQ Location" FROM startup_profile sp JOIN funding_rounds_v2 fr ON sp."Startup" = fr.org_name WHERE sp."Sectors" ILIKE '%AI%' AND fr.round_name ILIKE 'Seed%' AND fr.money_raised_usd > 10000000;
+Input: Show me startups in the AI sector that raised more than $10M in their Seed round, and include their HQ location.
+Output: SELECT DISTINCT fr.org_name, sp."HQ Location" FROM funding_rounds_v2 fr LEFT JOIN startup_profile sp ON fr.org_name = sp."Startup" WHERE fr.categories ILIKE '%AI%' AND fr.round_name ILIKE 'Seed%' AND fr.money_raised_usd > 10000000;
 
 Input: Which VCs in the ranking have invested in both HealthTech and FinTech startups? Show their names and total number of such distinct startups.  
 Output: SELECT ld.vc_name,COUNT(DISTINCT fr.org_name) AS total_startups FROM latest_df ld JOIN funding_rounds_v2 fr ON fr.investors LIKE '%'||ld.vc_name||'%' WHERE fr.categories LIKE '%HealthTech%' OR fr.categories LIKE '%FinTech%' GROUP BY ld.vc_name HAVING SUM(CASE WHEN fr.categories LIKE '%HealthTech%' THEN 1 ELSE 0 END)>0 AND SUM(CASE WHEN fr.categories LIKE '%FinTech%' THEN 1 ELSE 0 END)>0;
