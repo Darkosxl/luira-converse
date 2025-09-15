@@ -21,8 +21,8 @@ llm_main = ChatVertexAI(model_name="gemini-2.5-flash", temperature=0, thinking_b
 
 engine = create_engine(
     os.environ["POSTGRES_URL"],
-    pool_size=10,
-    max_overflow=20,
+    pool_size=20,  # Increased from 10
+    max_overflow=40,  # Increased from 20
     connect_args={
         "prepare_threshold": None,
         "sslmode": "require",
@@ -32,7 +32,7 @@ engine = create_engine(
         "sslcrl": None
     },
     pool_pre_ping=True,
-    pool_recycle=3600
+    pool_recycle=1800  # Reduced from 3600 for better connection recycling
 )
 
 db_pool = SQLDatabase(engine)

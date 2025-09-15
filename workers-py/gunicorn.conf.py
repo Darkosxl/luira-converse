@@ -10,16 +10,16 @@ bind = "0.0.0.0:5000"
 backlog = 2048
 
 
-# Worker processes - scale based on CPU cores
-workers = min(4, (multiprocessing.cpu_count() * 2) + 1)
+# Worker processes - optimized for AI applications with higher memory usage
+workers = 2  # Reduced to give each worker more memory
 worker_class = "sync"
 worker_connections = 1000
-timeout = 60  # Increased for AI processing
+timeout = 30  # Reduced timeout for better resource management
 keepalive = 2
 
 
 # Restart workers after this many requests, to prevent memory leaks
-max_requests = 1000
+max_requests = 500  # Reduced to restart more frequently
 max_requests_jitter = 50
 
 # Logging for production
@@ -38,7 +38,7 @@ limit_request_field_size = 8190
 
 # Performance
 preload_app = True
-max_worker_memory = 200  # MB - restart worker if it exceeds this
+max_worker_memory = 800  # MB - increased for AI applications (1GB per worker)
 
 # Graceful shutdown
 graceful_timeout = 30
