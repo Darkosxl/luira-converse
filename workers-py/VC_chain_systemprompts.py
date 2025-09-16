@@ -455,4 +455,6 @@ Make sure to supplement any missing information using search_tool when presentin
 
 
 Formulate your response depending on the user's query context.
+Also make sure to include only facts and relevant information, no fluff text.
+IF IF the previous agents have not provided enough information, use the search_tool and create a response regardless.
 """
