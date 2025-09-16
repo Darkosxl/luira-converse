@@ -49,9 +49,6 @@ class ChatOpenRouter(ChatOpenAI):
         openai_api_key = openai_api_key or os.environ.get("OPENROUTER_API")
         super().__init__(base_url="https://openrouter.ai/api/v1", openai_api_key=openai_api_key, **kwargs)
 
-print("Defining LLMs...")
-llm_main = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0)
-
 ####### Router output parser #######
 class RouterOutput(TypedDict):
     query_type: Annotated[str, "The agent to be routed to"]
@@ -65,6 +62,23 @@ if not log.handlers:
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     handler.setFormatter(formatter)
     log.addHandler(handler)
+
+# Shared LLM instances (reused across all agents to save memory)
+print("Initializing shared LLMs...")
+_shared_llm_gemini = None
+_shared_llm_kimi = None
+
+def get_shared_llm_gemini():
+    global _shared_llm_gemini
+    if _shared_llm_gemini is None:
+        _shared_llm_gemini = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
+    return _shared_llm_gemini
+
+def get_shared_llm_kimi():
+    global _shared_llm_kimi
+    if _shared_llm_kimi is None:
+        _shared_llm_kimi = ChatOpenRouter(model="moonshotai/kimi-k2-0905", temperature=0.11)
+    return _shared_llm_kimi
 
 
 
@@ -80,7 +94,7 @@ class AgentState(TypedDict):
 
 ################## AGENT MEMORY SUMMARIZER ##################
 
-summarizer = create_react_agent(llm_main, tools=[], prompt="You are responsible with summarizing the chat history for an LLM to remember only the important details")
+summarizer = create_react_agent(get_shared_llm_gemini(), tools=[], prompt="You are responsible with summarizing the chat history for an LLM to remember only the important details")
 def run_summarizer(state: AgentState, config: RunnableConfig):
     if len(state["chat_history"]) > 0:
         summarizer_response = summarizer.invoke({"messages": state["chat_history"]}, config)
@@ -92,11 +106,10 @@ def run_summarizer(state: AgentState, config: RunnableConfig):
 # -------------- ROUTER AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-router_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
-router_llm = router_llm.with_structured_output(RouterOutput)
 #router_agent = create_react_agent(router_llm, tools=, prompt=vc_systemprompts.ROUTER_SYSTEM_PROMPT)
 def run_router_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🧭 Running ROUTER agent\033[0m")
+    router_llm = get_shared_llm_gemini().with_structured_output(RouterOutput)
     messages = [vc_systemprompts.ROUTER_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
     response = router_llm.invoke(messages, config)
     return {"output": response}
@@ -106,8 +119,7 @@ def run_router_model(state: AgentState, config: RunnableConfig):
 # -------------- GENERAL AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-general_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
-general_agent = create_react_agent(general_llm, vc_tools.general_tools)
+general_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.general_tools)
 
 def run_general_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🤖 Running GENERAL agent\033[0m")
@@ -120,8 +132,7 @@ def run_general_model(state: AgentState, config: RunnableConfig):
 # -------------- RANKING AGENT CHAIN -------------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-ranking_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
-ranking_agent = create_react_agent(ranking_llm, vc_tools.ranking_tools)
+ranking_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.ranking_tools)
 
 def run_ranking_model(state: AgentState, config: RunnableConfig):
     print("\033[94m📊 Running RANKING agent\033[0m")
@@ -135,8 +146,7 @@ print(type(vc_tools.ranking_tools))
 # -------------- REASONING AGENT CHAIN -----------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-reasoning_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
-reasoning_agent = create_react_agent(reasoning_llm, vc_tools.reasoning_tools, prompt=vc_systemprompts.REASONING_SYSTEM_PROMPT)
+reasoning_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.reasoning_tools, prompt=vc_systemprompts.REASONING_SYSTEM_PROMPT)
 
 
 
@@ -145,7 +155,7 @@ def run_reasoning_model(state: AgentState, config: RunnableConfig):
     messages = [HumanMessage(content=state["input"])] + state["chat_history"]
     try:
         # Add recursion limit for the reasoning agent specifically
-        reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 25}}
+        reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 12, "max_concurrency": 2}}
 
         print(f"🔍 REASONING AGENT - Input messages: {len(messages)}")
         print(f"🔍 REASONING AGENT - User input: {state['input']}")
@@ -174,8 +184,7 @@ def run_reasoning_model(state: AgentState, config: RunnableConfig):
         return {"output": HumanMessage(content=f"Analysis encountered an error: {str(e)}")} 
 
 
-reasoning_validator_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
-reasoning_validator = create_react_agent(reasoning_validator_llm, vc_tools.reasoning_tools)
+reasoning_validator = create_react_agent(get_shared_llm_gemini(), vc_tools.reasoning_tools)
 
 def run_reasoning_validator(state: AgentState, config: RunnableConfig):
     print("\033[94m🧠 Running REASONING VALIDATOR agent\033[0m")
@@ -188,8 +197,7 @@ def run_reasoning_validator(state: AgentState, config: RunnableConfig):
 # -------------- PREDICTION AGENT CHAIN ----------------------
 # -----------CONVERTED TO LANGGRAPH REACT AGENT --------------
 
-prediction_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
-prediction_agent = create_react_agent(prediction_llm, vc_tools.prediction_tools, prompt=vc_systemprompts.PREDICTION_SYSTEM_PROMPT)
+prediction_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.prediction_tools, prompt=vc_systemprompts.PREDICTION_SYSTEM_PROMPT)
 
 def run_prediction_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🔮 Running PREDICTION agent\033[0m")
@@ -197,7 +205,7 @@ def run_prediction_model(state: AgentState, config: RunnableConfig):
     messages = [HumanMessage(content=state["input"])] + state["chat_history"]
     try:
         # Add recursion limit for the prediction agent specifically
-        prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 15}}
+        prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 12, "max_concurrency": 2}}
         response = prediction_agent.invoke({"messages": messages}, prediction_config)
         return {"output": response["messages"][-1]}
     except Exception as e:
@@ -208,12 +216,13 @@ def run_prediction_model(state: AgentState, config: RunnableConfig):
 # -------------- FINAL AGENT CHAIN -------------------------
 # ------------------------------------------------------------ --------------
 
-final_llm = ChatOpenRouter(model="moonshotai/kimi-k2-0905", temperature=0.11)
-final_agent = create_react_agent(final_llm, tools=vc_tools.final_tools, prompt=vc_systemprompts.FINAL_SYSTEM_PROMPT)
+final_agent = create_react_agent(get_shared_llm_kimi(), tools=vc_tools.final_tools, prompt=vc_systemprompts.FINAL_SYSTEM_PROMPT)
 def run_final_model(state: AgentState, config: RunnableConfig):
-    print("\033[94m Running FINAL agent\033[0m")
+    print("\033[94m🎯 Running FINAL agent\033[0m")
     messages = [vc_systemprompts.FINAL_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
-    response = final_agent.invoke({"messages": messages}, config)
+    # Final agent should be fast - 4 steps max
+    final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4, "max_concurrency": 1}}w
+    response = final_agent.invoke({"messages": messages}, final_config)
     return {"output": response}
 
 
@@ -290,7 +299,7 @@ except Exception:
 def get_assistant_response(user_input: str, session_id: str, general_agent_check: bool, chat_history: list[BaseMessage]):
     state = {"input": user_input, "chat_history": chat_history, "general_agent_check": general_agent_check}
     try:
-        response = graph.invoke(state, {"configurable": {"thread_id": session_id, "recursion_limit": 50}})
+        response = graph.invoke(state, {"configurable": {"thread_id": session_id, "recursion_limit": 12, "max_concurrency": 2}})
         print(response)
         ai_message = response["output"]
         return ai_message.content if hasattr(ai_message, 'content') else str(ai_message)

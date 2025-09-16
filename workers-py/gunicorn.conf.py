@@ -11,10 +11,10 @@ backlog = 2048
 
 
 # Worker processes - optimized for AI applications with higher memory usage
-workers = 2  # Reduced to give each worker more memory
+workers = 1  # Single worker to maximize memory per process
 worker_class = "sync"
 worker_connections = 1000
-timeout = 30  # Reduced timeout for better resource management
+timeout = 60  # Increased timeout for AI processing
 keepalive = 2
 
 

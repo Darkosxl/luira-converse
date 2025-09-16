@@ -54,17 +54,19 @@ class ConversationHost
     end
 
     def get_chat_instance(model_key, chat_id)
-        # Create a unique key for this chat and model combination
-        instance_key = "#{chat_id}_#{model_key}"
+        # Use only chat_id as key to maintain conversation history across models
+        instance_key = chat_id
 
-        # Return existing chat instance if it exists
-        return @@chat_instances[instance_key] if @@chat_instances[instance_key]
+        # Create new chat instance if it doesn't exist
+        unless @@chat_instances[instance_key]
+            model_name = MODEL_MAPPING[model_key] || 'google/gemini-2.0-flash-001'
+            @@chat_instances[instance_key] = RubyLLM.chat(model: model_name)
+            return @@chat_instances[instance_key]
+        end
 
-        # Create new chat instance for this model
+        # Switch to the requested model on existing instance
         model_name = MODEL_MAPPING[model_key] || 'google/gemini-2.0-flash-001'
-        @@chat_instances[instance_key] = RubyLLM.chat(model: model_name)
-
-        return @@chat_instances[instance_key]
+        @@chat_instances[instance_key].with_model(model_name)
     end
 
     def call_capmap(user_message, ai_id, chat_id, database)
