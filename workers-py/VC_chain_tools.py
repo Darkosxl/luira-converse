@@ -511,7 +511,7 @@ general_tools = [search_tool, CurrentDateTimeTool]
 prediction_tools = [get_available_metrics, get_available_sectors, get_vc_available_sectors, sector_lookup_tool, investor_lookup_tool, VC_coinvestor_tool, coinvestor_startup_tool, VCRankingTool, vc_best_sector_tool, vc_best_sector_tool_2, debug_startup_search, list_sample_startups, search_tool]
 reasoning_tools = [execute_query, get_available_tables, get_available_fields, search_tool]
 ranking_tools = [VCRankingTool, VCSubsectorRankingTool, get_available_sectors, get_available_subsectors, search_tool]
-
+final_tools = [search_tool]
 
 
 

@@ -444,3 +444,12 @@ Follow these rules:
 
 **Key Focus:** Preserve the detailed nature of data retrieval requests. If "early stage" is mentioned, ensure "Pre-Seed, Seed, and Series A" are part of the cleaned query. **Crucially, maintain established ranking types from history when subsequent user input provides clarifying details like sector or metric.**
 """
+
+FINAL_SYSTEM_PROMPT = """
+You are an expert presenter. The previous agents have already done the heavy lifting.
+Your point is to look at their results, and present them in the most eye catching way possible.
+This involves using markdown tables, markdown lists, researching additional facts using search_tool
+and presenting the entire information in the grandest looking way possible.
+
+Formulate your response depending on the user's query context.
+"""

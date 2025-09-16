@@ -138,6 +138,8 @@ print(type(vc_tools.ranking_tools))
 reasoning_llm = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
 reasoning_agent = create_react_agent(reasoning_llm, vc_tools.reasoning_tools, prompt=vc_systemprompts.REASONING_SYSTEM_PROMPT)
 
+
+
 def run_reasoning_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🧠 Running REASONING agent\033[0m")
     messages = [HumanMessage(content=state["input"])] + state["chat_history"]
@@ -203,6 +205,19 @@ def run_prediction_model(state: AgentState, config: RunnableConfig):
         return {"output": HumanMessage(content=f"Prediction analysis encountered an error: {str(e)}")}
 
 # ------------------------------------------------------------
+# -------------- FINAL AGENT CHAIN -------------------------
+# ------------------------------------------------------------ --------------
+
+final_llm = ChatOpenRouter(model="moonshotai/kimi-k2-0905", temperature=0.11)
+final_agent = create_react_agent(final_llm, tools=vc_tools.final_tools, prompt=vc_systemprompts.FINAL_SYSTEM_PROMPT)
+def run_final_model(state: AgentState, config: RunnableConfig):
+    print("\033[94m Running FINAL agent\033[0m")
+    messages = [vc_systemprompts.FINAL_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
+    response = final_agent.invoke({"messages": messages}, config)
+    return {"output": response}
+
+
+# ------------------------------------------------------------
 # -------------- NEW FULL CHAIN ------------------------------
 # ------------------LANGGRAPH---------------------------------
 
@@ -239,16 +254,17 @@ graph_builder.add_node("ranking", run_ranking_model)
 graph_builder.add_node("reasoning", run_reasoning_model)
 graph_builder.add_node("prediction", run_prediction_model)
 graph_builder.add_node("reasoning_validator", run_reasoning_validator)
-
+graph_builder.add_node("final", run_final_model)
 graph_builder.add_edge(START, "router")
 #graph_builder.add_edge("router", "summarizer")
 graph_builder.add_conditional_edges("router", router_function, {"general": "general", "ranking": "ranking", "reasoning": "reasoning", "prediction": "prediction"})
-graph_builder.add_edge("general", END)
-graph_builder.add_edge("ranking", END)
-graph_builder.add_edge("reasoning", END)
+graph_builder.add_edge("general", "final")
+graph_builder.add_edge("ranking", "final")
+graph_builder.add_edge("reasoning", "final")
 #graph_builder.add_edge("reasoning", "reasoning_validator")
 #graph_builder.add_conditional_edges("reasoning_validator", validator_function, {"END": END, "reasoning": "reasoning"})
-graph_builder.add_edge("prediction", END)
+graph_builder.add_edge("prediction", "final")
+graph_builder.add_edge("final", END)
 
 
 
