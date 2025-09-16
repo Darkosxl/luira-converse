@@ -223,7 +223,12 @@ def run_final_model(state: AgentState, config: RunnableConfig):
     # Final agent should be fast - 4 steps max
     final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4, "max_concurrency": 1}}
     response = final_agent.invoke({"messages": messages}, final_config)
-    return {"output": response}
+
+    # Extract only the final text content, not the full state
+    final_message = response["messages"][-1]
+    clean_content = final_message.content if hasattr(final_message, 'content') and final_message.content else "Response completed but no text content available."
+
+    return {"output": HumanMessage(content=clean_content)}
 
 
 # ------------------------------------------------------------
@@ -300,9 +305,14 @@ def get_assistant_response(user_input: str, session_id: str, general_agent_check
     state = {"input": user_input, "chat_history": chat_history, "general_agent_check": general_agent_check}
     try:
         response = graph.invoke(state, {"configurable": {"thread_id": session_id, "recursion_limit": 12, "max_concurrency": 2}})
-        print(response)
+
+        # Extract clean text content from the response
         ai_message = response["output"]
-        return ai_message.content if hasattr(ai_message, 'content') else str(ai_message)
+        if hasattr(ai_message, 'content') and ai_message.content:
+            return ai_message.content
+        else:
+            # Fallback for cases where content might be empty
+            return "I've completed the analysis, but the response content is not available."
     except Exception as e:
         print(f"Error in get_assistant_response: {e}")
         return "I apologize, but I encountered an error processing your request. Please try again."
