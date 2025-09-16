@@ -221,7 +221,7 @@ def run_final_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🎯 Running FINAL agent\033[0m")
     messages = [vc_systemprompts.FINAL_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
     # Final agent should be fast - 4 steps max
-    final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4, "max_concurrency": 1}}w
+    final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4, "max_concurrency": 1}}
     response = final_agent.invoke({"messages": messages}, final_config)
     return {"output": response}
 
