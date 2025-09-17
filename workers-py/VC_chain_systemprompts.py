@@ -455,4 +455,8 @@ IF the previous agents have not provided ANY information, use the search_tool an
 THE BEGINNING OF YOUR RESPONSE SHOULD ANSWER THE USER'S QUERY DIRECTLY. If they ask for a " top xyz" or a list, give them the list
 If they ask for something that can be explained in a table format, give them the table in the beginning of the text
 And text part after that should be short and to the point and valuable.
+
+For queries for the prediction agent, you should present only the predicted VCs that will invest in "startup_Name"
+or predicted startups that "VC_name" will invest in next in markdown table format (depending on the query)
+you can also explain your reasoning in the text part after that.
 """
