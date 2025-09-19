@@ -217,18 +217,18 @@ def execute_query(query: str) -> List[Dict[str, Any]]:
     # Replace exact ILIKE patterns with fuzzy similarity
     import re
 
-    # Find ILIKE patterns and replace with similarity-based matching
-    ilike_pattern = r"categories\s+ILIKE\s+'%([^%']+)%'"
+    # Find ILIKE patterns for any field and replace with similarity-based matching
+    ilike_pattern = r"(\w+)\s+ILIKE\s+'%([^%']+)%'"
     matches = re.findall(ilike_pattern, corrected_query, re.IGNORECASE)
 
-    for match in matches:
-        # Replace ILIKE with similarity check
-        old_pattern = f"categories ILIKE '%{match}%'"
-        new_pattern = f"(word_similarity(lower(categories), lower('{match}')) > 0.5 OR categories ILIKE '%{match}%')"
+    for field, term in matches:
+        # Replace ILIKE with similarity check for any field
+        old_pattern = f"{field} ILIKE '%{term}%'"
+        new_pattern = f"(word_similarity(lower({field}), lower('{term}')) > 0.5 OR {field} ILIKE '%{term}%')"
         corrected_query = corrected_query.replace(old_pattern, new_pattern)
 
         # Also handle case variations
-        old_pattern_lower = f"categories ILIKE '%{match.lower()}%'"
+        old_pattern_lower = f"{field} ILIKE '%{term.lower()}%'"
         corrected_query = corrected_query.replace(old_pattern_lower, new_pattern)
 
     print("Corrected query:", corrected_query)
