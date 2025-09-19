@@ -34,13 +34,13 @@ def result_clean(result):
         return [{"error": "No results found"}]
 @tool
 def VCRankingTool(
-    sector: str,
     metric: str,
-    count: int = 5
+    count: int = 5,
+    sector: str = None
 ) -> List[Dict[str, Any]]:
     """
-    Rank venture-capital firms by `metric` inside `sector`, using pg_trgm
-    word_similarity for fuzzy sector matching.
+    Rank venture-capital firms by `metric`, optionally filtered by `sector`.
+    If sector is provided, uses pg_trgm word_similarity for fuzzy sector matching.
     """
     try:
         SIM_THRESHOLD = 0.30
@@ -48,39 +48,57 @@ def VCRankingTool(
                  sector, metric, count)
 
         # ── 1.  Sanitize / look-up  ────────────────────────────────
-        sector_clean = re.sub(r"[^a-z0-9 ]", " ", sector.lower()).strip()
-
         try:
             metric_expr = vc_systemprompts.METRIC_EXPR[metric]
         except KeyError:
             return [{"error": f"Unknown metric '{metric}'"}]
 
         # ── 2.  Build the SQL with *metric_expr* spliced in  ───────
-        sql = f"""
-        WITH ranked AS (
-            SELECT
+        if sector:
+            # With sector filtering
+            sector_clean = re.sub(r"[^a-z0-9 ]", " ", sector.lower()).strip()
+            sql = f"""
+            WITH ranked AS (
+                SELECT
+                    vs.*,
+                    vo.*,
+                    vc.*,
+                    word_similarity(lower(vs."Sector"), :q) AS sim,
+                    {metric_expr}                       AS metric_val
+                FROM   vc_sector_based_raw vs
+                JOIN   vc_overall_raw      vo ON vo."Top Tier" = vs."Top Tier"
+                JOIN   vc_market_cagr      vc ON vc."Sector"   = vs."Sector"
+                WHERE  {metric_expr} IS NOT NULL               -- filter blanks
+            )
+            SELECT *
+            FROM   ranked
+            WHERE  sim >= :sim_th
+            ORDER  BY sim DESC, metric_val DESC NULLS LAST
+            LIMIT  :limit;
+            """
+            params = {
+                "q":      sector_clean,
+                "sim_th": SIM_THRESHOLD,
+                "limit":  count,
+            }
+        else:
+            # Without sector filtering - rank across all sectors
+            sql = f"""
+            SELECT DISTINCT
                 vs.*,
                 vo.*,
                 vc.*,
-                word_similarity(lower(vs."Sector"), :q) AS sim,
-                {metric_expr}                       AS metric_val
+                {metric_expr} AS metric_val
             FROM   vc_sector_based_raw vs
             JOIN   vc_overall_raw      vo ON vo."Top Tier" = vs."Top Tier"
             JOIN   vc_market_cagr      vc ON vc."Sector"   = vs."Sector"
             WHERE  {metric_expr} IS NOT NULL               -- filter blanks
-        )
-        SELECT *
-        FROM   ranked
-        WHERE  sim >= :sim_th
-        ORDER  BY sim DESC, metric_val DESC NULLS LAST
-        LIMIT  :limit;
-        """
-
-        params = {
-            "q":      sector_clean,
-            "sim_th": SIM_THRESHOLD,
-            "limit":  count,
-        }
+            ORDER  BY metric_val DESC NULLS LAST
+            LIMIT  :limit;
+            """
+            params = {
+                "limit":  count,
+            }
 
         # ── 3.  Execute  ───────────────────────────────────────────
         with engine.begin() as conn:
@@ -88,8 +106,12 @@ def VCRankingTool(
 
         log.info("VCRankingTool: returned %d rows", len(rows))
         if not rows:
-            return [{"warning":
-                     f"No VC found for metric '{metric}' near sector '{sector}'"}]
+            if sector:
+                return [{"warning":
+                         f"No VC found for metric '{metric}' near sector '{sector}'"}]
+            else:
+                return [{"warning":
+                         f"No VC found for metric '{metric}'"}]
         return rows
 
     except Exception as exc:

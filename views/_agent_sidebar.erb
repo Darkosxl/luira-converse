@@ -124,9 +124,17 @@
                 });
             }
 
-            // --- Populate dropdowns on page load ---
-            populateDropdown(sectorSelect, '/chat/available_sectors', 'sectors');
-            populateDropdown(subsectorSelect, '/chat/available_subsectors', 'subsectors');
+            // --- Populate dropdowns when ranking section is opened ---
+            window.populateRankingDropdowns = function() {
+              if (!sectorSelect.hasAttribute('data-loaded')) {
+                populateDropdown(sectorSelect, '/chat/available_sectors', 'sectors');
+                sectorSelect.setAttribute('data-loaded', 'true');
+              }
+              if (!subsectorSelect.hasAttribute('data-loaded')) {
+                populateDropdown(subsectorSelect, '/chat/available_subsectors', 'subsectors');
+                subsectorSelect.setAttribute('data-loaded', 'true');
+              }
+            };
             
             // --- Handle radio button changes ---
             rankingTypeRadios.forEach(radio => {
@@ -263,6 +271,13 @@ function toggleSection(sectionName) {
   const content = document.getElementById(sectionName + '-content');
   if (content) {
     content.style.display = content.style.display === 'none' ? 'block' : 'none';
+
+    // Load dropdowns when ranking section is opened
+    if (sectionName === 'ranking' && content.style.display === 'block') {
+      if (typeof window.populateRankingDropdowns === 'function') {
+        window.populateRankingDropdowns();
+      }
+    }
   }
 }
 </script>
