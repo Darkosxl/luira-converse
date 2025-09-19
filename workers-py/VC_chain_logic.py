@@ -92,15 +92,18 @@ class AgentState(TypedDict):
     output: str
 
 
-################## AGENT MEMORY SUMMARIZER ##################
+################## AGENT MEMORY LIMITER ##################
 
-summarizer = create_react_agent(get_shared_llm_gemini(), tools=[], prompt="You are responsible with summarizing the chat history for an LLM to remember only the important details")
-def run_summarizer(state: AgentState, config: RunnableConfig):
-    if len(state["chat_history"]) > 0:
-        summarizer_response = summarizer.invoke({"messages": state["chat_history"]}, config)
-        return {"chat_history": [summarizer_response["messages"][-1]]}
-    else:
-        return {"chat_history": []}
+def trim_chat_history(state: AgentState, config: RunnableConfig):
+    """Keep only the last 4 messages (2 user + 2 AI messages max)"""
+    chat_history = state["chat_history"]
+
+    if len(chat_history) <= 4:
+        return {"chat_history": chat_history}
+
+    # Keep only the last 4 messages
+    trimmed_history = chat_history[-4:]
+    return {"chat_history": trimmed_history}
 
 # ------------------------------------------------------------
 # -------------- ROUTER AGENT CHAIN -------------------------
@@ -261,7 +264,7 @@ def validator_function(state: AgentState):
 
 # -------------------CHAIN ASSEMBLY--------------------------
 
-graph_builder.add_node("summarizer", run_summarizer)
+graph_builder.add_node("memory_limiter", trim_chat_history)
 graph_builder.add_node("router", run_router_model)
 graph_builder.add_node("general", run_general_model)
 graph_builder.add_node("ranking", run_ranking_model)
@@ -269,8 +272,8 @@ graph_builder.add_node("reasoning", run_reasoning_model)
 graph_builder.add_node("prediction", run_prediction_model)
 graph_builder.add_node("reasoning_validator", run_reasoning_validator)
 graph_builder.add_node("final", run_final_model)
-graph_builder.add_edge(START, "router")
-#graph_builder.add_edge("router", "summarizer")
+graph_builder.add_edge(START, "memory_limiter")
+graph_builder.add_edge("memory_limiter", "router")
 graph_builder.add_conditional_edges("router", router_function, {"general": "general", "ranking": "ranking", "reasoning": "reasoning", "prediction": "prediction"})
 graph_builder.add_edge("general", "final")
 graph_builder.add_edge("ranking", "final")
