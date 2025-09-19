@@ -208,10 +208,33 @@ def VCSubsectorRankingTool(sector: str, metric: str, count: int = 5):
 
 @tool
 def execute_query(query: str) -> List[Dict[str, Any]]:
-    """Executes a SQL query and returns the results."""
+    """Executes a SQL query with automatic fuzzy matching for category names."""
     print("execute_query result: ", query)
+
+    # Auto-correct common category terms using fuzzy matching
+    corrected_query = query
+
+    # Replace exact ILIKE patterns with fuzzy similarity
+    import re
+
+    # Find ILIKE patterns and replace with similarity-based matching
+    ilike_pattern = r"categories\s+ILIKE\s+'%([^%']+)%'"
+    matches = re.findall(ilike_pattern, corrected_query, re.IGNORECASE)
+
+    for match in matches:
+        # Replace ILIKE with similarity check
+        old_pattern = f"categories ILIKE '%{match}%'"
+        new_pattern = f"(word_similarity(lower(categories), lower('{match}')) > 0.5 OR categories ILIKE '%{match}%')"
+        corrected_query = corrected_query.replace(old_pattern, new_pattern)
+
+        # Also handle case variations
+        old_pattern_lower = f"categories ILIKE '%{match.lower()}%'"
+        corrected_query = corrected_query.replace(old_pattern_lower, new_pattern)
+
+    print("Corrected query:", corrected_query)
+
     with engine.connect() as conn:
-        result = conn.execute(text(query))
+        result = conn.execute(text(corrected_query))
         rows = result.fetchall()
         if len(rows) > 0:
             return rows
