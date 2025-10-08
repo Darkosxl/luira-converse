@@ -71,7 +71,8 @@ class ConversationHost
 
     def call_capmap(user_message, ai_id, chat_id, database)
         require 'http'
-        response = HTTP.post(ENV['VC_COPILOT_FLASK_URL'], 
+        puts "DEBUG: Calling Flask at: #{ENV['VC_COPILOT_FLASK_URL']}"
+        response = HTTP.post(ENV['VC_COPILOT_FLASK_URL'],
             json: { message: user_message, general_agent_check: false })
         
         flask_response = JSON.parse(response.body.to_s)
