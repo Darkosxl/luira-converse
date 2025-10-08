@@ -18,7 +18,6 @@ COPY app.rb ./
 COPY models/ ./models/
 COPY views/ ./views/
 COPY public/ ./public/
-COPY .env ./
 
 # Expose Ruby/Sinatra port
 EXPOSE 4567
