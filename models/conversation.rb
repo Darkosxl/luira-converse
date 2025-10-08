@@ -71,16 +71,22 @@ class ConversationHost
 
     def call_capmap(user_message, ai_id, chat_id, database)
         require 'http'
-        puts "DEBUG: Calling Flask at: #{ENV['VC_COPILOT_FLASK_URL']}"
-        response = HTTP.post(ENV['VC_COPILOT_FLASK_URL'],
-            json: { message: user_message, general_agent_check: false })
-        
+
+        # Use chat_id as session identifier for Flask
+        response = HTTP.cookies(session: chat_id)
+            .timeout(connect: 10, read: 90)
+            .post(ENV['VC_COPILOT_FLASK_URL'],
+                json: { message: user_message, general_agent_check: false })
+
         flask_response = JSON.parse(response.body.to_s)
         ai_message = flask_response['reply'] || response.body.to_s
         rendered_html = @markdown.render(ai_message)
-        
+
         database.update_or_create_chat("private", ai_message, chat_id, "assistant")
         @@completed_responses[ai_id] = rendered_html
+    rescue => e
+        puts "ERROR calling Flask: #{e.class} - #{e.message}"
+        @@completed_responses[ai_id] = "<p>Error: #{e.message}</p>"
     end
 
     def call_model(user_message, ai_id, chat_id, database, model_key = 'gemini-2.5-flash')
