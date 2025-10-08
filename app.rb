@@ -104,22 +104,27 @@ class SinatraRouter < Sinatra::Base
     set :port, 4567
     set :server, 'puma'
 
+    # Trust proxy headers (for SSL termination)
+    set :protection, except: [:session_hijacking]
+    set :forwarded, true
+
     # Initialize shared database and conversation instances at startup
     configure do
         @@database = Database.new()
         @@conversation = ConversationHost.new()
     end
-    
+
     # Security middleware
     use Rack::Attack
     helpers Shield::Helpers
-    
+
     use Rack::Session::Cookie,
       key: 'app.session',
       secret: ENV['SESSION_SECRET'] || 'change-this-in-production-' + SecureRandom.hex(16),
       expire_after: 3600,
       httponly: true,
-      secure: ENV['RACK_ENV'] == 'production'
+      secure: false,  # Set to false since we're behind a reverse proxy
+      same_site: :lax
     
     # Helper method to get current user
     def current_user
@@ -139,9 +144,9 @@ class SinatraRouter < Sinatra::Base
         headers['Referrer-Policy'] = 'no-referrer'
         headers['Access-Control-Allow-Origin'] = 'none'
         
-        # Skip auth for login/health routes
-        pass if request.path_info =~ /^\/(login|logout|health)$/
-        
+        # Skip auth for login/health/landing routes
+        pass if request.path_info =~ /^\/(login|logout|health|)$/
+
         # Require authentication for everything else
         unless authenticated(User)
             session[:return_to] = request.fullpath
