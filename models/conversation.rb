@@ -29,20 +29,19 @@ class ConversationHost
 
     # Model mapping for display names to actual model identifiers
     MODEL_MAPPING = {
-        'claude-sonnet-4' => 'anthropic/claude-sonnet-4',
-        'deepseek-chat-v3.1' => 'deepseek/deepseek-chat-v3.1',
-        'gemini-2.5-pro' => 'google/gemini-2.5-pro',
-        'gemini-2.5-flash' => 'google/gemini-2.5-flash',
-        'gpt-4.1' => 'openai/gpt-4.1',
-        'gpt-5-chat' => 'openai/gpt-5-chat',
-        'r1-1776' => 'perplexity/r1-1776',
-        'sonar-reasoning-pro' => 'perplexity/sonar-reasoning-pro',
-        'qwen3-235b-thinking' => 'qwen/qwen3-235b-a22b-thinking-2507',
-        'grok-4' => 'x-ai/grok-4',
-        'o3-pro' => 'openai/o3-pro',
-        'kimi-k2' => 'moonshotai/kimi-k2',
-        'glm-4.5v' => 'z-ai/glm-4.5v'
-    }
+    'claude-sonnet-4.5' => 'anthropic/claude-sonnet-4-5',
+    'deepseek-v3.2' => 'deepseek/deepseek-v3.2',
+    'gemini-3-pro' => 'google/gemini-3-pro',
+    'gemini-2.5-flash' => 'google/gemini-2.5-flash',
+    'gpt-5.2' => 'openai/gpt-5.2',
+    'perplexity-sonar-pro-search' => 'perplexity/sonar-pro-search',
+    'perplexity-sonar-reasoning-pro' => 'perplexity/sonar-reasoning-pro',
+    'qwen3-VL-thinking-235B' => 'qwen/qwen3-vl-235b-a22b-thinking',
+    'grok-4.1-fast' => 'x-ai/grok-4.1-fast',
+    'kimi-k2-thinking' => 'moonshotai/kimi-k2-thinking',
+    'glm-4.6' => 'z-ai/glm-4.6'
+}
+
 
     def initialize()
         Dotenv.load
