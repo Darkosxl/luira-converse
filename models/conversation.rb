@@ -29,6 +29,7 @@ class ConversationHost
 
     # Model mapping for display names to actual model identifiers
     MODEL_MAPPING = {
+    'claude-opus-4.5' => 'anthropic/claude-opus-4-5',
     'claude-sonnet-4.5' => 'anthropic/claude-sonnet-4-5',
     'deepseek-v3.2' => 'deepseek/deepseek-v3.2',
     'gemini-3-pro' => 'google/gemini-3-pro',
