@@ -22,6 +22,7 @@ import VC_chain_tools as vc_tools
 import VC_chain_systemprompts as vc_systemprompts
 from langgraph.store.memory import InMemoryStore
 import VC_chain_database as vc_database
+import VC_email_utils
 from langchain_core.messages import (
     BaseMessage,
     HumanMessage,
@@ -184,6 +185,10 @@ def run_reasoning_model(state: AgentState, config: RunnableConfig):
         return {"output": final_message}
     except Exception as e:
         print(f"Error in reasoning agent: {e}")
+        VC_email_utils.send_error_notification(
+            str(e), 
+            {"source": "reasoning_agent", "input": state.get("input", "unknown")}
+        )
         return {"output": HumanMessage(content=f"Analysis encountered an error: {str(e)}")} 
 
 
@@ -213,6 +218,10 @@ def run_prediction_model(state: AgentState, config: RunnableConfig):
         return {"output": response["messages"][-1]}
     except Exception as e:
         print(f"Error in prediction agent: {e}")
+        VC_email_utils.send_error_notification(
+            str(e), 
+            {"source": "prediction_agent", "input": state.get("input", "unknown")}
+        )
         return {"output": HumanMessage(content=f"Prediction analysis encountered an error: {str(e)}")}
 
 # ------------------------------------------------------------
@@ -318,6 +327,10 @@ def get_assistant_response(user_input: str, session_id: str, general_agent_check
             return "I've completed the analysis, but the response content is not available."
     except Exception as e:
         print(f"Error in get_assistant_response: {e}")
+        VC_email_utils.send_error_notification(
+            str(e), 
+            {"source": "get_assistant_response", "input": user_input, "session_id": session_id}
+        )
         return "I apologize, but I encountered an error processing your request. Please try again."
 
 
