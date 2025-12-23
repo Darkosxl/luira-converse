@@ -270,12 +270,13 @@ function startAIStream(aiResponse, aiId) {
 <div class="bg-white px-4 py-4">
   <div class="flex items-center justify-between">
     <div class="flex items-center">
-      <button class="p-2 hover:bg-gray-100 rounded-lg mr-2" 
+      <button class="p-2 mr-2 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md rounded-xl text-gray-700 transition-all duration-200" 
               hx-post="/toggle-left-sidebar" 
               hx-target="#sidebar"
-              hx-swap="outerHTML">
+              hx-swap="outerHTML"
+              title="Chat History">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
       </button>
     </div>
@@ -357,105 +358,129 @@ function startAIStream(aiResponse, aiId) {
 </div>
 
 <!-- Input Form - Sticky at bottom -->
-<div class="sticky bottom-0 bg-white px-4 py-4">
-  <div class="max-w-3xl mx-auto">
-    <div class="flex items-center gap-2">
-      <!-- Model Selector Button - Right next to chatbox -->
-      <div class="relative">
-        <button type="button"
-                id="model-selector-btn"
-                class="flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg border text-gray-700"
-                onclick="toggleModelDropdown()">
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="sticky bottom-0 bg-white px-4 py-6">
+  <div class="max-w-3xl mx-auto flex items-center gap-3">
+    
+    <!-- Model Selector -->
+    <div class="relative">
+      <button type="button"
+              id="model-selector-btn"
+              class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition-colors duration-200 text-sm font-medium"
+              onclick="toggleModelDropdown()">
+        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-          </svg>
-          <span id="selected-model" class="font-medium">CapMap</span>
-          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </button>
+        </svg>
+        <span id="selected-model">CapMap</span>
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
 
-        <!-- Dropdown Menu -->
-        <div id="model-dropdown"
-             class="hidden absolute model-dropdown mb-2 w-64 bg-white border border-gray-300 rounded-lg shadow-lg">
-          <div class="py-1 max-h-64 overflow-y-auto">
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 font-medium text-blue-600"
-                    onclick="selectModel('capmap', 'CapMap')">
-              CapMap
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('claude-opus-4.5', 'Claude Opus 4.5')">
-              Claude Opus 4.5
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('claude-sonnet-4.5', 'Claude Sonnet 4.5')">
-              Claude Sonnet 4.5
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('deepseek-v3.2', 'DeepSeek v3.2')">
-              DeepSeek v3.2
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('gemini-3-pro', 'Gemini 3 Pro')">
-              Gemini 3 Pro
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('gemini-2.5-flash', 'Gemini 2.5 Flash')">
-              Gemini 2.5 Flash
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('gpt-5.2', 'GPT-5.2')">
-              GPT-5.2
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('perplexity-sonar-pro-search', 'Perplexity Sonar Pro Search')">
-              Perplexity Sonar Pro Search
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('perplexity-sonar-reasoning-pro', 'Perplexity Sonar Reasoning Pro')">
-              Perplexity Sonar Reasoning Pro
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('qwen3-VL-thinking-235B', 'Qwen3 VL Thinking 235B')">
-              Qwen3 VL Thinking 235B
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('grok-4.1-fast', 'Grok 4.1 Fast')">
-              Grok 4.1 Fast
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('kimi-k2-thinking', 'Kimi K2 Thinking')">
-              Kimi K2 Thinking
-            </button>
-            <button type="button" class="w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-                    onclick="selectModel('glm-4.6', 'GLM-4.6')">
-              GLM-4.6
-            </button>
-          </div>
+      <!-- Dropdown Menu -->
+      <div id="model-dropdown"
+           class="hidden absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50">
+        <div class="py-1 max-h-80 overflow-y-auto">
+          <% [
+            ['capmap', 'CapMap', true],
+            ['claude-opus-4.5', 'Claude Opus 4.5', false],
+            ['claude-sonnet-4.5', 'Claude Sonnet 4.5', false],
+            ['deepseek-v3.2', 'DeepSeek v3.2', false],
+            ['gemini-3-pro', 'Gemini 3 Pro', false],
+            ['gemini-2.5-flash', 'Gemini 2.5 Flash', false],
+            ['gpt-5.2', 'GPT-5.2', false],
+            ['perplexity-sonar-pro-search', 'Perplexity Sonar Pro', false],
+            ['perplexity-sonar-reasoning-pro', 'Perplexity Reasoning', false],
+            ['qwen3-VL-thinking-235B', 'Qwen3 VL Thinking', false],
+            ['grok-4.1-fast', 'Grok 4.1 Fast', false],
+            ['kimi-k2-thinking', 'Kimi K2 Thinking', false],
+            ['glm-4.6', 'GLM-4.6', false]
+          ].each do |id, name, is_selected| %>
+          <button type="button" 
+                  class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center justify-between group <%= is_selected ? 'text-blue-600 font-medium' : 'text-gray-700' %>"
+                  onclick="selectModel('<%= id %>', '<%= name %>')">
+            <span><%= name %></span>
+            <% if is_selected %>
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <% end %>
+          </button>
+          <% end %>
         </div>
       </div>
-
-      <!-- Chat Form -->
-      <form class="relative flex-1"
-            hx-post="/chat/messages"
-            hx-target=".container"
-            hx-swap="beforeend"
-            hx-on::after-request="document.getElementById('welcome-section')?.remove()">
-        <input class="w-full px-4 py-3 pr-14 border border-gray-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent"
-               name="message"
-               type="text"
-               placeholder="Send a message..."
-               id="message-input"/>
-        <input type="hidden" name="model" id="model-input" value="capmap"/>
-        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-black hover:bg-gray-800 text-white rounded-full flex items-center justify-center transition-all duration-200"
-                type="submit"
-                id="send-button">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l0-16m-4 4l4-4 4 4"/>
-          </svg>
-        </button>
-      </form>
     </div>
+
+    <!-- Chat Form -->
+    <form class="relative flex-1"
+          hx-post="/chat/messages"
+          hx-target=".container"
+          hx-swap="beforeend"
+          hx-on::after-request="document.getElementById('welcome-section')?.remove(); document.getElementById('message-input').value = ''">
+      <input class="w-full pl-5 pr-14 py-3.5 border border-gray-300 rounded-full bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 shadow-sm text-base transition-shadow duration-200"
+             name="message"
+             type="text"
+             placeholder="Send a message..."
+             id="message-input"
+             autocomplete="off"/>
+      <input type="hidden" name="model" id="model-input" value="capmap"/>
+      <button class="absolute right-2 top-1/2 transform -translate-y-1/2 w-9 h-9 bg-black hover:scale-105 active:scale-95 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md"
+              type="submit"
+              id="send-button">
+        <svg class="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleModelDropdown() {
+    const dropdown = document.getElementById('model-dropdown');
+    dropdown.classList.toggle('hidden');
+}
+
+function selectModel(id, name) {
+    // Update hidden input
+    document.getElementById('model-input').value = id;
+    
+    // Update button text
+    document.getElementById('selected-model').textContent = name;
+    
+    // Update selected state in dropdown (visual only, quick toggle)
+    const buttons = document.querySelectorAll('#model-dropdown button');
+    buttons.forEach(btn => {
+        const span = btn.querySelector('span');
+        const isSelected = span.textContent === name;
+        
+        btn.className = `w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center justify-between group ${isSelected ? 'text-blue-600 font-medium' : 'text-gray-700'}`;
+        
+        // Remove existing checkmark if any
+        const existingCheck = btn.querySelector('svg');
+        if (existingCheck) existingCheck.remove();
+        
+        // Add checkmark if selected
+        if (isSelected) {
+            btn.innerHTML = `<span>${name}</span><svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
+        } else {
+             btn.innerHTML = `<span>${span.textContent}</span>`;
+        }
+    });
+
+    // Close dropdown
+    document.getElementById('model-dropdown').classList.add('hidden');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('model-dropdown');
+    const button = document.getElementById('model-selector-btn');
+    
+    if (!dropdown.classList.contains('hidden') && 
+        !button.contains(event.target) && 
+        !dropdown.contains(event.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
+</script>
   </div>
 </div>
 

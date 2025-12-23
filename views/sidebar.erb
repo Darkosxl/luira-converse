@@ -1,28 +1,28 @@
 <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 transform <%= @left_sidebar_open ? 'translate-x-0' : '-translate-x-full' %> transition-transform duration-300 ease-in-out z-50">
-  <div class="p-4 border-b border-gray-200">
-    <div class="flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-gray-900">Chat History</h2>
-      <div class="flex items-center gap-2">
-        <a href="/chat"
-           class="p-1 hover:bg-gray-100 rounded text-gray-600 hover:text-gray-900 transition-colors"
-           title="New Chat"
-           hx-get="/chat"
-           hx-target="body"
-           hx-push-url="true">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
-        </a>
-        <button class="p-1 hover:bg-gray-100 rounded"
-                hx-post="/close-left-sidebar"
-                hx-target="#sidebar"
-                hx-swap="outerHTML">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
-      </div>
+  <div class="p-6 border-b border-gray-100 bg-white">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-xl font-bold text-gray-900 tracking-tight">Chat History</h2>
+      <button class="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-600 transition-colors"
+              hx-post="/close-left-sidebar"
+              hx-target="#sidebar"
+              hx-swap="outerHTML">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
     </div>
+    
+    <a href="/chat"
+       class="flex items-center justify-center gap-2 w-full py-2 px-4 bg-black hover:bg-gray-800 text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow-md group"
+       title="New Chat"
+       hx-get="/chat"
+       hx-target="body"
+       hx-push-url="true">
+      <svg class="w-4 h-4 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span class="font-medium text-sm">New Chat</span>
+    </a>
   </div>
   
   <div class="overflow-y-auto h-full pb-20">
