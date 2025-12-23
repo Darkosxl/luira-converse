@@ -189,7 +189,7 @@ class SinatraRouter < Sinatra::Base
     get '/chat' do
         # Clear current chat session to start fresh
         session.delete(:current_chat_id)
-        @show_welcome = session[:first_visit] != false
+        @show_welcome = true
         @left_sidebar_open = session[:left_sidebar_open] || false
         @right_sidebar_open = session[:right_sidebar_open] || false
         erb :'chat'
@@ -221,7 +221,7 @@ class SinatraRouter < Sinatra::Base
         user_html = erb :user_message, layout: false, locals: {message: user_message}
         # Use appropriate logo based on model
         logo_src = model_key == 'capmap' ? "/logo.svg" : "/logo_luira.svg"
-        ai_placeholder = "<div id=\"#{ai_id}\" class=\"flex justify-start mb-6\"><div class=\"flex items-start gap-3 max-w-2xl\"><div class=\"ai-avatar-container ai-loading\"><img src=\"#{logo_src}\" class=\"logo-loading\" alt=\"Loading\"></div><div class=\"text-gray-900 flex-1 min-w-0 break-words\"><div class=\"typing-indicator\">AI is thinking...</div></div></div></div>"
+        ai_placeholder = "<div id=\"#{ai_id}\" class=\"flex justify-start mb-6\"><div class=\"flex items-start gap-3 max-w-2xl\"><div class=\"ai-avatar-container\"><img src=\"#{logo_src}\" alt=\"AI\"></div><div class=\"text-gray-900 flex-1 min-w-0 break-words\"><div class=\"inline-block px-4 py-3 bg-gray-100 rounded-2xl rounded-tl-none\"><div class=\"flex items-center gap-3\"><div class=\"typing-bubble\"><div class=\"typing-dot\"></div><div class=\"typing-dot\"></div><div class=\"typing-dot\"></div></div><span class=\"text-xs font-medium text-gray-500 status-text\">Analyzing Request...</span></div></div></div></div></div>"
 
         # Start SSE connection immediately
         sse_script = "<script>startAIStream('', '#{ai_id}');</script>"
