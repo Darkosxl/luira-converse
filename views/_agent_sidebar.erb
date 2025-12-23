@@ -1,91 +1,133 @@
 <!-- Right Agent Sidebar -->
 <div id="agent-sidebar" class="fixed right-0 top-0 h-full w-80 bg-gray-50 border-l border-gray-200 transform <%= @right_sidebar_open ? 'translate-x-0' : 'translate-x-full' %> transition-transform duration-300 ease-in-out z-50">
-  <div class="p-4 border-b border-gray-200">
+  <div class="p-6 border-b border-gray-100">
     <div class="flex items-center justify-between">
-      <h2 class="text-lg font-semibold text-gray-900">Agent Models (VC Copilot)</h2>
-      <button class="p-1 hover:bg-gray-100 rounded" 
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-black rounded-lg text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+            </svg>
+        </div>
+        <div>
+            <h2 class="text-lg font-bold text-gray-900 leading-tight">Agent Models</h2>
+            <p class="text-xs text-gray-500 font-medium">VC Copilot Suite</p>
+        </div>
+      </div>
+      <button class="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 text-gray-400 hover:text-gray-600" 
               hx-post="/close-right-sidebar" 
               hx-target="#agent-sidebar"
               hx-swap="outerHTML">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
   </div>
   
-  <div class="overflow-y-auto h-full pb-20">
-    <div class="p-4 space-y-3">
+  <div class="overflow-y-auto h-full pb-32">
+    <div class="p-4 space-y-4">
       
       <!-- Ranking Model --> 
-      <div class="border border-gray-200 rounded-lg">
-        <button onclick="toggleSection('ranking')" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
-          <div class="flex items-center gap-2">
-            <img src="/logo.svg" style="width: 20px; height: 20px;" alt="Ranking">
-            <span class="text-gray-900">Ranking</span>
+      <div class="group border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+        <button onclick="toggleSection('ranking')" class="w-full p-4 text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/>
+                </svg>
+            </div>
+            <span class="font-semibold text-gray-900">Ranking Agent</span>
           </div>
+          <svg class="w-5 h-5 text-gray-400 transform transition-transform duration-200" id="ranking-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
         </button>
         <div id="ranking-content" style="display: none;">
-        <div class="p-3 border-t border-gray-200">
-          <p class="text-sm text-gray-600 mb-3">This agent will ensure that one consistent metric of rank/venture capital firms against each other for a metric in a given sector.</p>
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+          <p class="text-sm text-gray-600 mb-4 leading-relaxed">Analyze and rank venture capital firms based on specific metrics and performance indicators.</p>
           
-          <div class="space-y-4">
+          <div class="space-y-5">
             <div>
-              <label class="block text-sm text-gray-700 mb-2">Choose Ranking Type:</label>
-              <div class="flex items-center space-x-4">
-                <label class="inline-flex items-center">
-                  <input type="radio" name="ranking_type" value="sector" class="form-radio" checked>
-                  <span class="ml-2">Sector Rank</span>
+              <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Analysis Level</label>
+              <div class="flex p-1 bg-gray-200 rounded-lg">
+                <label class="flex-1 text-center cursor-pointer">
+                  <input type="radio" name="ranking_type" value="sector" class="hidden peer" checked>
+                  <span class="block py-2 px-3 text-sm font-medium text-gray-600 rounded-md peer-checked:bg-white peer-checked:text-black peer-checked:shadow-sm transition-all duration-200">Sector</span>
                 </label>
-                <label class="inline-flex items-center">
-                  <input type="radio" name="ranking_type" value="subsector" class="form-radio">
-                  <span class="ml-2">Subsector Rank</span>
+                <label class="flex-1 text-center cursor-pointer">
+                  <input type="radio" name="ranking_type" value="subsector" class="hidden peer">
+                  <span class="block py-2 px-3 text-sm font-medium text-gray-600 rounded-md peer-checked:bg-white peer-checked:text-black peer-checked:shadow-sm transition-all duration-200">Subsector</span>
                 </label>
               </div>
             </div>
 
             <!-- Sector Ranking Section -->
-            <div id="sector-ranking-section">
+            <div id="sector-ranking-section" class="space-y-4">
               <div>
-                <label for="sector-metrics" class="block text-sm text-gray-700 mb-1">Available Sector Metrics:</label>
-                <select id="sector-metrics" class="w-full border border-gray-300 rounded p-2 text-sm">
-                  <option>Current Market Size</option>
-                  <option>CAGR</option>
-                  <option>Total Exits / Total Investments</option>
-                  <option>AUM</option>
-                  <option>Ticket Size</option>
-                  <option>Follow on Index</option>
-                  <option>Sector specific investment</option>
-                  <option>Sector specific exit</option>
-                  <option>Sector specific exit/investment</option>
-                </select>
+                <label for="sector-metrics" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Metric</label>
+                <div class="relative">
+                    <select id="sector-metrics" class="appearance-none w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block p-2.5 pr-8">
+                      <option>Current Market Size</option>
+                      <option>CAGR</option>
+                      <option>Total Exits / Total Investments</option>
+                      <option>AUM</option>
+                      <option>Ticket Size</option>
+                      <option>Follow on Index</option>
+                      <option>Sector specific investment</option>
+                      <option>Sector specific exit</option>
+                      <option>Sector specific exit/investment</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
               </div>
               <div>
-                <label for="sector-select" class="block text-sm text-gray-700 mb-1">Available Sectors:</label>
-                <select id="sector-select" class="w-full border border-gray-300 rounded p-2 text-sm">
-                  <option>Loading sectors...</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Subsector Ranking Section (hidden by default) -->
-            <div id="subsector-ranking-section" style="display: none;">
-              <div>
-                <label for="subsector-metrics" class="block text-sm text-gray-700 mb-1">Available Subsector Metrics:</label>
-                <select id="subsector-metrics" class="w-full border border-gray-300 rounded p-2 text-sm">
-                  <option>series_#</option>
-                </select>
-              </div>
-              <div>
-                <label for="subsector-select" class="block text-sm text-gray-700 mb-1">Available Subsectors:</label>
-                <select id="subsector-select" class="w-full border border-gray-300 rounded p-2 text-sm">
-                  <option>Loading subsectors...</option>
-                </select>
+                <label for="sector-select" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Target Sector</label>
+                <div class="relative">
+                    <select id="sector-select" class="appearance-none w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block p-2.5 pr-8">
+                    <option>Loading sectors...</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
               </div>
             </div>
 
-            <button id="generate-prompt-btn" class="w-full bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors text-sm">
-              Generate Prompt
+            <!-- Subsector Ranking Section -->
+            <div id="subsector-ranking-section" class="space-y-4" style="display: none;">
+              <div>
+                <label for="subsector-metrics" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Metric</label>
+                <div class="relative">
+                    <select id="subsector-metrics" class="appearance-none w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block p-2.5 pr-8">
+                    <option>series_#</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+              </div>
+              <div>
+                <label for="subsector-select" class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Target Subsector</label>
+                <div class="relative">
+                    <select id="subsector-select" class="appearance-none w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-black focus:border-black block p-2.5 pr-8">
+                    <option>Loading subsectors...</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            <button id="generate-prompt-btn" class="w-full group relative flex justify-center py-2.5 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all duration-200 shadow-sm hover:shadow-md">
+              <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                <svg class="h-5 w-5 text-gray-500 group-hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </span>
+              Generate Analysis
             </button>
           </div>
         </div>
@@ -95,46 +137,6 @@
             const rankingTypeRadios = document.querySelectorAll('input[name="ranking_type"]');
             const sectorSection = document.getElementById('sector-ranking-section');
             const subsectorSection = document.getElementById('subsector-ranking-section');
-            const sectorSelect = document.getElementById('sector-select');
-            const subsectorSelect = document.getElementById('subsector-select');
-            const generatePromptBtn = document.getElementById('generate-prompt-btn');
-            const chatInput = document.querySelector('input[name="message"]');
-
-            // --- Function to fetch and populate a dropdown ---
-            function populateDropdown(selectElement, url, dataKey) {
-              fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                  selectElement.innerHTML = ''; // Clear loading message
-                  const items = data[dataKey] || [];
-                  if (items.length === 0) {
-                    selectElement.innerHTML = '<option>No data available</option>';
-                    return;
-                  }
-                  items.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item;
-                    option.textContent = item;
-                    selectElement.appendChild(option);
-                  });
-                })
-                .catch(error => {
-                  console.error(`Error fetching ${dataKey}:`, error);
-                  selectElement.innerHTML = `<option>Error loading ${dataKey}</option>`;
-                });
-            }
-
-            // --- Populate dropdowns when ranking section is opened ---
-            window.populateRankingDropdowns = function() {
-              if (!sectorSelect.hasAttribute('data-loaded')) {
-                populateDropdown(sectorSelect, '/chat/available_sectors', 'sectors');
-                sectorSelect.setAttribute('data-loaded', 'true');
-              }
-              if (!subsectorSelect.hasAttribute('data-loaded')) {
-                populateDropdown(subsectorSelect, '/chat/available_subsectors', 'subsectors');
-                subsectorSelect.setAttribute('data-loaded', 'true');
-              }
-            };
             
             // --- Handle radio button changes ---
             rankingTypeRadios.forEach(radio => {
@@ -148,110 +150,95 @@
                 }
               });
             });
-
-            // --- Handle Generate Prompt button click ---
-            generatePromptBtn.addEventListener('click', function() {
-              const rankingType = document.querySelector('input[name="ranking_type"]:checked').value;
-              let topic = '';
-              let metric = '';
-
-              if (rankingType === 'sector') {
-                topic = document.getElementById('sector-select').value;
-                metric = document.getElementById('sector-metrics').value;
-              } else {
-                topic = document.getElementById('subsector-select').value;
-                metric = document.getElementById('subsector-metrics').value;
-              }
-
-              if (topic && metric && chatInput) {
-                const prompt = `top 5 VCs in "${topic}" using "${metric}"`;
-                chatInput.value = prompt;
-                chatInput.focus();
-              } else {
-                if (!chatInput) console.error('Chat input not found');
-              }
-            });
+            
+            // Re-bind listeners if needed or just rely on the existing ones if not replaced by htmx
           });
         </script>
-
         </div>
       </div>
 
       <!-- Reasoning Model -->
-      <div class="border border-gray-200 rounded-lg">
-        <button onclick="toggleSection('reasoning')" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
-          <div class="flex items-center gap-2">
-            <img src="/logo.svg" style="width: 20px; height: 20px;" alt="Reasoning">
-            <span class="text-gray-900">Reasoning</span>
+      <div class="group border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+        <button onclick="toggleSection('reasoning')" class="w-full p-4 text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+            </div>
+            <span class="font-semibold text-gray-900">Reasoning Agent</span>
           </div>
+          <svg class="w-5 h-5 text-gray-400 transform transition-transform duration-200" id="reasoning-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
         </button>
         <div id="reasoning-content" style="display: none;">
-        <div class="p-3 border-t border-gray-200">
-          <p class="text-sm text-gray-600 mb-3">This one is a generalist model, it can perform general database queries in the FinTech tables available at its disposal, here are some prompts one can try:</p>
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+          <p class="text-sm text-gray-600 mb-4 leading-relaxed">Expert generalist for FinTech database queries and complex reasoning tasks.</p>
           <div class="space-y-2">
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'All Series B investments made by Sequoia Capital'">
-              All Series B investments made by Sequoia Capital
+            <% [
+                "All Series B investments made by Sequoia Capital",
+                "Show startups in AI with over $10M funding",
+                "Which VCs invested in both HealthTech and FinTech?",
+                "List the series B or later-stage investments of Accel",
+                "Sort startups according to number of follow-on investments",
+                "List startups seeded by YC and Andreessen Horowitz",
+                "CAP table analysis of OpenAI",
+                "Which VCs can invest in the next round of Stripe?"
+            ].each do |prompt| %>
+            <button class="w-full text-left p-3 text-sm bg-white border border-gray-200 text-gray-700 hover:bg-white hover:border-purple-300 hover:shadow-sm hover:text-purple-700 rounded-lg transition-all duration-200 group flex items-start gap-2"
+                    onclick="document.querySelector('input[name=message]').value = '<%= prompt %>'; document.querySelector('input[name=message]').focus();">
+              <svg class="w-4 h-4 text-purple-400 mt-0.5 group-hover:text-purple-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+              <span><%= prompt %></span>
             </button>
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'Show startups in AI with over $10M funding and in...'">
-              Show startups in AI with over $10M funding and in...
-            </button>
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'Which VCs invested in both HealthTech and FinTech...'">
-              Which VCs invested in both HealthTech and FinTech...
-            </button>
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'List the series B or later-stage investments of Accel'">
-              List the series B or later-stage investments of Accel
-            </button>
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'Sort startups according to number of follow-on inv...'">
-              Sort startups according to number of follow-on inv...
-            </button>
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'List the startups that Sequoia Capital and GV have invested in together'">
-              List the startups that Sequoia Capital and GV have...
-            </button>
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'CAP table of OpenAI'">
-              CAP table of OpenAI
-            </button>
-            <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                    onclick="document.querySelector('input[name=message]').value = 'Which VCs can invest in the next round of Stripe?'">
-              Which VCs can invest in the next round of Stripe?
-            </button>
+            <% end %>
           </div>
         </div>
         </div>
       </div>
 
       <!-- Prediction Model -->
-      <div class="border border-gray-200 rounded-lg">
-        <button onclick="toggleSection('prediction')" class="w-full p-3 text-left flex items-center hover:bg-gray-100">
-          <div class="flex items-center gap-2">
-            <img src="/logo.svg" style="width: 20px; height: 20px;" alt="Prediction">
-            <span class="text-gray-900">Prediction</span>
+      <div class="group border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+        <button onclick="toggleSection('prediction')" class="w-full p-4 text-left flex items-center justify-between bg-white hover:bg-gray-50 transition-colors">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                </svg>
+            </div>
+            <span class="font-semibold text-gray-900">Prediction Agent</span>
           </div>
+          <svg class="w-5 h-5 text-gray-400 transform transition-transform duration-200" id="prediction-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
         </button>
         <div id="prediction-content" style="display: none;">
-        <div class="p-3 border-t border-gray-200">
-          <p class="text-sm text-gray-600 mb-3">This agent is able to draw conclusions from repeating venture capital investments. You have two main types of prompts:</p>
-          <div class="space-y-3">
-            <div>
-              <p class="text-sm font-medium text-gray-700 mb-2">Type 1:</p>
-              <p class="text-sm text-gray-600 mb-2">Predict the next VC that will invest in Startup</p>
-              <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                      onclick="document.querySelector('input[name=message]').value = 'predict the next VC that will invest in Cluely'">
-                Try Type 1
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50">
+          <p class="text-sm text-gray-600 mb-4 leading-relaxed">Predict future investment trends and VC patterns based on historical data.</p>
+          <div class="space-y-4">
+            <div class="bg-white p-3 rounded-lg border border-gray-200">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] uppercase font-bold rounded-full">Forward</span>
+                <p class="text-xs font-semibold text-gray-700">Predict Next Investor</p>
+              </div>
+              <p class="text-xs text-gray-500 mb-3">Guess whom the next VC investing in a specific Startup will be.</p>
+              <button class="w-full text-center py-2 text-xs font-medium bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-md border border-gray-200 transition-colors"
+                      onclick="document.querySelector('input[name=message]').value = 'predict the next VC that will invest in Cluely'; document.querySelector('input[name=message]').focus();">
+                Use this prompt pattern
               </button>
             </div>
-            <div>
-              <p class="text-sm font-medium text-gray-700 mb-2">Type 2:</p>
-              <p class="text-sm text-gray-600 mb-2">Predict which startup would VC invest in next. You can limit the second prompt by adding it a sector of your choice.</p>
-              <button class="w-full text-left p-2 text-sm text-gray-700 hover:bg-gray-100 rounded border"
-                      onclick="document.querySelector('input[name=message]').value = 'predict which startup in the AI sector would Sequoia Capital invest in next'">
-                Try Type 2
+            
+            <div class="bg-white p-3 rounded-lg border border-gray-200">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-[10px] uppercase font-bold rounded-full">Reverse</span>
+                <p class="text-xs font-semibold text-gray-700">Predict Next Investment</p>
+              </div>
+              <p class="text-xs text-gray-500 mb-3">Predict which startup a specific VC will invest in next (optionally within a sector).</p>
+              <button class="w-full text-center py-2 text-xs font-medium bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-md border border-gray-200 transition-colors"
+                      onclick="document.querySelector('input[name=message]').value = 'predict which startup in the AI sector would Sequoia Capital invest in next'; document.querySelector('input[name=message]').focus();">
+                Use this prompt pattern
               </button>
             </div>
           </div>
@@ -262,6 +249,30 @@
     </div>
   </div>
 </div>
+
+<script>
+function toggleSection(sectionName) {
+  const content = document.getElementById(sectionName + '-content');
+  const arrow = document.getElementById(sectionName + '-arrow');
+  
+  if (content) {
+    const isHidden = content.style.display === 'none';
+    content.style.display = isHidden ? 'block' : 'none';
+    
+    // Rotate arrow
+    if (arrow) {
+        arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    // Load dropdowns when ranking section is opened
+    if (sectionName === 'ranking' && isHidden) {
+      if (typeof window.populateRankingDropdowns === 'function') {
+        window.populateRankingDropdowns();
+      }
+    }
+  }
+}
+</script>
 
 
 
