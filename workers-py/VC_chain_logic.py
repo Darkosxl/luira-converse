@@ -156,7 +156,9 @@ def run_router_model(state: AgentState, config: RunnableConfig):
     router_llm = get_shared_llm_gemini().with_structured_output(RouterOutput)
     context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
     messages = [vc_systemprompts.ROUTER_SYSTEM_PROMPT, context_msg] + state["chat_history"]
-    response = router_llm.invoke(messages, config)
+    # Router just classifies - no tools needed
+    router_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 1}}
+    response = router_llm.invoke(messages, router_config)
     return {"output": response}
 
 
@@ -170,7 +172,9 @@ def run_general_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🤖 Running GENERAL agent\033[0m")
     context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
     messages = [vc_systemprompts.GENERAL_SYSTEM_PROMPT, context_msg] + state["chat_history"]
-    response = general_agent.invoke({"messages": messages}, config)
+    # General agent: 1-2 web searches + datetime
+    general_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 3}}
+    response = general_agent.invoke({"messages": messages}, general_config)
     return {"output": response["messages"][-1]}
 
 
@@ -184,7 +188,9 @@ def run_ranking_model(state: AgentState, config: RunnableConfig):
     print("\033[94m📊 Running RANKING agent\033[0m")
     context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
     messages = [vc_systemprompts.RANKING_SYSTEM_PROMPT, context_msg] + state["chat_history"]
-    response = ranking_agent.invoke({"messages": messages}, config)
+    # Ranking agent: get sectors/subsectors + call ranking tool
+    ranking_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4}}
+    response = ranking_agent.invoke({"messages": messages}, ranking_config)
     return {"output": response["messages"][-1]}
 print(type(vc_tools.ranking_tools))
 
@@ -203,8 +209,8 @@ def run_reasoning_model(state: AgentState, config: RunnableConfig):
     messages = [context_msg] + state["chat_history"]
     try:
         # Add recursion limit for the reasoning agent specifically
-        reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 12, "max_concurrency": 2}}
-
+        reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 7, "max_concurrency": 2}}
+        
         print(f"🔍 REASONING AGENT - Input messages: {len(messages)}")
         print(f"🔍 REASONING AGENT - User input: {state['input']}")
 
@@ -242,7 +248,9 @@ def run_reasoning_validator(state: AgentState, config: RunnableConfig):
     print("\033[94m🧠 Running REASONING VALIDATOR agent\033[0m")
     context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
     messages = [vc_systemprompts.REASONING_VALIDATOR_SYSTEM_PROMPT, context_msg] + state["chat_history"]
-    response = reasoning_validator.invoke({"messages": messages}, config)
+    # Validator just checks output - minimal turns
+    validator_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 2}}
+    response = reasoning_validator.invoke({"messages": messages}, validator_config)
     return {"output": response["messages"][-1], "reasoning_validated_check": str("reasoning_validated_check: True") in response["messages"][-1].content}
 
 
@@ -259,7 +267,7 @@ def run_prediction_model(state: AgentState, config: RunnableConfig):
     messages = [context_msg] + state["chat_history"]
     try:
         # Add recursion limit for the prediction agent specifically
-        prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 12, "max_concurrency": 2}}
+        prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 9, "max_concurrency": 2}}
         response = prediction_agent.invoke({"messages": messages}, prediction_config)
         return {"output": response["messages"][-1]}
     except Exception as e:
@@ -281,7 +289,7 @@ def run_final_model(state: AgentState, config: RunnableConfig):
     context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS IN YOUR RESPONSE]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
     messages = [vc_systemprompts.FINAL_SYSTEM_PROMPT, context_msg] + state["chat_history"]
     # Final agent should be fast - 4 steps max
-    final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4, "max_concurrency": 1}}
+    final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 2, "max_concurrency": 1}}
     response = final_agent.invoke({"messages": messages}, final_config)
 
     # Extract only the final text content, not the full state
