@@ -72,7 +72,7 @@ _shared_llm_kimi = None
 def get_shared_llm_gemini():
     global _shared_llm_gemini
     if _shared_llm_gemini is None:
-        _shared_llm_gemini = ChatOpenRouter(model="google/gemini-3-flash", temperature=0.11)
+        _shared_llm_gemini = ChatOpenRouter(model="google/gemini-3-flash-preview", temperature=0.11)
     return _shared_llm_gemini
 
 def get_shared_llm_kimi():
