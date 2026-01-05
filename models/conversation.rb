@@ -32,7 +32,7 @@ class ConversationHost
     'claude-opus-4.5' => 'anthropic/claude-opus-4-5',
     'claude-sonnet-4.5' => 'anthropic/claude-sonnet-4-5',
     'deepseek-v3.2' => 'deepseek/deepseek-v3.2',
-    'gemini-3-pro' => 'google/gemini-3-pro',
+    'gemini-3-pro' => 'google/gemini-3-pro-preview',
     'gemini-2.5-flash' => 'google/gemini-2.5-flash',
     'gpt-5.2' => 'openai/gpt-5.2',
     'perplexity-sonar-pro-search' => 'perplexity/sonar-pro-search',
