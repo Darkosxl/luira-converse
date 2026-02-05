@@ -93,7 +93,20 @@ class Database
     @db[:Stream].where(chatId: id).delete
     @db[:Chat].where(id: id).delete
   end
-
+  
+  #user register
+  def create_user(email, password)
+    if @db[:User].where(email: email).first
+      raise "User already exists"
+    end
+    @db[:User].insert(email: email, password: password)
+  end
+  
+  #user login
+  def get_user(email, password)
+    @db[:User].where(email: email, password: password).first
+  end
+  
   def get_chats
     @db[:Chat].order(Sequel.desc(:createdAt)).all
   end

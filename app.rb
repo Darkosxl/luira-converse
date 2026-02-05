@@ -171,6 +171,7 @@ class SinatraRouter < Sinatra::Base
     
     post '/login' do
         if login(User, params[:password], session.delete(:return_to) || '/chat')
+            loginhandler(params[:username], params[:password])
             redirect session[:return_to] || '/chat'
         else
             @error = "Invalid password"
