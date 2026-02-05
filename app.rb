@@ -7,7 +7,6 @@ require 'date'
 require 'redcarpet'
 require 'json'
 require 'net/http'
-require 'shield'
 require 'rack/attack'
 
 require_relative 'models/stream'
@@ -69,35 +68,6 @@ Rack::Attack.throttled_responder = lambda do |req|
 end
 
 # Authentication User class
-class User
-  attr_reader :id, :username, :role
-  
-  def initialize(id, username, role)
-    @id = id
-    @username = username
-    @role = role
-  end
-  
-  # Shield expects this method
-  def self.[](id)
-    new(id, 'admin', 'admin') if id == 1
-  end
-  
-  def self.authenticate(password, *args)
-    require 'bcrypt'
-    password_hash = ENV['PASSWORD_HASH'] || BCrypt::Password.create('1qa3ed5tg', cost: 12)
-    if BCrypt::Password.new(password_hash) == password
-      # Return admin user - full access to everything
-      new(1, 'admin', 'admin')
-    else
-      nil
-    end
-  end
-  
-  def admin?
-    true  # Always admin - keep it simple
-  end
-end
 
 class SinatraRouter < Sinatra::Base
     set :bind, '0.0.0.0'
@@ -116,11 +86,10 @@ class SinatraRouter < Sinatra::Base
 
     # Security middleware
     use Rack::Attack
-    helpers Shield::Helpers
 
     use Rack::Session::Cookie,
       key: 'app.session',
-      secret: ENV['SESSION_SECRET'] || 'change-this-in-production-' + SecureRandom.hex(16),
+      secret: ENV['SESSION_SECRET'],
       expire_after: 3600,
       httponly: true,
       secure: false,  # Set to false since we're behind a reverse proxy
@@ -145,18 +114,14 @@ class SinatraRouter < Sinatra::Base
         headers['Access-Control-Allow-Origin'] = 'none'
         
         # Skip auth for login/health/landing routes
-        pass if request.path_info =~ /^\/(login|logout|health|)$/
+        pass if request.path_info =~ /^\/(login|logout|health|register)$/
 
         # Require authentication for everything else
-        unless authenticated(User)
-            session[:return_to] = request.fullpath
+        unless session[:user_id]
+            session[:return_to] = request.fullpath    
             redirect '/login'
         end
         
-        # Set up user context - admin can access everything
-        @current_user = current_user
-        @is_admin = admin?
-
         # Use shared instances instead of creating new ones per request
         @database = @@database
         @conversation = @@conversation
@@ -170,13 +135,14 @@ class SinatraRouter < Sinatra::Base
     end
     
     post '/login' do
-        if login(User, params[:password], session.delete(:return_to) || '/chat')
-            loginhandler(params[:username], params[:password])
-            redirect session[:return_to] || '/chat'
-        else
-            @error = "Invalid password"
-            erb :login
-        end
+      user_id = @database.get_user(params[:email], params[:password])
+      if user_id == 404
+        @error = "User not found"
+        erb :login
+      else
+        session[:user_id] = user_id
+        redirect '/chat'
+      end
     end
     
     get '/logout' do
@@ -184,6 +150,19 @@ class SinatraRouter < Sinatra::Base
         redirect '/login'
     end
 
+    get '/register' do
+      erb :'register'
+    end
+    post '/register' do
+      user_id = @database.create_user(params[:email], params[:password])
+      if user_id == "User already exists"
+        @error = user_id
+        erb :register
+      else
+        session[:user_id] = user_id 
+        redirect '/chat' 
+      end
+    end
     get '/' do
        erb :'landing-page'
     end
@@ -193,6 +172,7 @@ class SinatraRouter < Sinatra::Base
         @show_welcome = true
         @left_sidebar_open = session[:left_sidebar_open] || false
         @right_sidebar_open = session[:right_sidebar_open] || false
+        @current_user = @database.get_user_by_id(session[:user_id])
         erb :'chat'
     end
     get '/chat/available_sectors' do
@@ -209,7 +189,7 @@ class SinatraRouter < Sinatra::Base
     post '/chat/messages' do
         user_message = params[:message]
         model_key = params[:model] || 'capmap'
-        chat_id = @database.update_or_create_chat("private", user_message, session[:current_chat_id])
+        chat_id = @database.update_or_create_chat("private", user_message, session[:current_chat_id], 'user', session[:user_id])
         session[:current_chat_id] = chat_id
         session[:first_visit] = false
 
@@ -288,7 +268,36 @@ class SinatraRouter < Sinatra::Base
     end
     
     
-
+    post '/create-checkout-session' do
+      content_type 'application/json'
+      require 'stripe'
+      Stripe.api_key = ENV['STRIPE_API_KEY']
+      
+      # Get plan type from request
+      plan = params[:plan] || 'advanced'
+      
+      # Map plans to Stripe price IDs (set these in your .env)
+      price_ids = {
+        'advanced' => ENV['LUIRA_ADVANCED_PRICE_ID'],
+        'pro' => ENV['LUIRA_PRO_PRICE_ID']
+      }
+      
+      price_id = price_ids[plan] || price_ids['advanced']
+      
+      checkout_session = Stripe::Checkout::Session.create({
+        line_items: [{
+          price: price_id,
+          quantity: 1,
+        }],
+        mode: 'subscription',
+        success_url: "#{request.base_url}/chat?upgrade=#{plan}",
+        cancel_url: "#{request.base_url}/chat",
+        client_reference_id: session[:user_id],
+        customer_email: @database.get_user_by_id(session[:user_id])[:email],
+      })
+      
+      redirect checkout_session.url, 303
+    end    
     # Chat history routes
     get '/chat/history' do
         chats = @database.get_chats
@@ -298,6 +307,25 @@ class SinatraRouter < Sinatra::Base
         erb :chat_history, layout: false, locals: { grouped_chats: grouped_chats }
     end
 
+    post '/stripe/webhook' do
+      payload = request.body.read
+      sig_header = request.env['HTTP_STRIPE_SIGNATURE']
+      begin 
+        event = Stripe::Webhook.construct_event(payload, sig_header, ENV["STRIPE_PROD_WEBHOOK_SECRET"])
+      rescue => e
+        halt 400, { error: e.message}.to_json
+      end
+      
+      if event['type'] == 'checkout.session.completed'
+        session = event['data']['object']
+        user_id = session['client_reference_id']
+        
+        plan = session['amount_total'] >= 2000 ? 'pro' : 'advanced'
+        @database.change_user_plan(user_id, plan)
+      end
+      status 200
+    end
+    
     delete '/chat/:id' do
         chat_id = params[:id]
         @database.delete_chat_by_id(chat_id)

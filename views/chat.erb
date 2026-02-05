@@ -147,6 +147,144 @@ table tr:hover {
 .logo-loading {
   animation: logoRotate 3s infinite;
 }
+
+/* ===== UPGRADE CELEBRATION ANIMATION ===== */
+
+/* Blur the main content during animation */
+.upgrade-blur {
+  filter: blur(8px);
+  transition: filter 0.5s ease;
+}
+
+/* The upgrade overlay */
+.upgrade-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+/* The premium ball */
+.premium-ball {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  box-shadow: 
+    0 0 60px rgba(255, 215, 0, 0.6),
+    0 0 120px rgba(255, 165, 0, 0.4),
+    inset 0 -10px 30px rgba(0,0,0,0.2),
+    inset 0 10px 30px rgba(255,255,255,0.3);
+  animation: ball-spawn-expand 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Golden ball for Advanced */
+.premium-ball.golden {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+}
+
+/* Diamond ball for Pro */
+.premium-ball.diamond {
+  background: linear-gradient(135deg, #E8F4FF 0%, #B8E0FF 25%, #FFFFFF 50%, #D4F1FF 75%, #A8D8FF 100%);
+  box-shadow: 
+    0 0 60px rgba(180, 220, 255, 0.8),
+    0 0 120px rgba(135, 206, 250, 0.5),
+    inset 0 -10px 30px rgba(100,150,200,0.2),
+    inset 0 10px 30px rgba(255,255,255,0.8);
+}
+
+.premium-ball.diamond::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.8) 50%, transparent 60%);
+  animation: diamond-shimmer 2s infinite;
+}
+
+@keyframes diamond-shimmer {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Stage 1: Spawn and expand with rotation */
+@keyframes ball-spawn-expand {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+/* Stage 2: Smash to bottom-left corner */
+@keyframes ball-smash {
+  0% {
+    transform: scale(1.2) rotate(360deg);
+  }
+  50% {
+    transform: scale(1.4) rotate(540deg) translate(-40vw, 35vh);
+  }
+  80% {
+    transform: scale(0.4) rotate(720deg) translate(-45vw, 42vh);
+  }
+  100% {
+    transform: scale(0.35) rotate(720deg) translate(-45vw, 42vh);
+    opacity: 0;
+  }
+}
+
+.premium-ball.smashing {
+  animation: ball-smash 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* Impact flash on avatar */
+@keyframes impact-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.8);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 40px 20px rgba(255, 215, 0, 0.6);
+    transform: scale(1.3);
+  }
+  100% {
+    box-shadow: 0 0 20px 5px rgba(255, 215, 0, 0.3);
+    transform: scale(1);
+  }
+}
+
+.avatar-impact {
+  animation: impact-flash 0.5s ease-out forwards;
+}
+
+/* Premium avatar styles */
+.avatar-golden {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%) !important;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.avatar-diamond {
+  background: linear-gradient(135deg, #E8F4FF 0%, #B8E0FF 50%, #FFFFFF 100%) !important;
+  box-shadow: 0 0 20px rgba(135, 206, 250, 0.5);
+  color: #1a1a2e !important;
+}
 </style>
 
 <script>
@@ -445,6 +583,134 @@ function startAIStream(aiResponse, aiId) {
     </form>
   </div>
 </div>
+
+<!-- Account Widget - Bottom Left -->
+<% if @current_user %>
+  <%
+    account_type = (@current_user[:account_type] || 'free').downcase
+    
+    # Avatar gradient based on account type
+    avatar_class = case account_type
+      when 'advanced' then 'avatar-golden'
+      when 'pro' then 'avatar-diamond'
+      else 
+        # Free users get random gradient
+        email_hash = @current_user[:email].bytes.sum
+        hue1 = (email_hash * 137) % 360
+        hue2 = (hue1 + 60) % 360
+        nil
+    end
+    
+    avatar_style = avatar_class ? '' : "background: linear-gradient(135deg, hsl(#{((@current_user[:email].bytes.sum * 137) % 360)}, 70%, 60%), hsl(#{(((@current_user[:email].bytes.sum * 137) % 360) + 60) % 360}, 75%, 65%))"
+    
+    # Account type badge colors
+    badge_colors = {
+      'free' => 'bg-gray-100 text-gray-700 border-gray-200',
+      'advanced' => 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-transparent',
+      'pro' => 'bg-gradient-to-r from-blue-400 to-cyan-300 text-gray-900 border-transparent'
+    }
+    badge_class = badge_colors[account_type] || badge_colors['free']
+  %>
+  
+  <div class="fixed bottom-6 left-6 z-50" id="account-widget">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 flex items-center gap-3 hover:shadow-xl transition-shadow duration-300 max-w-xs">
+      <!-- Avatar Circle with Gradient -->
+      <div class="relative flex-shrink-0">
+        <div id="user-avatar" class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md <%= avatar_class %>" 
+             style="<%= avatar_style %>">
+          <%= @current_user[:email][0].upcase %>
+        </div>
+        <!-- Online indicator -->
+        <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
+      </div>
+      
+      <!-- User Info -->
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-semibold text-gray-900 truncate">
+          <%= @current_user[:email] %>
+        </div>
+        <div class="mt-1">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border <%= badge_class %>">
+            <%= account_type.capitalize %>
+          </span>
+        </div>
+      </div>
+      
+      <!-- Settings Icon -->
+      <a href="/logout" class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200" title="Logout">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+<% end %>
+
+<!-- Upgrade Celebration Overlay (hidden by default) -->
+<div id="upgrade-overlay" class="upgrade-overlay" style="display: none;">
+  <div id="premium-ball" class="premium-ball golden">
+    <span id="ball-letter"><%= @current_user ? @current_user[:email][0].upcase : '★' %></span>
+  </div>
+</div>
+
+<script>
+// Check for upgrade parameter
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const upgradePlan = urlParams.get('upgrade');
+  
+  if (upgradePlan && (upgradePlan === 'advanced' || upgradePlan === 'pro')) {
+    // Start the celebration!
+    startUpgradeCelebration(upgradePlan);
+    
+    // Clean the URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+})();
+
+function startUpgradeCelebration(plan) {
+  const overlay = document.getElementById('upgrade-overlay');
+  const ball = document.getElementById('premium-ball');
+  const mainContent = document.querySelector('body');
+  const avatar = document.getElementById('user-avatar');
+  
+  if (!overlay || !ball) return;
+  
+  // Set ball type (golden or diamond)
+  ball.classList.remove('golden', 'diamond');
+  ball.classList.add(plan === 'pro' ? 'diamond' : 'golden');
+  
+  // Blur main content
+  if (mainContent) mainContent.classList.add('upgrade-blur');
+  
+  // Show overlay
+  overlay.style.display = 'flex';
+  
+  // After expand animation (2.5s), start smash
+  setTimeout(() => {
+    ball.classList.add('smashing');
+    
+    // After smash (0.8s), do impact and cleanup
+    setTimeout(() => {
+      // Flash the avatar
+      if (avatar) {
+        avatar.classList.add('avatar-impact');
+        avatar.classList.add(plan === 'pro' ? 'avatar-diamond' : 'avatar-golden');
+      }
+      
+      // Hide overlay
+      overlay.style.display = 'none';
+      
+      // Remove blur
+      if (mainContent) mainContent.classList.remove('upgrade-blur');
+      
+      // Reset ball for next time
+      ball.classList.remove('smashing');
+      
+    }, 800);
+  }, 2500);
+}
+</script>
 
 <script>
 let currentEventSource = null;

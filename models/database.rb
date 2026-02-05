@@ -2,6 +2,7 @@ require 'sequel'
 require 'pg'
 require 'securerandom'
 require 'dotenv'
+require 'bcrypt'
 
 class Database
   
@@ -15,20 +16,19 @@ class Database
       test: true
     )
   end
-
   def get_chat_by_id(id)
     @db.select().from(:Chat).where(id: id).first
   end
   #get or create chat
   
-  def update_or_create_chat(visibility, message, id=nil, role='user')
+  def update_or_create_chat(visibility, message, id=nil, role='user', user_id)
     if id == nil or @db[:Chat].where(id: id).first.nil?
       chat_id = SecureRandom.uuid
       @db[:Chat].insert(
         id: chat_id, 
         title: message, 
         visibility: visibility, 
-        userId: 'd67c4a00-04ee-430d-8f66-c6244534f39f', 
+        userId: user_id, 
         createdAt: Time.now
       )
       message_id = SecureRandom.uuid
@@ -58,6 +58,10 @@ class Database
     end
   end
 
+  def change_user_plan(user_id, plan)
+    @db[:User].where(id: user_id).update(account_type: plan, updatedAt: Time.now)
+  end
+  
   def get_available_sectors
     query = %q(SELECT DISTINCT "Sector" FROM vc_sector_based_raw WHERE "Sector" IS NOT NULL ORDER BY "Sector")
     @db.fetch(query).map(:Sector)
@@ -97,16 +101,29 @@ class Database
   #user register
   def create_user(email, password)
     if @db[:User].where(email: email).first
-      raise "User already exists"
+      return "User already exists"
     end
-    @db[:User].insert(email: email, password: password)
+    password_hash = BCrypt::Password.create(password, cost: 12)
+    id = SecureRandom.uuid
+    @db[:User].insert(id: id, email: email, password_hash: password_hash, createdAt: Time.now, account_type: "free")
+    return id
   end
   
   #user login
   def get_user(email, password)
-    @db[:User].where(email: email, password: password).first
+    user = @db[:User].where(email: email).first
+    return 404 unless user
+    return BCrypt::Password.new(user[:password_hash]) == password ? user[:id] : 404
   end
   
+  def get_user_by_id(user_id)
+    @db[:User].where(id: user_id).first
+  end
+  
+ def user_exists?(email)
+   @db[:User].where(email: email).count > 0
+ end
+
   def get_chats
     @db[:Chat].order(Sequel.desc(:createdAt)).all
   end
