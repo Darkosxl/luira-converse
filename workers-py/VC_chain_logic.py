@@ -72,13 +72,13 @@ _shared_llm_kimi = None
 def get_shared_llm_gemini():
     global _shared_llm_gemini
     if _shared_llm_gemini is None:
-        _shared_llm_gemini = ChatOpenRouter(model="google/gemini-2.0-flash-001", temperature=0.11)
+        _shared_llm_gemini = ChatOpenRouter(model="google/gemini-3-flash-preview", temperature=0.11)
     return _shared_llm_gemini
 
 def get_shared_llm_kimi():
     global _shared_llm_kimi
     if _shared_llm_kimi is None:
-        _shared_llm_kimi = ChatOpenRouter(model="google/gemini-2.5-pro", temperature=0.11)
+        _shared_llm_kimi = ChatOpenRouter(model="google/gemini-3-pro-preview", temperature=0.11)
     return _shared_llm_kimi
 
 
@@ -88,6 +88,7 @@ def get_shared_llm_kimi():
 class AgentState(TypedDict):
     input: str
     chat_history: list[BaseMessage]
+    context_summary: str  # Extracted constraints and context from conversation
     general_agent_check: bool
     reasoning_validated_check: bool
     output: str
@@ -96,15 +97,54 @@ class AgentState(TypedDict):
 ################## AGENT MEMORY LIMITER ##################
 
 def trim_chat_history(state: AgentState, config: RunnableConfig):
-    """Keep only the last 4 messages (2 user + 2 AI messages max)"""
     chat_history = state["chat_history"]
 
-    if len(chat_history) <= 4:
+    if len(chat_history) <= 10:
         return {"chat_history": chat_history}
 
-    # Keep only the last 4 messages
-    trimmed_history = chat_history[-4:]
+    trimmed_history = chat_history[-10:]
     return {"chat_history": trimmed_history}
+
+
+################## CONTEXT SUMMARIZER ##################
+
+def run_context_summarizer(state: AgentState, config: RunnableConfig):
+    """Extract key constraints and context from the conversation history to pass to all agents"""
+    print("\033[95m📋 Running CONTEXT SUMMARIZER\033[0m")
+    
+    chat_history = state.get("chat_history", [])
+    current_input = state["input"]
+    
+    # If no history, create a minimal context from just the current input
+    if not chat_history or len(chat_history) == 0:
+        return {"context_summary": f"CONSTRAINTS: None specified yet\nSECTOR: Not established\nENTITIES: None\nINTENT: {current_input[:200]}"}
+    
+    # Build conversation string for the summarizer
+    conversation_text = ""
+    for msg in chat_history:
+        role = "User" if isinstance(msg, HumanMessage) else "Assistant"
+        content = msg.content if hasattr(msg, 'content') else str(msg)
+        conversation_text += f"{role}: {content}\n\n"
+    
+    conversation_text += f"User (current): {current_input}"
+    
+    # Use the fast LLM to extract context
+    summarizer_llm = get_shared_llm_gemini()
+    
+    messages = [
+        vc_systemprompts.CONTEXT_SUMMARIZER_SYSTEM_PROMPT,
+        HumanMessage(content=f"Analyze this conversation and extract the key context:\n\n{conversation_text}")
+    ]
+    
+    try:
+        response = summarizer_llm.invoke(messages, config)
+        context_summary = response.content if hasattr(response, 'content') else str(response)
+        print(f"\033[95m📋 Context extracted: {context_summary[:200]}...\033[0m")
+        return {"context_summary": context_summary}
+    except Exception as e:
+        print(f"Error in context summarizer: {e}")
+        return {"context_summary": "CONSTRAINTS: Unable to extract\nSECTOR: Unknown\nENTITIES: Unknown\nINTENT: Unknown"}
+
 
 # ------------------------------------------------------------
 # -------------- ROUTER AGENT CHAIN -------------------------
@@ -114,8 +154,11 @@ def trim_chat_history(state: AgentState, config: RunnableConfig):
 def run_router_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🧭 Running ROUTER agent\033[0m")
     router_llm = get_shared_llm_gemini().with_structured_output(RouterOutput)
-    messages = [vc_systemprompts.ROUTER_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
-    response = router_llm.invoke(messages, config)
+    context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
+    messages = [vc_systemprompts.ROUTER_SYSTEM_PROMPT, context_msg] + state["chat_history"]
+    # Router just classifies - no tools needed
+    router_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 1}}
+    response = router_llm.invoke(messages, router_config)
     return {"output": response}
 
 
@@ -127,8 +170,11 @@ general_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.general_too
 
 def run_general_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🤖 Running GENERAL agent\033[0m")
-    messages = [vc_systemprompts.GENERAL_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
-    response = general_agent.invoke({"messages": messages}, config)
+    context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
+    messages = [vc_systemprompts.GENERAL_SYSTEM_PROMPT, context_msg] + state["chat_history"]
+    # General agent: 1-2 web searches + datetime
+    general_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 3}}
+    response = general_agent.invoke({"messages": messages}, general_config)
     return {"output": response["messages"][-1]}
 
 
@@ -140,8 +186,11 @@ ranking_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.ranking_too
 
 def run_ranking_model(state: AgentState, config: RunnableConfig):
     print("\033[94m📊 Running RANKING agent\033[0m")
-    messages = [vc_systemprompts.RANKING_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
-    response = ranking_agent.invoke({"messages": messages}, config)
+    context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
+    messages = [vc_systemprompts.RANKING_SYSTEM_PROMPT, context_msg] + state["chat_history"]
+    # Ranking agent: get sectors/subsectors + call ranking tool
+    ranking_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4}}
+    response = ranking_agent.invoke({"messages": messages}, ranking_config)
     return {"output": response["messages"][-1]}
 print(type(vc_tools.ranking_tools))
 
@@ -156,11 +205,12 @@ reasoning_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.reasoning
 
 def run_reasoning_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🧠 Running REASONING agent\033[0m")
-    messages = [HumanMessage(content=state["input"])] + state["chat_history"]
+    context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
+    messages = [context_msg] + state["chat_history"]
     try:
         # Add recursion limit for the reasoning agent specifically
-        reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 12, "max_concurrency": 2}}
-
+        reasoning_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 7, "max_concurrency": 2}}
+        
         print(f"🔍 REASONING AGENT - Input messages: {len(messages)}")
         print(f"🔍 REASONING AGENT - User input: {state['input']}")
 
@@ -196,8 +246,11 @@ reasoning_validator = create_react_agent(get_shared_llm_gemini(), vc_tools.reaso
 
 def run_reasoning_validator(state: AgentState, config: RunnableConfig):
     print("\033[94m🧠 Running REASONING VALIDATOR agent\033[0m")
-    messages = [vc_systemprompts.REASONING_VALIDATOR_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
-    response = reasoning_validator.invoke({"messages": messages}, config)
+    context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
+    messages = [vc_systemprompts.REASONING_VALIDATOR_SYSTEM_PROMPT, context_msg] + state["chat_history"]
+    # Validator just checks output - minimal turns
+    validator_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 2}}
+    response = reasoning_validator.invoke({"messages": messages}, validator_config)
     return {"output": response["messages"][-1], "reasoning_validated_check": str("reasoning_validated_check: True") in response["messages"][-1].content}
 
 
@@ -209,11 +262,12 @@ prediction_agent = create_react_agent(get_shared_llm_gemini(), vc_tools.predicti
 
 def run_prediction_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🔮 Running PREDICTION agent\033[0m")
-    # Don't add system prompt here since it's already in the agent
-    messages = [HumanMessage(content=state["input"])] + state["chat_history"]
+    # Include context with constraints for prediction agent
+    context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
+    messages = [context_msg] + state["chat_history"]
     try:
         # Add recursion limit for the prediction agent specifically
-        prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 12, "max_concurrency": 2}}
+        prediction_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 9, "max_concurrency": 2}}
         response = prediction_agent.invoke({"messages": messages}, prediction_config)
         return {"output": response["messages"][-1]}
     except Exception as e:
@@ -231,9 +285,11 @@ def run_prediction_model(state: AgentState, config: RunnableConfig):
 final_agent = create_react_agent(get_shared_llm_kimi(), tools=vc_tools.final_tools, prompt=vc_systemprompts.FINAL_SYSTEM_PROMPT)
 def run_final_model(state: AgentState, config: RunnableConfig):
     print("\033[94m🎯 Running FINAL agent\033[0m")
-    messages = [vc_systemprompts.FINAL_SYSTEM_PROMPT, HumanMessage(content=state["input"])] + state["chat_history"]
+    # Include context with constraints for final presentation
+    context_msg = HumanMessage(content=f"[CONVERSATION CONTEXT - MUST RESPECT THESE CONSTRAINTS IN YOUR RESPONSE]\n{state.get('context_summary', '')}\n\n[CURRENT QUERY]\n{state['input']}")
+    messages = [vc_systemprompts.FINAL_SYSTEM_PROMPT, context_msg] + state["chat_history"]
     # Final agent should be fast - 4 steps max
-    final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 4, "max_concurrency": 1}}
+    final_config = {**config, "configurable": {**config.get("configurable", {}), "recursion_limit": 2, "max_concurrency": 1}}
     response = final_agent.invoke({"messages": messages}, final_config)
 
     # Extract only the final text content, not the full state
@@ -274,6 +330,7 @@ def validator_function(state: AgentState):
 # -------------------CHAIN ASSEMBLY--------------------------
 
 graph_builder.add_node("memory_limiter", trim_chat_history)
+graph_builder.add_node("context_summarizer", run_context_summarizer)
 graph_builder.add_node("router", run_router_model)
 graph_builder.add_node("general", run_general_model)
 graph_builder.add_node("ranking", run_ranking_model)
@@ -282,7 +339,8 @@ graph_builder.add_node("prediction", run_prediction_model)
 graph_builder.add_node("reasoning_validator", run_reasoning_validator)
 graph_builder.add_node("final", run_final_model)
 graph_builder.add_edge(START, "memory_limiter")
-graph_builder.add_edge("memory_limiter", "router")
+graph_builder.add_edge("memory_limiter", "context_summarizer")
+graph_builder.add_edge("context_summarizer", "router")
 graph_builder.add_conditional_edges("router", router_function, {"general": "general", "ranking": "ranking", "reasoning": "reasoning", "prediction": "prediction"})
 graph_builder.add_edge("general", "final")
 graph_builder.add_edge("ranking", "final")
@@ -314,7 +372,12 @@ except Exception:
 
 
 def get_assistant_response(user_input: str, session_id: str, general_agent_check: bool, chat_history: list[BaseMessage]):
-    state = {"input": user_input, "chat_history": chat_history, "general_agent_check": general_agent_check}
+    state = {
+        "input": user_input, 
+        "chat_history": chat_history, 
+        "general_agent_check": general_agent_check,
+        "context_summary": ""  # Will be populated by context_summarizer node
+    }
     try:
         response = graph.invoke(state, {"configurable": {"thread_id": session_id, "recursion_limit": 12, "max_concurrency": 2}})
 
