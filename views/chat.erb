@@ -368,52 +368,48 @@ function clearPreviousLoadingStates() {
   });
 }
 
-function startAIStream(aiResponse, aiId) {
-  const aiContent = document.getElementById(aiId).querySelector('.text-gray-900 div');
+function startAIStream(aiResponse, aiId, contentId) {
+  const loaderDiv  = document.getElementById(contentId + '-loader');
+  const contentDiv = document.getElementById(contentId);
   const avatarContainer = document.getElementById(aiId).querySelector('.ai-avatar-container');
 
-  // Make sure current avatar is visible
-  avatarContainer.style.display = 'flex';
+  // Make sure avatar is visible
+  if (avatarContainer) avatarContainer.style.display = 'flex';
 
   const eventSource = new EventSource('/chat/stream/' + aiId);
   let accumulatedContent = '';
-  aiContent.innerHTML = '';
+  let firstChunk = true;
 
   eventSource.onmessage = function(event) {
-    if (avatarContainer.classList.contains('ai-loading')) {
-      avatarContainer.classList.remove('ai-loading');
-      // Keep the logo but remove loading animation
-      const img = avatarContainer.querySelector('img');
-      if (img && img.classList.contains('logo-loading')) {
-        img.classList.remove('logo-loading');
-      }
+    if (firstChunk) {
+      // Hide typing loader, show content area
+      if (loaderDiv)  loaderDiv.classList.add('hidden');
+      if (contentDiv) contentDiv.classList.remove('hidden');
+      firstChunk = false;
     }
     accumulatedContent += event.data;
-    // Show accumulated content as HTML
-    aiContent.innerHTML = accumulatedContent;
+    if (contentDiv) contentDiv.innerHTML = accumulatedContent;
   };
 
   eventSource.addEventListener('complete', function(event) {
-    // Final render to ensure proper HTML
-    aiContent.innerHTML = accumulatedContent;
-    // Keep the avatar visible as this is now the latest response
-    // (Previous ones were already hidden by clearPreviousLoadingStates)
+    if (contentDiv) contentDiv.innerHTML = accumulatedContent;
+    // Ensure loader is hidden on completion (e.g. empty response)
+    if (loaderDiv)  loaderDiv.classList.add('hidden');
+    if (contentDiv) contentDiv.classList.remove('hidden');
     eventSource.close();
   });
 
   eventSource.onerror = function(error) {
     console.error('SSE error:', error);
-    avatarContainer.classList.remove('ai-loading');
-    // Remove loading animation on error
-    const img = avatarContainer.querySelector('img');
-    if (img && img.classList.contains('logo-loading')) {
-      img.classList.remove('logo-loading');
+    if (loaderDiv)  loaderDiv.classList.add('hidden');
+    if (contentDiv) {
+      contentDiv.classList.remove('hidden');
+      if (!accumulatedContent) contentDiv.textContent = 'Error loading response';
     }
-    // Keep avatar visible even on error as this is the latest response
-    aiContent.textContent = 'Error loading response';
     eventSource.close();
   };
 }
+
 
 
 
@@ -638,7 +634,7 @@ function startAIStream(aiResponse, aiId) {
           hx-post="/chat/messages"
           hx-target=".container"
           hx-swap="beforeend"
-          hx-on::after-request="document.getElementById('welcome-section')?.remove(); document.getElementById('message-input').value = ''">
+          hx-on::after-request="document.getElementById('welcome-section')?.remove(); document.getElementById('message-input').value = ''; htmx.ajax('GET', '/chat/request_info', {target: '#request-info-widget', swap: 'innerHTML'})">
       <input class="w-full pl-5 pr-14 py-3.5 border border-gray-300 rounded-full bg-white text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-gray-400 shadow-sm text-base transition-shadow duration-200"
              name="message"
              type="text"
@@ -724,6 +720,7 @@ function startAIStream(aiResponse, aiId) {
               <%= account_type %>
             </span>
           </div>
+          <div id="request-info-widget">
           <% if @request_info %>
             <%
               pct       = ((@request_info[:count].to_f / @request_info[:limit]) * 100).round
@@ -743,6 +740,7 @@ function startAIStream(aiResponse, aiId) {
               </div>
             </div>
           <% end %>
+          </div>
           <% if account_type == 'free' %>
             <a href="/plans" class="mt-2 block">
               <button id="upgrade-btn"

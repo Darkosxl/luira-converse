@@ -1,0 +1,19 @@
+<% if request_info %>
+  <%
+    pct        = ((request_info[:count].to_f / request_info[:limit]) * 100).round
+    remaining  = request_info[:remaining]
+    bar_color  = pct >= 80 ? '#ef4444' : pct >= 50 ? '#f59e0b' : '#22c55e'
+    text_color = pct >= 80 ? 'color:#ef4444' : pct >= 50 ? 'color:#f59e0b' : 'color:#6b7280'
+  %>
+  <div class="mt-1.5">
+    <div class="flex justify-between items-center mb-1">
+      <span class="text-[9px] font-medium" style="<%= text_color %>">
+        <%= remaining %> / <%= request_info[:limit] %> requests left
+      </span>
+    </div>
+    <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+      <div class="h-full rounded-full transition-all duration-500"
+           style="width:<%= [pct, 100].min %>%; background:<%= bar_color %>;"></div>
+    </div>
+  </div>
+<% end %>

@@ -270,6 +270,12 @@ class SinatraRouter < Sinatra::Base
         @request_info = @database.get_request_info(session[:user_id])
         erb :'chat'
     end
+    get '/chat/request_info' do
+        content_type 'text/html'
+        request_info = @database.get_request_info(session[:user_id])
+        erb :_request_info, layout: false, locals: { request_info: request_info }
+    end
+
     get '/chat/available_sectors' do
         content_type :json
         sectors = @database.get_available_sectors
@@ -318,10 +324,30 @@ class SinatraRouter < Sinatra::Base
         user_html = erb :user_message, layout: false, locals: {message: user_message}
         # Use appropriate logo based on model
         logo_src = model_key == 'capmap' ? "/logo.svg" : "/logo_luira.svg"
-        ai_placeholder = "<div id=\"#{ai_id}\" class=\"flex justify-start mb-6\"><div class=\"flex items-start gap-3 max-w-2xl\"><div class=\"ai-avatar-container\"><img src=\"#{logo_src}\" alt=\"AI\"></div><div class=\"text-gray-900 flex-1 min-w-0 break-words\"><div class=\"inline-block px-4 py-3 bg-gray-100 rounded-2xl rounded-tl-none\"><div class=\"flex items-center gap-3\"><div class=\"typing-bubble\"><div class=\"typing-dot\"></div><div class=\"typing-dot\"></div><div class=\"typing-dot\"></div></div><span class=\"text-xs font-medium text-gray-500 status-text\">Analyzing Request...</span></div></div></div></div></div>"
+        content_id = "#{ai_id}-content"
+        ai_placeholder = <<~HTML
+          <div id="#{ai_id}" class="flex justify-start mb-6">
+            <div class="flex items-start gap-3 max-w-2xl w-full">
+              <div class="ai-avatar-container flex-shrink-0">
+                <img src="#{logo_src}" alt="AI">
+              </div>
+              <div class="flex flex-col gap-1 flex-1 min-w-0">
+                <div id="#{content_id}-loader" class="inline-flex items-center gap-3 px-4 py-3 bg-gray-100 rounded-2xl rounded-tl-none">
+                  <div class="typing-bubble">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                  </div>
+                  <span class="text-xs font-medium text-gray-500">Analyzing Request...</span>
+                </div>
+                <div id="#{content_id}" class="hidden text-gray-900 break-words prose prose-sm max-w-none"></div>
+              </div>
+            </div>
+          </div>
+        HTML
 
         # Start SSE connection immediately
-        sse_script = "<script>startAIStream('', '#{ai_id}');</script>"
+        sse_script = "<script>startAIStream('', '#{ai_id}', '#{content_id}');</script>"
 
         "#{user_html}#{ai_placeholder}#{sse_script}"
     end
