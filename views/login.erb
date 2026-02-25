@@ -3,169 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Luira</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'brand-navy': '#050a30',
-                        'brand-purple': '#7910ff',
-                        'brand-cyan': '#00d2ff',
-                        'brand-dark': '#0f1547',
-                        'brand-darker': '#020614',
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 1s ease-out',
-                        'fade-in': 'fadeIn 1.5s ease-out',
-                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite alternate',
-                        'float': 'float 6s ease-in-out infinite',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            from: { opacity: '0', transform: 'translateY(30px)' },
-                            to: { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        fadeIn: {
-                            from: { opacity: '0' },
-                            to: { opacity: '1' }
-                        },
-                        pulseGlow: {
-                            from: { boxShadow: '0 0 20px rgba(121, 16, 255, 0.3)' },
-                            to: { boxShadow: '0 0 40px rgba(121, 16, 255, 0.6)' }
-                        },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        }
-                    }
-                }
-            }
-        }
+    <title>Sign In – Luira | AI-Powered Conversations</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Sign in to Luira – your AI-powered conversation platform. Access your dashboard securely.">
+    <link rel="canonical" href="https://luira.amoredit.com/login">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://luira.amoredit.com/login">
+    <meta property="og:title" content="Sign In – Luira">
+    <meta property="og:description" content="Sign in to Luira – your AI-powered conversation platform.">
+    <meta property="og:site_name" content="Luira">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Sign In – Luira">
+    <meta name="twitter:description" content="Sign in to Luira – your AI-powered conversation platform.">
+
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Luira",
+      "url": "https://luira.amoredit.com",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "provider": {
+        "@type": "Organization",
+        "name": "Luira",
+        "url": "https://luira.amoredit.com"
+      }
+    }
     </script>
+
+    <link rel="stylesheet" href="/output.css">
     <style>
-        @keyframes gradient-x {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        .animate-gradient-text {
-            background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
-            background-size: 400% 400%;
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradient-x 3s ease infinite;
+        /* Brand colors */
+        :root {
+            --brand-navy:   #050a30;
+            --brand-purple: #7910ff;
+            --brand-cyan:   #00d2ff;
+            --brand-dark:   #0f1547;
+            --brand-darker: #020614;
         }
 
-        .input-glow:focus {
-            box-shadow: 0 0 20px rgba(121, 16, 255, 0.25);
+        /* Reset & base */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-family: 'Inter', system-ui, sans-serif; font-size: 16px; }
+        body {
+            background-color: var(--brand-navy);
+            color: white;
+            min-height: 100svh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
         }
 
-        .bg-grid {
-            background-image: 
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
                 linear-gradient(rgba(121, 16, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(121, 16, 255, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
+            pointer-events: none;
         }
 
+        /* Orbs — blur reduced from 80px → 40px (M-1) */
         .orb {
             position: absolute;
             border-radius: 50%;
-            filter: blur(80px);
+            filter: blur(40px);
             opacity: 0.4;
-            animation: float 8s ease-in-out infinite;
+            will-change: transform;
+        }
+        .orb-purple {
+            width: 24rem; height: 24rem;
+            background: var(--brand-purple);
+            top: -12rem; left: -12rem;
+        }
+        .orb-cyan {
+            width: 20rem; height: 20rem;
+            background: var(--brand-cyan);
+            bottom: -10rem; right: -10rem;
+        }
+
+        /* Float animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-10px); }
+        }
+        .anim-float { animation: float 8s ease-in-out infinite; }
+
+        /* Fade-in-up animation */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .anim-fade-in-up { animation: fadeInUp 0.9s ease-out both; }
+
+        /* Fade-in */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .anim-fade-in { animation: fadeIn 0.4s ease-out both; }
+
+        /* Pulse-glow — uses opacity on ::after to avoid main-thread box-shadow cost (H-6) */
+        @keyframes glowPulse {
+            from { opacity: 0.4; }
+            to   { opacity: 1; }
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(15,21,71,0.92), rgba(31,41,55,0.92));
+            /* Reduced from backdrop-blur-xl (24px) → backdrop-blur (8px) (M-2) */
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 3rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(121, 16, 255, 0.2);
+            max-width: 28rem;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 1.5rem;
+            box-shadow: 0 0 40px rgba(121, 16, 255, 0.5);
+            pointer-events: none;
+            animation: glowPulse 2s ease-in-out infinite alternate;
+        }
+
+        /* Logo icon */
+        .logo-icon {
+            width: 4rem; height: 4rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, var(--brand-purple), var(--brand-cyan));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        .logo-icon svg { width: 2rem; height: 2rem; color: white; }
+
+        /* Heading — solid color fallback so Chrome picks it as LCP candidate (L-6) */
+        .heading-gradient {
+            color: white; /* solid fallback */
+            background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.875rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        /* Remove gradient animation (gradient-x) — it animates background-position causing main-thread repaints (H-6) */
+
+        /* Inputs */
+        .input-wrapper { position: relative; }
+        .input-icon {
+            position: absolute; top: 0; left: 0;
+            height: 100%; padding-left: 1rem;
+            display: flex; align-items: center;
+            pointer-events: none;
+        }
+        .input-icon svg { width: 1.25rem; height: 1.25rem; color: #6b7280; }
+
+        .field-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(5, 10, 48, 0.5);
+            border: 1px solid rgba(121, 16, 255, 0.3);
+            border-radius: 0.75rem;
+            color: white;
+            /* Text is 16px — meeting mobile minimum (M-6) */
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .field-input::placeholder { color: #6b7280; }
+        .field-input:focus {
+            border-color: var(--brand-purple);
+            box-shadow: 0 0 20px rgba(121, 16, 255, 0.25);
+        }
+
+        /* Labels — 16px minimum (M-6) */
+        .field-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #d1d5db;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Error banner */
+        .error-banner {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--brand-purple), #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 0.5rem;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -12px rgba(121, 16, 255, 0.4);
+        }
+        .btn-submit:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(121, 16, 255, 0.3);
+        }
+
+        /* Footer links — min 48px tap target (M-7) */
+        .footer-link-row {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(55, 65, 81, 0.5);
+            text-align: center;
+        }
+        .footer-text { color: #9ca3af; font-size: 1rem; }
+        .footer-link {
+            /* Min 48px tap target: add padding so the clickable area is large enough (M-7) */
+            display: inline-block;
+            padding: 0.75rem 0.5rem;
+            color: var(--brand-cyan);
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+            min-height: 48px;
+            line-height: 48px;
+            vertical-align: middle;
+        }
+        .footer-link:hover { color: white; }
+
+        /* Forgot password link */
+        .forgot-link {
+            display: block;
+            text-align: right;
+            margin-top: 0.25rem;
+            font-size: 0.875rem;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .forgot-link:hover { color: var(--brand-cyan); }
+
+        /* Divider */
+        .form-space { margin-bottom: 1.25rem; }
+
+        /* prefers-reduced-motion (L-5) */
+        @media (prefers-reduced-motion: reduce) {
+            .anim-float,
+            .anim-fade-in-up,
+            .anim-fade-in,
+            .card::after { animation: none; }
+            .orb { opacity: 0.2; }
+        }
+
+        /* Mobile layout fix (M-8) */
+        @media (max-width: 480px) {
+            .card { padding: 2rem 1.5rem; }
+            body { padding: 1rem; }
         }
     </style>
 </head>
-<body class="bg-brand-navy text-white min-h-screen flex items-center justify-center p-8 bg-grid relative overflow-hidden">
+<body>
     <!-- Decorative orbs -->
-    <div class="orb w-96 h-96 bg-brand-purple -top-48 -left-48" style="animation-delay: 0s;"></div>
-    <div class="orb w-80 h-80 bg-brand-cyan -bottom-40 -right-40" style="animation-delay: -4s;"></div>
-    
-    <div class="bg-gradient-to-br from-brand-dark/90 to-gray-800/90 backdrop-blur-xl p-12 rounded-3xl border border-brand-purple/20 max-w-md w-full animate-fade-in-up shadow-2xl animate-pulse-glow relative z-10">
-        <!-- Logo/Brand -->
-        <div class="flex justify-center mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-purple to-brand-cyan flex items-center justify-center animate-float">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-            </div>
+    <div class="orb orb-purple anim-float" style="animation-delay: 0s;"></div>
+    <div class="orb orb-cyan anim-float" style="animation-delay: -4s;"></div>
+
+    <div class="card anim-fade-in-up">
+        <!-- Logo -->
+        <div class="logo-icon anim-float" style="animation-delay: -1s;">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
         </div>
 
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold mb-2 animate-gradient-text">
-                Welcome Back
-            </h1>
-            <p class="text-gray-400">
-                Sign in to continue to your dashboard
-            </p>
+        <div style="text-align:center; margin-bottom:2rem;">
+            <h1 class="heading-gradient">Welcome Back</h1>
+            <p style="color:#9ca3af; font-size:1rem;">Sign in to continue to your dashboard</p>
         </div>
-        
+
         <% if @error %>
-            <div class="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl mb-6 animate-fade-in flex items-center gap-3">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="error-banner anim-fade-in" role="alert">
+                <svg style="width:1.25rem;height:1.25rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <p class="text-sm font-medium"><%= @error %></p>
+                <p style="font-size:0.875rem;font-weight:500;"><%= @error %></p>
             </div>
         <% end %>
-        
-        <form method="post" class="space-y-5">
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        <form method="post" action="/login" novalidate>
+            <div class="form-space">
+                <label for="email" class="field-label">Email Address</label>
+                <div class="input-wrapper">
+                    <div class="input-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
                         </svg>
                     </div>
-                    <input 
-                        type="email" 
+                    <input
+                        type="email"
                         id="email"
-                        name="email" 
-                        placeholder="you@example.com" 
-                        required 
+                        name="email"
+                        placeholder="you@example.com"
+                        required
                         autofocus
-                        class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow"
+                        autocomplete="email"
+                        class="field-input"
                     >
                 </div>
             </div>
 
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="form-space">
+                <label for="password" class="field-label">Password</label>
+                <div class="input-wrapper">
+                    <div class="input-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
                     </div>
-                    <input 
-                        type="password" 
+                    <input
+                        type="password"
                         id="password"
-                        name="password" 
-                        placeholder="••••••••" 
-                        required 
-                        class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow"
+                        name="password"
+                        placeholder="••••••••"
+                        required
+                        autocomplete="current-password"
+                        class="field-input"
                     >
                 </div>
+                <a href="#" class="forgot-link" tabindex="0">Forgot password?</a>
             </div>
-            
-            <button 
-                type="submit" 
-                class="w-full px-6 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 focus:outline-none focus:ring-4 focus:ring-brand-purple/30 mt-2"
-            >
+
+            <button type="submit" class="btn-submit">
                 Sign In
             </button>
         </form>
-        
-        <div class="mt-8 pt-6 border-t border-gray-700/50">
-            <p class="text-center text-gray-400">
-                Don't have an account? 
-                <a href="/register" class="text-brand-cyan hover:text-white transition-colors font-medium">
-                    Create one
-                </a>
+
+        <div class="footer-link-row">
+            <p class="footer-text">
+                Don't have an account?
+                <a href="/register" class="footer-link">Create one</a>
             </p>
         </div>
     </div>

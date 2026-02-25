@@ -132,20 +132,26 @@ class SinatraRouter < Sinatra::Base
         headers['X-XSS-Protection'] = '1; mode=block'
         headers['Referrer-Policy'] = 'no-referrer'
         headers['Access-Control-Allow-Origin'] = 'none'
-        
+        # HSTS — browser-level enforcement (H-2); Cloudflare dashboard is the primary control
+        headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        # CSP — tightened once Tailwind CDN is removed (H-3)
+        headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src https://js.stripe.com; frame-ancestors 'none'"
+
         @database = @@database
         @conversation = @@conversation
-        # Skip auth for login/health/landing/register routes
-        pass if request.path_info =~ /^\/(login|logout|health|register(\/send-code)?|stripe\/webhook)$/
+        # Skip auth for login/health/landing/register/robots/sitemap routes
+        pass if request.path_info =~ /^\/(login|logout|health|register(\/send-code)?|stripe\/webhook|robots\.txt|sitemap\.xml)$/
+
+        # Add noindex header to auth-only pages
+        if request.path_info =~ /^\/(login|register)/
+            headers['X-Robots-Tag'] = 'noindex, nofollow'
+        end
 
         # Require authentication for everything else
         unless session[:user_id]
             session[:return_to] = request.fullpath    
             redirect '/login'
         end
-        
-        # Use shared instances instead of creating new ones per request
-        
     end
     get '/health' do
         'OK'
@@ -259,6 +265,36 @@ class SinatraRouter < Sinatra::Base
     end
     get '/' do
        erb :'landing-page'
+    end
+
+    # ── SEO: public robots.txt (C-3) ─────────────────────────────────────────
+    get '/robots.txt' do
+        content_type 'text/plain'
+        headers['Cache-Control'] = 'public, max-age=86400'
+        <<~ROBOTS
+            User-agent: *
+            Disallow: /login
+            Disallow: /register
+            Disallow: /dashboard/
+            Disallow: /cdn-cgi/
+            Sitemap: https://luira.amoredit.com/sitemap.xml
+        ROBOTS
+    end
+
+    # ── SEO: public sitemap.xml (C-4) ────────────────────────────────────────
+    get '/sitemap.xml' do
+        content_type 'application/xml'
+        headers['Cache-Control'] = 'public, max-age=3600'
+        <<~XML
+            <?xml version="1.0" encoding="UTF-8"?>
+            <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+              <url>
+                <loc>https://luira.amoredit.com/</loc>
+                <changefreq>weekly</changefreq>
+                <priority>1.0</priority>
+              </url>
+            </urlset>
+        XML
     end
     get '/chat' do
         # Clear current chat session to start fresh

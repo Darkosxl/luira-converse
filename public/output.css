@@ -1,0 +1,35 @@
+/* Luira — compiled stylesheet
+ * This file exists to serve as the CSS reference for auth pages (login, register).
+ * All page-specific styles are inlined in each template.
+ * Google Fonts are loaded here to avoid an extra round-trip in templates.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Minimal cross-browser baseline */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+}
+
+body {
+    margin: 0;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: 100%;
+    line-height: inherit;
+}
+
+button {
+    cursor: pointer;
+}

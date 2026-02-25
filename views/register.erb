@@ -3,61 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Luira</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'brand-navy': '#050a30',
-                        'brand-purple': '#7910ff',
-                        'brand-cyan': '#00d2ff',
-                        'brand-dark': '#0f1547',
-                        'brand-darker': '#020614',
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 1s ease-out',
-                        'fade-in': 'fadeIn 0.4s ease-out',
-                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite alternate',
-                        'float': 'float 6s ease-in-out infinite',
-                        'slide-down': 'slideDown 0.35s cubic-bezier(0.34,1.56,0.64,1)',
-                    },
-                    keyframes: {
-                        fadeInUp: { from: { opacity: '0', transform: 'translateY(30px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-                        fadeIn:   { from: { opacity: '0' }, to: { opacity: '1' } },
-                        pulseGlow: {
-                            from: { boxShadow: '0 0 20px rgba(121, 16, 255, 0.3)' },
-                            to:   { boxShadow: '0 0 40px rgba(121, 16, 255, 0.6)' }
-                        },
-                        float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } },
-                        slideDown: { from: { opacity: '0', transform: 'translateY(-10px) scale(0.97)' }, to: { opacity: '1', transform: 'translateY(0) scale(1)' } },
-                    }
-                }
-            }
-        }
+    <title>Create Account – Luira | AI-Powered Conversations</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Create your Luira account – join the AI-powered conversation platform. Get started for free.">
+    <link rel="canonical" href="https://luira.amoredit.com/register">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://luira.amoredit.com/register">
+    <meta property="og:title" content="Create Account – Luira">
+    <meta property="og:description" content="Create your Luira account – join the AI-powered conversation platform.">
+    <meta property="og:site_name" content="Luira">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Create Account – Luira">
+    <meta name="twitter:description" content="Create your Luira account – join the AI-powered conversation platform.">
+
+    <!-- JSON-LD Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Luira",
+      "url": "https://luira.amoredit.com",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "provider": {
+        "@type": "Organization",
+        "name": "Luira",
+        "url": "https://luira.amoredit.com"
+      }
+    }
     </script>
+
+    <link rel="stylesheet" href="/output.css">
     <style>
-        @keyframes gradient-x {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        /* Brand colors */
+        :root {
+            --brand-navy:   #050a30;
+            --brand-purple: #7910ff;
+            --brand-cyan:   #00d2ff;
+            --brand-dark:   #0f1547;
         }
-        .animate-gradient-text {
-            background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
-            background-size: 400% 400%;
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradient-x 3s ease infinite;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-family: 'Inter', system-ui, sans-serif; font-size: 16px; }
+        body {
+            background-color: var(--brand-navy);
+            color: white;
+            min-height: 100svh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
         }
-        .input-glow:focus { box-shadow: 0 0 20px rgba(121, 16, 255, 0.25); }
-        .bg-grid {
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
             background-image:
                 linear-gradient(rgba(121, 16, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(121, 16, 255, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
+            pointer-events: none;
         }
-        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: float 8s ease-in-out infinite; }
+        /* Orbs — blur reduced 80px → 40px (M-1) */
+        .orb { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.4; will-change: transform; }
 
         /* Code digit boxes */
         .digit-box {
@@ -98,42 +109,245 @@
         #countdown { font-variant-numeric: tabular-nums; }
     </style>
 </head>
-<body class="bg-brand-navy text-white min-h-screen flex items-center justify-center p-8 bg-grid relative overflow-hidden">
-    <div class="orb w-96 h-96 bg-brand-cyan -top-48 -right-48" style="animation-delay: 0s;"></div>
-    <div class="orb w-80 h-80 bg-brand-purple -bottom-40 -left-40" style="animation-delay: -4s;"></div>
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-10px); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes glowPulse {
+            from { opacity: 0.4; }
+            to   { opacity: 1; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-5px); }
+            40%       { transform: translateX(5px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
+        }
+        .anim-float { animation: float 8s ease-in-out infinite; }
+        .anim-fade-in-up { animation: fadeInUp 0.9s ease-out both; }
+        .anim-fade-in    { animation: fadeIn 0.4s ease-out both; }
+        .anim-slide-down { animation: slideDown 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
 
-    <div class="bg-gradient-to-br from-brand-dark/90 to-gray-800/90 backdrop-blur-xl p-12 rounded-3xl border border-brand-purple/20 max-w-md w-full animate-fade-in-up shadow-2xl animate-pulse-glow relative z-10">
+        /* Card — backdrop-blur reduced from 24px → 8px (M-2) */
+        .card {
+            background: linear-gradient(135deg, rgba(15,21,71,0.92), rgba(31,41,55,0.92));
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 3rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(121, 16, 255, 0.2);
+            max-width: 28rem;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+        }
+        /* Pulse glow via opacity on ::after — avoids main-thread box-shadow repaints (H-6) */
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 1.5rem;
+            box-shadow: 0 0 40px rgba(121, 16, 255, 0.5);
+            pointer-events: none;
+            animation: glowPulse 2s ease-in-out infinite alternate;
+        }
+        .logo-icon {
+            width: 4rem; height: 4rem;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, var(--brand-cyan), var(--brand-purple));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+        /* Heading — solid fallback so Chrome picks as LCP candidate (L-6) */
+        .heading-gradient {
+            color: white;
+            background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.875rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        /* Inputs — 16px minimum (M-6) */
+        .field-label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #d1d5db;
+            margin-bottom: 0.5rem;
+        }
+        .field-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(5, 10, 48, 0.5);
+            border: 1px solid rgba(121, 16, 255, 0.3);
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .field-input::placeholder { color: #6b7280; }
+        .field-input:focus {
+            border-color: var(--brand-purple);
+            box-shadow: 0 0 20px rgba(121, 16, 255, 0.25);
+        }
+        .input-wrapper { position: relative; }
+        .input-icon {
+            position: absolute; top: 0; left: 0;
+            height: 100%; padding-left: 1rem;
+            display: flex; align-items: center;
+            pointer-events: none;
+        }
+        .input-icon svg { width: 1.25rem; height: 1.25rem; color: #6b7280; }
+        .form-space { margin-bottom: 1.25rem; }
+        .error-banner {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #fca5a5;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* Code digit boxes */
+        .digit-box {
+            width: 48px; height: 56px;
+            background: rgba(5,10,48,0.5);
+            border: 1.5px solid rgba(121,16,255,0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+            caret-color: #00d2ff;
+        }
+        .digit-box:focus {
+            border-color: #7910ff;
+            box-shadow: 0 0 18px rgba(121,16,255,0.3);
+            transform: scale(1.05);
+        }
+        .digit-box.filled { border-color: #00d2ff; }
+        .digit-box.error  { border-color: #ef4444 !important; box-shadow: 0 0 12px rgba(239,68,68,0.3) !important; animation: shake 0.4s ease; }
+
+        /* Send code button states */
+        .send-btn-idle    { background: rgba(121,16,255,0.15); border: 1.5px solid rgba(121,16,255,0.4); color: #a78bfa; }
+        .send-btn-loading { background: rgba(121,16,255,0.08); border: 1.5px solid rgba(121,16,255,0.2); color: #6b7280; cursor: not-allowed; }
+        .send-btn-sent    { background: rgba(0,210,255,0.12); border: 1.5px solid rgba(0,210,255,0.3); color: #67e8f9; }
+
+        /* Submit button */
+        .btn-submit {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, var(--brand-cyan), var(--brand-purple));
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: transform 0.3s, box-shadow 0.3s, opacity 0.2s;
+        }
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px -12px rgba(0, 210, 255, 0.4);
+        }
+        .btn-submit:focus { outline: none; box-shadow: 0 0 0 4px rgba(0,210,255,0.3); }
+        .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        /* Countdown */
+        #countdown { font-variant-numeric: tabular-nums; }
+
+        /* Footer */
+        .footer-link-row {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(55, 65, 81, 0.5);
+            text-align: center;
+        }
+        .footer-text { color: #9ca3af; font-size: 1rem; }
+        /* Min 48px tap target for register link (M-7) */
+        .footer-link {
+            display: inline-block;
+            padding: 0.75rem 0.5rem;
+            min-height: 48px;
+            line-height: 48px;
+            vertical-align: middle;
+            color: var(--brand-purple);
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-link:hover { color: white; }
+
+        /* prefers-reduced-motion (L-5) */
+        @media (prefers-reduced-motion: reduce) {
+            .anim-float, .anim-fade-in-up, .anim-fade-in, .anim-slide-down, .card::after { animation: none; }
+            .orb { opacity: 0.2; }
+        }
+        /* Mobile layout (M-8) */
+        @media (max-width: 480px) {
+            .card { padding: 2rem 1.5rem; }
+            body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="orb anim-float" style="width:24rem;height:24rem;background:var(--brand-cyan);top:-12rem;right:-12rem;animation-delay:0s;"></div>
+    <div class="orb anim-float" style="width:20rem;height:20rem;background:var(--brand-purple);bottom:-10rem;left:-10rem;animation-delay:-4s;"></div>
+
+    <div class="card anim-fade-in-up">
         <!-- Logo -->
-        <div class="flex justify-center mb-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-cyan to-brand-purple flex items-center justify-center animate-float">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-                </svg>
-            </div>
+        <div class="logo-icon anim-float" style="animation-delay:-1s;">
+            <svg style="width:2rem;height:2rem;color:white;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+            </svg>
         </div>
 
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold mb-2 animate-gradient-text">Create Account</h1>
-            <p class="text-gray-400">Verify your email to get started</p>
+        <div style="text-align:center;margin-bottom:2rem;">
+            <h1 class="heading-gradient">Create Account</h1>
+            <p style="color:#9ca3af;font-size:1rem;">Verify your email to get started</p>
         </div>
 
         <!-- Error / success banners -->
         <% if @error %>
-            <div id="server-error" class="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl mb-6 animate-fade-in flex items-center gap-3">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <p class="text-sm font-medium"><%= @error %></p>
+            <div id="server-error" class="error-banner anim-fade-in" role="alert">
+                <svg style="width:1.25rem;height:1.25rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p style="font-size:0.875rem;font-weight:500;"><%= @error %></p>
             </div>
         <% end %>
 
-        <form id="register-form" method="POST" action="/register" class="space-y-5" onsubmit="return validateBeforeSubmit()">
+        <form id="register-form" method="POST" action="/register" onsubmit="return validateBeforeSubmit()" style="margin-top:0;">
 
             <!-- Email row with Send Code button -->
-            <div>
-                <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                <div class="flex gap-2">
-                    <div class="relative flex-1">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>
+            <div class="form-space">
+                <label for="email" class="field-label">Email Address</label>
+                <div style="display:flex;gap:0.5rem;">
+                    <div class="input-wrapper" style="flex:1;">
+                        <div class="input-icon" aria-hidden="true">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>
                         </div>
                         <input
                             type="email"
@@ -142,24 +356,27 @@
                             placeholder="you@example.com"
                             required
                             autofocus
+                            autocomplete="email"
                             value="<%= @prefill_email || '' %>"
-                            class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow"
+                            class="field-input"
+                            style="padding-right:1rem;"
                         >
                     </div>
                     <button type="button" id="send-code-btn"
                             onclick="sendCode()"
-                            class="send-btn-idle px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0">
+                            style="border-radius:0.75rem;font-size:0.875rem;font-weight:600;white-space:nowrap;flex-shrink:0;padding:0 1rem;cursor:pointer;transition:all 0.2s;"
+                            class="send-btn-idle">
                         Send Code
                     </button>
                 </div>
-                <p id="send-status" class="mt-1.5 text-xs text-gray-500 hidden"></p>
+                <p id="send-status" style="margin-top:0.375rem;font-size:0.75rem;color:#6b7280;display:none;"></p>
             </div>
 
             <!-- 6-digit code section (hidden until code sent) -->
-            <div id="code-section" class="hidden animate-slide-down">
-                <label class="block text-sm font-medium text-gray-300 mb-3">Verification Code</label>
-                <div class="flex gap-2 justify-center mb-2" id="digit-inputs">
-                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="0" id="d0" autocomplete="off">
+            <div id="code-section" style="display:none;" class="anim-slide-down form-space">
+                <label class="field-label">Verification Code</label>
+                <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.5rem;" id="digit-inputs">
+                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="0" id="d0" autocomplete="one-time-code">
                     <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="1" id="d1" autocomplete="off">
                     <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="2" id="d2" autocomplete="off">
                     <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="3" id="d3" autocomplete="off">
@@ -168,54 +385,55 @@
                 </div>
                 <!-- Hidden input that carries the assembled code -->
                 <input type="hidden" name="verification_code" id="verification_code">
-                <p class="text-center text-xs text-gray-500">
-                    Didn't get it? <button type="button" id="resend-btn" onclick="sendCode(true)" class="text-brand-cyan hover:text-white transition-colors underline underline-offset-2 disabled:opacity-40" disabled>
+                <p style="text-align:center;font-size:0.75rem;color:#6b7280;">
+                    Didn't get it? <button type="button" id="resend-btn" onclick="sendCode(true)" style="color:var(--brand-cyan);text-decoration:underline;background:none;border:none;cursor:pointer;transition:color 0.2s;" disabled>
                         Resend <span id="countdown"></span>
                     </button>
                 </p>
             </div>
 
             <!-- Password -->
-            <div>
-                <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <div class="form-space">
+                <label for="password" class="field-label">Password</label>
+                <div class="input-wrapper">
+                    <div class="input-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     </div>
                     <input type="password" id="password" name="password" placeholder="••••••••" required minlength="8"
-                           class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow">
+                           autocomplete="new-password"
+                           class="field-input">
                 </div>
-                <p class="mt-2 text-xs text-gray-500">Must be at least 8 characters</p>
+                <p style="margin-top:0.5rem;font-size:0.75rem;color:#6b7280;">Must be at least 8 characters</p>
             </div>
 
             <!-- Confirm Password -->
-            <div>
-                <label for="password_confirm" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            <div class="form-space">
+                <label for="password_confirm" class="field-label">Confirm Password</label>
+                <div class="input-wrapper">
+                    <div class="input-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
                     <input type="password" id="password_confirm" name="password_confirm" placeholder="••••••••" required minlength="8"
-                           class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow">
+                           autocomplete="new-password"
+                           class="field-input">
                 </div>
             </div>
 
             <!-- Client-side error -->
-            <div id="client-error" class="hidden bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl animate-fade-in flex items-center gap-3">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <p class="text-sm font-medium" id="client-error-text"></p>
+            <div id="client-error" style="display:none;" class="error-banner anim-fade-in" role="alert">
+                <svg style="width:1.25rem;height:1.25rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p style="font-size:0.875rem;font-weight:500;" id="client-error-text"></p>
             </div>
 
-            <button type="submit" id="submit-btn"
-                    class="w-full px-6 py-4 bg-gradient-to-r from-brand-cyan to-brand-purple text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-cyan/40 focus:outline-none focus:ring-4 focus:ring-brand-cyan/30 mt-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
+            <button type="submit" id="submit-btn" class="btn-submit">
                 Create Account
             </button>
         </form>
 
-        <div class="mt-8 pt-6 border-t border-gray-700/50">
-            <p class="text-center text-gray-400">
+        <div class="footer-link-row">
+            <p class="footer-text">
                 Already have an account?
-                <a href="/login" class="text-brand-purple hover:text-white transition-colors font-medium">Sign in</a>
+                <a href="/login" class="footer-link">Sign in</a>
             </p>
         </div>
     </div>
@@ -277,7 +495,7 @@ async function sendCode(isResend = false) {
     const status = document.getElementById('send-status');
 
     btn.disabled = true;
-    btn.className = 'send-btn-loading px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+    btn.className = 'send-btn-loading';
     btn.textContent = 'Sending…';
 
     try {
@@ -290,15 +508,15 @@ async function sendCode(isResend = false) {
 
         if (res.ok) {
             codeSent = true;
-            btn.className = 'send-btn-sent px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+            btn.className = 'send-btn-sent';
             btn.textContent = '✓ Sent';
 
             status.textContent = `Code sent to ${email} — check your inbox (and spam).`;
-            status.className = 'mt-1.5 text-xs text-brand-cyan';
+            status.style.color = '#00d2ff';
 
             // Show code section
             const section = document.getElementById('code-section');
-            section.classList.remove('hidden');
+            section.style.display = 'block';
             setTimeout(() => document.getElementById('d0').focus(), 100);
 
             // Lock email field
@@ -311,7 +529,7 @@ async function sendCode(isResend = false) {
         }
     } catch (err) {
         btn.disabled = false;
-        btn.className = 'send-btn-idle px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+        btn.className = 'send-btn-idle';
         btn.textContent = 'Send Code';
         showClientError(err.message);
     }
@@ -348,7 +566,7 @@ function validateBeforeSubmit() {
             setTimeout(() => b.classList.remove('error'), 600);
         });
         // Show the code section if hidden
-        document.getElementById('code-section').classList.remove('hidden');
+        document.getElementById('code-section').style.display = 'block';
         return false;
     }
 
@@ -365,19 +583,19 @@ function validateBeforeSubmit() {
 function showClientError(msg) {
     const el = document.getElementById('client-error');
     document.getElementById('client-error-text').textContent = msg;
-    el.classList.remove('hidden');
+    el.style.display = 'flex';
 }
 function hideClientError() {
-    document.getElementById('client-error').classList.add('hidden');
+    document.getElementById('client-error').style.display = 'none';
 }
 
 // If server returned an error, re-show the code section (user may have had a wrong code)
 <% if @error && @prefill_email %>
 document.addEventListener('DOMContentLoaded', () => {
     codeSent = true;
-    document.getElementById('code-section').classList.remove('hidden');
+    document.getElementById('code-section').style.display = 'block';
     document.getElementById('email').readOnly = true;
-    document.getElementById('send-code-btn').className = 'send-btn-sent px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+    document.getElementById('send-code-btn').className = 'send-btn-sent';
     document.getElementById('send-code-btn').textContent = '✓ Sent';
 });
 <% end %>
