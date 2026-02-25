@@ -42,6 +42,7 @@ class Database
       test: true
     )
     ensure_feedback_table!
+    ensure_verification_codes_table!
   end
   def get_chat_by_id(id)
     @db.select().from(:Chat).where(id: id).first
@@ -263,6 +264,32 @@ class Database
     end
   end
 
+  # ── Verification codes (stored in Postgres, replaces Redis) ──────────────
+
+  # Upsert a verification code for the given email. Expires in 15 minutes.
+  def store_verification_code(email, code)
+    # Delete any previous code for this email first
+    @db[:verification_codes].where(email: email).delete
+    @db[:verification_codes].insert(
+      email:      email,
+      code:       code,
+      expires_at: Time.now + 900  # 15 minutes
+    )
+  end
+
+  # Returns the code string if it exists and hasn't expired, otherwise nil.
+  def get_verification_code(email)
+    row = @db[:verification_codes].where(email: email).first
+    return nil unless row
+    return nil if Time.now > row[:expires_at]  # expired
+    row[:code]
+  end
+
+  # Delete the code after successful verification.
+  def delete_verification_code(email)
+    @db[:verification_codes].where(email: email).delete
+  end
+
   private
 
   def generate_id
@@ -277,6 +304,16 @@ class Database
       Text        :note,       null: false
       String      :plan,       null: false, default: 'free'
       DateTime    :created_at, null: false, default: Sequel::CURRENT_TIMESTAMP
+    end
+  end
+
+  # Creates the verification_codes table if it doesn't already exist.
+  def ensure_verification_codes_table!
+    @db.create_table?(:verification_codes) do
+      primary_key :id
+      String      :email,      null: false
+      String      :code,       null: false
+      DateTime    :expires_at, null: false
     end
   end
 end

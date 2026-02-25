@@ -19,20 +19,7 @@ require_relative 'models/conversation'
 # ==========================================
 Dotenv.load
 
-# Configure Rack::Attack for rate limiting
-if ENV['REDIS_URL']
-  require 'redis'
-  redis_url = ENV['REDIS_URL']
-  redis_username = ENV['REDIS_USERNAME']
-  redis_password = ENV['REDIS_PASSWORD']
-  # Ensure Redis URL has proper scheme
-  redis_url = "redis://#{redis_username}:#{redis_password}@#{redis_url}"
-  Rack::Attack.cache.store = Redis.new(url: redis_url)
-else
-  # Use ActiveSupport memory store for fallback
-  #require 'active_support/cache/memory_store'
-  #Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
-end
+# Rack::Attack uses its built-in in-memory cache store
 
 # Rate limiting rules (periods in seconds)
 Rack::Attack.throttle('req/ip', limit: 100, period: 60) { |req| req.ip }
@@ -182,7 +169,7 @@ class SinatraRouter < Sinatra::Base
     end
 
     # Send a 6-digit verification code to the given email via Resend.
-    # Stores the code in Redis with a 15-minute TTL keyed by email.
+    # Stores the code in Postgres with a 15-minute expiry.
     post '/register/send-code' do
       content_type :json
       email = params[:email].to_s.strip.downcase
@@ -193,11 +180,8 @@ class SinatraRouter < Sinatra::Base
 
       code = rand(100_000..999_999).to_s
 
-      # Store in Redis — key: verify:<email>, value: code, TTL: 900s
-      redis = Redis.new(
-        url: "redis://#{ENV['REDIS_USERNAME']}:#{ENV['REDIS_PASSWORD']}@#{ENV['REDIS_URL']}"
-      )
-      redis.set("verify:#{email}", code, ex: 900)
+      # Store in Postgres (replaces old Redis store)
+      @database.store_verification_code(email, code)
 
       # Send via Resend
       uri = URI('https://api.resend.com/emails')
@@ -233,11 +217,8 @@ class SinatraRouter < Sinatra::Base
       code     = params[:verification_code].to_s.strip
       password = params[:password].to_s
 
-      # 1. Validate code against Redis before touching the DB
-      redis = Redis.new(
-        url: "redis://#{ENV['REDIS_USERNAME']}:#{ENV['REDIS_PASSWORD']}@#{ENV['REDIS_URL']}"
-      )
-      stored = redis.get("verify:#{email}")
+      # 1. Validate code against Postgres
+      stored = @database.get_verification_code(email)
 
       if stored.nil?
         @error = 'Verification code expired or not sent. Please request a new one.'
@@ -252,7 +233,7 @@ class SinatraRouter < Sinatra::Base
       end
 
       # 2. Code is valid — delete it so it can't be reused
-      redis.del("verify:#{email}")
+      @database.delete_verification_code(email)
 
       # 3. Create the user
       user_id = @database.create_user(email, password)

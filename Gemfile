@@ -34,7 +34,7 @@ gem 'nokogiri' # For HTML parsing if needed
 gem 'shield'           # Authentication
 gem 'rack-attack'      # Rate limiting
 gem 'connection_pool'  # DB connection management
-gem 'redis'           # For rack-attack storage (optional but recommended)
+
 gem 'bcrypt'          # For password hashing
 gem 'activesupport'   # For cache store support
 gem 'stripe'          # Stripe payments
