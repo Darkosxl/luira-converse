@@ -140,7 +140,7 @@ class SinatraRouter < Sinatra::Base
         @database = @@database
         @conversation = @@conversation
         # Skip auth for login/health/landing/register/robots/sitemap/pricing routes
-        pass if request.path_info =~ /^\/(login|logout|health|register(\/send-code)?|stripe\/webhook|robots\.txt|sitemap\.xml|pricing)$/
+        pass if request.path_info =~ /^\/(|login|logout|health|register(\/send-code)?|stripe\/webhook|robots\.txt|sitemap\.xml|pricing)$/
 
         # Add noindex header to auth-only pages
         if request.path_info =~ /^\/(login|register)/
