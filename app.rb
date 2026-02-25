@@ -288,7 +288,8 @@ class SinatraRouter < Sinatra::Base
         # --- Model tier access gate ---
 
         user       = @database.get_user_by_id(session[:user_id])
-        acct       = @database.effective_account_type(user)
+        acct       = @database.effective_account_type(user).to_s.downcase
+        acct       = 'free' unless TIER_RANK.key?(acct)
         model_tier = MODEL_TIERS[model_key] || 'free'
 
         if TIER_RANK[model_tier] > TIER_RANK[acct]

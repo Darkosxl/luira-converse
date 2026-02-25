@@ -250,6 +250,19 @@ class Database
     { count: count, limit: limit, remaining: [limit - count, 0].max }
   end
 
+  # Resolves the user's actual plan at the moment of the call.
+  # If subscription_ends_at is set and has passed, the user is treated as 'free'
+  # even if account_type still shows 'advanced' or 'pro'.
+  # This means grace period works without any cron jobs — it resolves on every request.
+  def effective_account_type(user, now = Time.now)
+    ends_at = user[:subscription_ends_at]
+    if ends_at && now > ends_at
+      'free'
+    else
+      (user[:account_type] || 'free').downcase
+    end
+  end
+
   private
 
   def generate_id
@@ -264,19 +277,6 @@ class Database
       Text        :note,       null: false
       String      :plan,       null: false, default: 'free'
       DateTime    :created_at, null: false, default: Sequel::CURRENT_TIMESTAMP
-    end
-  end
-
-  # Resolves the user's actual plan at the moment of the call.
-  # If subscription_ends_at is set and has passed, the user is treated as 'free'
-  # even if account_type still shows 'advanced' or 'pro'.
-  # This means grace period works without any cron jobs — it resolves on every request.
-  def effective_account_type(user, now = Time.now)
-    ends_at = user[:subscription_ends_at]
-    if ends_at && now > ends_at
-      'free'
-    else
-      (user[:account_type] || 'free').downcase
     end
   end
 end
