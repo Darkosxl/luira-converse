@@ -135,7 +135,7 @@ class SinatraRouter < Sinatra::Base
         # HSTS — browser-level enforcement (H-2); Cloudflare dashboard is the primary control
         headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         # CSP — tightened once Tailwind CDN is removed (H-3)
-        headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-src https://js.stripe.com; frame-ancestors 'none'"
+        headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src https://js.stripe.com; frame-ancestors 'none'"
 
         @database = @@database
         @conversation = @@conversation
@@ -223,7 +223,8 @@ class SinatraRouter < Sinatra::Base
       Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(req) }
 
       { ok: true }.to_json
-    rescue StandardError
+    rescue StandardError => e
+      warn "[send-code] ERROR: #{e.class}: #{e.message}\n#{e.backtrace.first(5).join("\n")}"
       halt 500, { error: 'Failed to send email. Please try again.' }.to_json
     end
 
