@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing – Luira | AI-Powered Conversations</title>
+    <meta name="description" content="Simple transparent pricing for Luira. Start free, upgrade for advanced AI models and more requests.">
+    <link rel="canonical" href="https://luira.amoredit.com/pricing">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://luira.amoredit.com/pricing">
+    <meta property="og:title" content="Pricing – Luira">
+    <meta property="og:site_name" content="Luira">
+
+    <link rel="stylesheet" href="/output.css">
+    <style>
+        :root {
+            --navy:   #050a30;
+            --purple: #7910ff;
+            --cyan:   #00d2ff;
+            --dark:   #0f1547;
+            --darker: #020614;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-family: 'Inter', system-ui, sans-serif; }
+        body {
+            background-color: var(--navy);
+            color: white;
+            min-height: 100svh;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                linear-gradient(rgba(121,16,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(121,16,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+        a { color: inherit; text-decoration: none; }
+
+        /* Nav */
+        nav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.25rem 3rem;
+            border-bottom: 1px solid rgba(121,16,255,0.12);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.25rem; font-weight: 700;
+        }
+        .nav-logo-icon {
+            width: 2.25rem; height: 2.25rem; border-radius: 0.6rem;
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-nav {
+            padding: 0.6rem 1.4rem;
+            background: linear-gradient(135deg, var(--purple), #5a0dcf);
+            border-radius: 0.6rem;
+            font-size: 0.875rem; font-weight: 600; color: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(121,16,255,0.3); }
+
+        /* Page */
+        .page {
+            max-width: 64rem; margin: 0 auto;
+            padding: 5rem 2rem 6rem;
+        }
+        .page-header { text-align: center; margin-bottom: 4rem; }
+        .page-label {
+            display: inline-block;
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+        .page-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800; letter-spacing: -0.025em;
+            margin-bottom: 0.75rem;
+        }
+        .gradient-text {
+            color: white;
+            background: linear-gradient(135deg, white 0%, var(--cyan) 50%, var(--purple) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .page-sub { font-size: 1.05rem; color: rgba(255,255,255,0.5); }
+
+        /* Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(15,21,71,0.9), rgba(31,41,55,0.7));
+            border: 1px solid rgba(121,16,255,0.15);
+            border-radius: 1.25rem;
+            padding: 2.25rem;
+            display: flex; flex-direction: column;
+            position: relative;
+        }
+        .card.popular {
+            border-color: rgba(121,16,255,0.5);
+            background: linear-gradient(135deg, rgba(121,16,255,0.12), rgba(15,21,71,0.95));
+        }
+        .card.popular::before {
+            content: 'Most Popular';
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: white; font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.3rem 0.9rem; border-radius: 9999px;
+        }
+        .plan-name { font-size: 0.9rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .plan-price {
+            display: flex; align-items: baseline; gap: 0.3rem;
+            margin-bottom: 0.25rem;
+        }
+        .plan-amount { font-size: 3rem; font-weight: 800; letter-spacing: -0.04em; }
+        .plan-per { font-size: 0.9rem; color: rgba(255,255,255,0.4); }
+        .plan-desc { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-bottom: 1.75rem; }
+        .divider { height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 1.75rem; }
+        .features { list-style: none; flex: 1; }
+        .features li {
+            display: flex; align-items: flex-start; gap: 0.75rem;
+            font-size: 0.9rem; color: rgba(255,255,255,0.75);
+            padding: 0.45rem 0;
+        }
+        .features li.off { color: rgba(255,255,255,0.25); }
+        .check { color: var(--cyan); font-size: 1rem; flex-shrink: 0; }
+        .cross { color: rgba(255,255,255,0.2); flex-shrink: 0; }
+
+        /* CTA join bar */
+        .join-bar {
+            margin-top: 3.5rem;
+            text-align: center;
+            padding: 2.5rem;
+            background: linear-gradient(135deg, rgba(121,16,255,0.1), rgba(0,210,255,0.05));
+            border: 1px solid rgba(121,16,255,0.2);
+            border-radius: 1.25rem;
+        }
+        .join-bar p { color: rgba(255,255,255,0.6); margin-bottom: 1.25rem; font-size: 1.05rem; }
+        .btn-join {
+            display: inline-block;
+            padding: 0.9rem 2.25rem;
+            background: linear-gradient(135deg, var(--purple), #5a0dcf);
+            color: white; border-radius: 0.75rem;
+            font-size: 1rem; font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(121,16,255,0.3);
+        }
+        .btn-join:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(121,16,255,0.45); }
+
+        @media (max-width: 480px) {
+            nav { padding: 1rem 1.25rem; }
+            .page { padding: 3rem 1.25rem 4rem; }
+        }
+        @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    </style>
+</head>
+<body>
+<nav>
+    <a href="/" class="nav-logo">
+        <div class="nav-logo-icon">
+            <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+        </div>
+        Luira
+    </a>
+    <a href="/login" class="btn-nav">Sign In</a>
+</nav>
+
+<div class="page">
+    <div class="page-header">
+        <div class="page-label">Pricing</div>
+        <h1 class="page-title"><span class="gradient-text">Simple, transparent pricing</span></h1>
+        <p class="page-sub">No hidden fees. Cancel anytime.</p>
+    </div>
+
+    <div class="grid">
+
+        <!-- Free -->
+        <div class="card">
+            <div class="plan-name">Free</div>
+            <div class="plan-price">
+                <span class="plan-amount">€0</span>
+                <span class="plan-per">/mo</span>
+            </div>
+            <p class="plan-desc">Perfect for exploring the platform.</p>
+            <div class="divider"></div>
+            <ul class="features">
+                <li><span class="check">✓</span> 30 requests per month</li>
+                <li><span class="check">✓</span> Core free AI models</li>
+                <li class="off"><span class="cross">✗</span> CapMap model access</li>
+                <li class="off"><span class="cross">✗</span> Advanced AI models</li>
+                <li class="off"><span class="cross">✗</span> Pro AI models</li>
+            </ul>
+        </div>
+
+        <!-- Advanced -->
+        <div class="card popular">
+            <div class="plan-name">Advanced</div>
+            <div class="plan-price">
+                <span class="plan-amount gradient-text">€10</span>
+                <span class="plan-per">/mo</span>
+            </div>
+            <p class="plan-desc">For daily professional analysis.</p>
+            <div class="divider"></div>
+            <ul class="features">
+                <li><span class="check">✓</span> 200 requests per month</li>
+                <li><span class="check">✓</span> Advanced models unlocked</li>
+                <li><span class="check">✓</span> CapMap model access</li>
+                <li><span class="check">✓</span> Priority response speed</li>
+                <li class="off"><span class="cross">✗</span> Pro AI models</li>
+            </ul>
+        </div>
+
+        <!-- Pro -->
+        <div class="card">
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">
+                <span class="plan-amount">€20</span>
+                <span class="plan-per">/mo</span>
+            </div>
+            <p class="plan-desc">Maximum limits for heavy users.</p>
+            <div class="divider"></div>
+            <ul class="features">
+                <li><span class="check">✓</span> 500 requests per month</li>
+                <li><span class="check">✓</span> All AI models unlocked</li>
+                <li><span class="check">✓</span> CapMap model access</li>
+                <li><span class="check">✓</span> Highest priority access</li>
+                <li><span class="check">✓</span> Pro-only models</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="join-bar">
+        <p>Create a free account to get started — upgrade anytime from your dashboard.</p>
+        <a href="/register" class="btn-join">Create Free Account</a>
+    </div>
+</div>
+
+</body>
+</html>

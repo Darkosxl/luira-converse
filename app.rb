@@ -139,8 +139,8 @@ class SinatraRouter < Sinatra::Base
 
         @database = @@database
         @conversation = @@conversation
-        # Skip auth for login/health/landing/register/robots/sitemap routes
-        pass if request.path_info =~ /^\/(login|logout|health|register(\/send-code)?|stripe\/webhook|robots\.txt|sitemap\.xml)$/
+        # Skip auth for login/health/landing/register/robots/sitemap/pricing routes
+        pass if request.path_info =~ /^\/(login|logout|health|register(\/send-code)?|stripe\/webhook|robots\.txt|sitemap\.xml|pricing)$/
 
         # Add noindex header to auth-only pages
         if request.path_info =~ /^\/(login|register)/
@@ -265,6 +265,10 @@ class SinatraRouter < Sinatra::Base
     end
     get '/' do
        erb :'landing-page'
+    end
+
+    get '/pricing' do
+        erb :'pricing'
     end
 
     # ── SEO: public robots.txt (C-3) ─────────────────────────────────────────

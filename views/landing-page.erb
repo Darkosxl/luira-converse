@@ -3,266 +3,568 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Luira - AI-Powered Private Capital Copilot</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'brand-navy': '#050a30',
-                        'brand-purple': '#7910ff',
-                        'brand-cyan': '#00d2ff',
-                        'brand-dark': '#0f1547',
-                        'brand-darker': '#020614',
-                    },
-                    animation: {
-                        'fade-in-up': 'fadeInUp 1s ease-out',
-                        'fade-in': 'fadeIn 1.5s ease-out',
-                        'slide-in-down': 'slideInDown 1.2s ease-out',
-                        'slide-in-left': 'slideInLeft 0.8s ease-out',
-                        'fade-in-left': 'fadeInLeft 0.8s ease-out',
-                    },
-                    keyframes: {
-                        fadeInUp: {
-                            from: { opacity: '0', transform: 'translateY(30px)' },
-                            to: { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        fadeIn: {
-                            from: { opacity: '0' },
-                            to: { opacity: '1' }
-                        },
-                        slideInDown: {
-                            from: { opacity: '0', transform: 'translateY(-30px)' },
-                            to: { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        slideInLeft: {
-                            from: { opacity: '0', transform: 'translateX(-30px)' },
-                            to: { opacity: '1', transform: 'translateX(0)' }
-                        },
-                        fadeInLeft: {
-                            from: { opacity: '0', transform: 'translateX(-20px)' },
-                            to: { opacity: '1', transform: 'translateX(0)' }
-                        }
-                    }
-                }
-            }
-        }
+    <title>Luira – AI-Powered Private Capital Copilot</title>
+    <meta name="description" content="Luira is an LLM-powered copilot for private capital investors — explore, assess, and prioritize startup opportunities through conversation and AI-driven insights.">
+    <link rel="canonical" href="https://luira.amoredit.com/">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://luira.amoredit.com/">
+    <meta property="og:title" content="Luira – AI-Powered Private Capital Copilot">
+    <meta property="og:description" content="LLM-powered deal flow intelligence for private capital investors.">
+    <meta property="og:site_name" content="Luira">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Luira – AI-Powered Private Capital Copilot">
+    <meta name="twitter:description" content="LLM-powered deal flow intelligence for private capital investors.">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Luira",
+      "url": "https://luira.amoredit.com",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "AI-powered copilot for private capital investors",
+      "provider": { "@type": "Organization", "name": "Luira", "url": "https://luira.amoredit.com" }
+    }
     </script>
+
+    <link rel="stylesheet" href="/output.css">
     <style>
-        @keyframes gradient-x {
-            0%, 100% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
+        :root {
+            --navy:   #050a30;
+            --purple: #7910ff;
+            --cyan:   #00d2ff;
+            --dark:   #0f1547;
+            --darker: #020614;
         }
-        
-        .animate-gradient-text {
-            background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
-            background-size: 400% 400%;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-family: 'Inter', system-ui, sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--navy); color: white; overflow-x: hidden; }
+        a { color: inherit; text-decoration: none; }
+
+        /* ── Animations ── */
+        @keyframes fadeInUp  { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn    { from { opacity:0; } to { opacity:1; } }
+        @keyframes float     { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
+        @keyframes gradientShift {
+            0%,100% { background-position:0% 50%; }
+            50%     { background-position:100% 50%; }
+        }
+        .anim-fade-up { animation: fadeInUp 0.9s ease-out both; }
+        .anim-fade    { animation: fadeIn 1.2s ease-out both; }
+        .anim-float   { animation: float 7s ease-in-out infinite; }
+
+        /* ── Nav ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 1.25rem 3rem;
+            background: rgba(5,10,48,0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(121,16,255,0.12);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em;
+        }
+        .nav-logo-icon {
+            width: 2.25rem; height: 2.25rem; border-radius: 0.6rem;
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            display: flex; align-items: center; justify-content: center;
+        }
+        .nav-links { display: flex; align-items: center; gap: 2rem; }
+        .nav-links a { font-size: 0.9rem; color: rgba(255,255,255,0.7); transition: color 0.2s; }
+        .nav-links a:hover { color: white; }
+        .btn-nav {
+            padding: 0.6rem 1.4rem;
+            background: linear-gradient(135deg, var(--purple), #5a0dcf);
+            border-radius: 0.6rem;
+            font-size: 0.875rem; font-weight: 600;
+            color: white !important;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-nav:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(121,16,255,0.3); }
+        @media (max-width: 640px) {
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { gap: 1rem; }
+            .nav-link-pricing { display: none; }
+        }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100svh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(121,16,255,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(121,16,255,0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(60px); pointer-events: none;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            background: rgba(121,16,255,0.12);
+            border: 1px solid rgba(121,16,255,0.3);
+            border-radius: 9999px;
+            font-size: 0.8rem; font-weight: 600; color: #a78bfa;
+            margin-bottom: 1.75rem;
+            letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        .hero-title {
+            font-size: clamp(2.4rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            max-width: 16ch;
+            margin: 0 auto 1.5rem;
+        }
+        .gradient-text {
+            color: white;
+            background: linear-gradient(135deg, white 0%, var(--cyan) 40%, var(--purple) 100%);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: gradient-x 3s ease infinite;
+        }
+        .hero-sub {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.65);
+            max-width: 42ch;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+        .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn-primary {
+            padding: 0.9rem 2rem;
+            background: linear-gradient(135deg, var(--purple), #5a0dcf);
+            color: white; border-radius: 0.75rem;
+            font-size: 1rem; font-weight: 600;
+            transition: transform 0.25s, box-shadow 0.25s;
+            box-shadow: 0 4px 20px rgba(121,16,255,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(121,16,255,0.45); }
+        .btn-secondary {
+            padding: 0.9rem 2rem;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.85); border-radius: 0.75rem;
+            font-size: 1rem; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: background 0.25s, border-color 0.25s;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+
+        /* Stats bar */
+        .stats-bar {
+            display: flex; gap: 3rem; justify-content: center; flex-wrap: wrap;
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .stat-item { text-align: center; }
+        .stat-num { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; }
+        .stat-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        /* ── Sections shared ── */
+        section { padding: 6rem 2rem; }
+        .section-inner { max-width: 72rem; margin: 0 auto; }
+        .section-label {
+            display: inline-block;
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--cyan);
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+            font-weight: 800; letter-spacing: -0.025em;
+            line-height: 1.15; margin-bottom: 1rem;
+        }
+        .section-sub {
+            font-size: 1.05rem; color: rgba(255,255,255,0.55);
+            max-width: 48ch; line-height: 1.7;
+        }
+
+        /* ── Feature cards ── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+            gap: 1.5rem; margin-top: 3.5rem;
+        }
+        .feature-card {
+            background: linear-gradient(135deg, rgba(15,21,71,0.8), rgba(31,41,55,0.6));
+            border: 1px solid rgba(121,16,255,0.15);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            border-color: rgba(121,16,255,0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(121,16,255,0.1);
+        }
+        .feature-icon {
+            width: 3rem; height: 3rem; border-radius: 0.75rem;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 1.25rem; font-size: 1.5rem;
+        }
+        .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .feature-card p { font-size: 0.9rem; color: rgba(255,255,255,0.55); line-height: 1.65; }
+
+        /* ── Chat demo ── */
+        .chat-demo {
+            background: linear-gradient(135deg, rgba(15,21,71,0.9), rgba(5,10,48,0.9));
+            border: 1px solid rgba(121,16,255,0.2);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            max-width: 40rem;
+            margin: 3rem auto 0;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+        }
+        .chat-header {
+            display: flex; align-items: center; gap: 0.75rem;
+            margin-bottom: 2rem; padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .chat-dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; }
+        .msg-user, .msg-ai {
+            padding: 0.9rem 1.2rem;
+            border-radius: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            max-width: 85%;
+        }
+        .msg-user {
+            background: rgba(121,16,255,0.2);
+            border: 1px solid rgba(121,16,255,0.3);
+            margin-left: auto;
+            border-bottom-right-radius: 0.25rem;
+            color: rgba(255,255,255,0.9);
+        }
+        .msg-ai {
+            background: rgba(0,210,255,0.08);
+            border: 1px solid rgba(0,210,255,0.2);
+            border-bottom-left-radius: 0.25rem;
+            color: rgba(255,255,255,0.85);
+        }
+
+        /* ── Pricing preview ── */
+        .pricing-section { background: rgba(255,255,255,0.02); }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+            gap: 1.5rem; margin-top: 3.5rem;
+        }
+        .price-card {
+            background: linear-gradient(135deg, rgba(15,21,71,0.9), rgba(31,41,55,0.7));
+            border: 1px solid rgba(121,16,255,0.15);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            display: flex; flex-direction: column;
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .price-card.popular {
+            border-color: rgba(121,16,255,0.5);
+            background: linear-gradient(135deg, rgba(121,16,255,0.15), rgba(15,21,71,0.9));
+            position: relative;
+        }
+        .price-card.popular::before {
+            content: 'Most Popular';
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: white; font-size: 0.7rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            padding: 0.3rem 0.9rem; border-radius: 9999px;
+        }
+        .price-card:hover { border-color: rgba(121,16,255,0.5); transform: translateY(-3px); }
+        .price-name { font-size: 1rem; font-weight: 700; color: rgba(255,255,255,0.7); margin-bottom: 0.5rem; }
+        .price-amount { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 0.25rem; }
+        .price-period { font-size: 0.875rem; color: rgba(255,255,255,0.4); margin-bottom: 1.5rem; }
+        .price-divider { height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 1.5rem; }
+        .price-features { list-style: none; flex: 1; }
+        .price-features li {
+            display: flex; align-items: flex-start; gap: 0.6rem;
+            font-size: 0.875rem; color: rgba(255,255,255,0.7);
+            padding: 0.35rem 0;
+        }
+        .check { color: var(--cyan); flex-shrink: 0; margin-top: 1px; }
+        .price-cta {
+            display: block; text-align: center;
+            margin-top: 1.75rem;
+            padding: 0.85rem;
+            border-radius: 0.75rem;
+            font-size: 0.9rem; font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .price-cta.outline {
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.8);
+        }
+        .price-cta.outline:hover { background: rgba(255,255,255,0.06); }
+        .price-cta.filled {
+            background: linear-gradient(135deg, var(--purple), #5a0dcf);
+            color: white;
+            box-shadow: 0 4px 20px rgba(121,16,255,0.3);
+        }
+        .price-cta.filled:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(121,16,255,0.45); }
+
+        /* ── CTA section ── */
+        .cta-section {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(121,16,255,0.08), rgba(0,210,255,0.04));
+            border-top: 1px solid rgba(121,16,255,0.15);
+            border-bottom: 1px solid rgba(121,16,255,0.15);
+        }
+
+        /* ── Footer ── */
+        footer {
+            background: var(--darker);
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .footer-inner {
+            max-width: 72rem; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1.5rem;
+        }
+        .footer-links { display: flex; gap: 2rem; flex-wrap: wrap; }
+        .footer-links a { font-size: 0.875rem; color: rgba(255,255,255,0.45); transition: color 0.2s; }
+        .footer-links a:hover { color: rgba(255,255,255,0.8); }
+        .footer-copy { font-size: 0.8rem; color: rgba(255,255,255,0.3); }
+
+        @media (prefers-reduced-motion: reduce) {
+            .anim-fade-up, .anim-fade, .anim-float { animation: none; opacity: 1; }
         }
     </style>
 </head>
-<body class="bg-brand-navy text-white overflow-x-hidden">
-    <!-- Hero Section -->
-    <section class="min-h-screen flex flex-col items-center justify-center text-center p-8 bg-gradient-to-br from-brand-navy to-blue-900 animate-fade-in-up">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-gradient-text animate-slide-in-down">
-            Empowering Private Capital Investors with AI-Driven Insights
+<body>
+
+<!-- Navigation -->
+<nav>
+    <div class="nav-logo">
+        <div class="nav-logo-icon">
+            <svg width="18" height="18" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+        </div>
+        Luira
+    </div>
+    <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing" class="nav-link-pricing">Pricing</a>
+        <a href="/login" class="btn-nav">Sign In</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <!-- Orbs -->
+    <div class="orb" style="width:30rem;height:30rem;background:var(--purple);opacity:0.18;top:-8rem;right:-8rem;"></div>
+    <div class="orb" style="width:22rem;height:22rem;background:var(--cyan);opacity:0.12;bottom:-4rem;left:-6rem;"></div>
+
+    <div style="position:relative;z-index:1;">
+        <div class="hero-badge anim-fade" style="animation-delay:0.1s;">
+            <span style="width:6px;height:6px;border-radius:50%;background:var(--cyan);display:inline-block;"></span>
+            Private Capital Intelligence
+        </div>
+
+        <h1 class="hero-title anim-fade-up" style="animation-delay:0.2s;">
+            Your AI Copilot for <span class="gradient-text">Deal Flow Intelligence</span>
         </h1>
-        <p class="text-lg md:text-xl mb-12 max-w-2xl opacity-90 animate-fade-in">
-            Our LLM-powered platform acts as a copilot for private capital investors — helping you explore, assess, and prioritize startup opportunities through conversation and interactive reasoning.
+
+        <p class="hero-sub anim-fade-up" style="animation-delay:0.35s;">
+            Luira helps private capital investors explore, assess, and prioritize startup opportunities through AI conversation and interactive reasoning — powered by real investment, network, and team signals.
         </p>
-        <div class="flex gap-6 flex-wrap justify-center animate-fade-in-up" style="animation-delay: 0.3s;">
-            <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 no-underline">
-                Request Early Access
-            </a>
-            <a href="https://wealt.co" target="_blank" class="px-8 py-4 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-cyan/40 no-underline">
-                Join the Pilot
-            </a>
-            <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 no-underline">
-                Book a Demo
-            </a>
-        </div>
-    </section>
 
-    <!-- What It Does Section -->
-    <section class="bg-brand-navy text-white py-20 px-8 text-center animate-fade-in-up">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold mb-12">🧠 What It Does (LLM Copilot Concept)</h2>
-            
-            <div class="w-full max-w-2xl h-72 bg-gradient-to-br from-gray-800 to-gray-900 border-2 border-dashed border-brand-purple rounded-2xl flex items-center justify-center mx-auto my-8 text-brand-purple text-xl">
-                📹 Video Coming Soon
-            </div>
-            
-            <div class="max-w-2xl mx-auto mt-12 bg-brand-dark rounded-2xl p-8 shadow-2xl">
-                <div class="mb-4 p-4 bg-brand-purple rounded-2xl ml-8 text-right animate-slide-in-left">
-                    "Which pre-seed AI startups align with our past investments in digital health?"
-                </div>
-                <div class="p-4 bg-brand-cyan text-brand-navy rounded-2xl mr-8 animate-slide-in-left" style="animation-delay: 0.5s;">
-                    "Here are 3 startups based on your co-investor history, sector preferences, and recent team growth indicators."
-                </div>
-            </div>
+        <div class="hero-ctas anim-fade-up" style="animation-delay:0.5s;">
+            <a href="/register" class="btn-primary">Get Started Free</a>
+            <a href="#features" class="btn-secondary">See How It Works</a>
         </div>
-    </section>
 
-    <!-- Trusted By Section -->
-    <section class="bg-brand-navy text-white py-12 px-8 text-center">
-        <h3 class="text-xl md:text-2xl font-semibold mb-8 opacity-80">🔒 Trusted by companies</h3>
-        <div class="flex justify-center gap-8 flex-wrap">
-            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
-                Company 1
+        <div class="stats-bar anim-fade" style="animation-delay:0.7s;">
+            <div class="stat-item">
+                <div class="stat-num gradient-text">3</div>
+                <div class="stat-label">Intelligence Engines</div>
             </div>
-            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
-                Company 2
+            <div class="stat-item">
+                <div class="stat-num gradient-text">10+</div>
+                <div class="stat-label">AI Models Available</div>
             </div>
-            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
-                Company 3
-            </div>
-            <div class="w-30 h-15 bg-white bg-opacity-10 rounded-lg flex items-center justify-center text-sm opacity-70 px-6 py-4">
-                Company 4
+            <div class="stat-item">
+                <div class="stat-num gradient-text">∞</div>
+                <div class="stat-label">Insights on Demand</div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- How It Works Section -->
-    <section class="bg-brand-navy text-white py-20 px-8 animate-fade-in-up">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">📊 How It Works — Our 3 Intelligence Engines</h2>
-            <p class="text-center text-xl mb-12 text-brand-cyan">Three Engines. One Intelligent Copilot.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-10 rounded-2xl border border-brand-purple/20 transition-all duration-300 hover:-translate-y-2 hover:border-brand-purple hover:shadow-2xl hover:shadow-brand-purple/20 animate-fade-in-up">
-                    <div class="text-4xl mb-4 text-brand-purple">🔁</div>
-                    <h3 class="text-xl font-semibold mb-4 text-brand-cyan">1. Historical Investment Patterns</h3>
-                    <p class="text-gray-300">We analyze your past investments, their outcomes, and underlying attributes (sector, founder profile, deal stage) to learn what you're great at — and suggest aligned opportunities.</p>
-                </div>
-                
-                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-10 rounded-2xl border border-brand-purple/20 transition-all duration-300 hover:-translate-y-2 hover:border-brand-purple hover:shadow-2xl hover:shadow-brand-purple/20 animate-fade-in-up" style="animation-delay: 0.2s;">
-                    <div class="text-4xl mb-4 text-brand-purple">🤝</div>
-                    <h3 class="text-xl font-semibold mb-4 text-brand-cyan">2. Co-Investor Network Signals</h3>
-                    <p class="text-gray-300">Many successful deals include familiar co-investors. We map your co-investment history and discover which VCs you frequently align with — to surface unseen deal patterns and partner-led opportunities.</p>
-                </div>
-                
-                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-10 rounded-2xl border border-brand-purple/20 transition-all duration-300 hover:-translate-y-2 hover:border-brand-purple hover:shadow-2xl hover:shadow-brand-purple/20 animate-fade-in-up" style="animation-delay: 0.4s;">
-                    <div class="text-4xl mb-4 text-brand-purple">📈</div>
-                    <h3 class="text-xl font-semibold mb-4 text-brand-cyan">3. Talent Opportunity Signals</h3>
-                    <p class="text-gray-300">By monitoring LinkedIn data — hiring trends, leadership churn, layoffs — we detect team-driven inflection points in startups and help you catch momentum before others do.</p>
-                </div>
-            </div>
+<!-- Features -->
+<section id="features">
+    <div class="section-inner">
+        <div style="max-width:44ch;">
+            <div class="section-label">How It Works</div>
+            <h2 class="section-title">Three Intelligence Engines. One Copilot.</h2>
+            <p class="section-sub">Luira combines historical investment patterns, co-investor network signals, and talent opportunity data into a single conversational interface.</p>
         </div>
-    </section>
 
-    <!-- Use Cases Section -->
-    <section class="bg-brand-navy text-white py-20 px-8 animate-fade-in-up">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">🧭 Use Cases — Who It's For</h2>
-            <p class="text-center text-xl mb-12 text-brand-cyan">Built for the Entire Private Capital Ecosystem</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-12">
-                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up">
-                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Venture Capital</h3>
-                    <p class="text-gray-300">Source and score startups aligned with your thesis</p>
-                </div>
-                
-                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up" style="animation-delay: 0.1s;">
-                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Corporate Venture Capitals</h3>
-                    <p class="text-gray-300">Track startups that support strategic innovation</p>
-                </div>
-                
-                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up" style="animation-delay: 0.2s;">
-                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Growth & Private Equity</h3>
-                    <p class="text-gray-300">Spot teams with signals of scalable momentum</p>
-                </div>
-                
-                <div class="bg-gradient-to-br from-brand-dark to-gray-800 p-8 rounded-xl border border-brand-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:border-brand-cyan hover:shadow-xl hover:shadow-brand-cyan/20 animate-fade-in-up" style="animation-delay: 0.3s;">
-                    <h3 class="text-lg font-semibold mb-4 text-brand-purple">Accelerators</h3>
-                    <p class="text-gray-300">Select and support high-potential startups with context-aware insights</p>
-                </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(121,16,255,0.15);">🔁</div>
+                <h3>Historical Investment Patterns</h3>
+                <p>We analyze your past investments — sector, stage, founder profile, outcomes — to learn what you're great at and surface aligned opportunities automatically.</p>
             </div>
-        </div>
-    </section>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,210,255,0.12);">🤝</div>
+                <h3>Co-Investor Network Signals</h3>
+                <p>Map your co-investment history and discover which VCs you frequently align with — uncovering unseen deal patterns and partner-led opportunities before they surface publicly.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(121,16,255,0.15);">📈</div>
+                <h3>Talent Opportunity Signals</h3>
+                <p>Monitor hiring trends, leadership changes, and team momentum signals to catch inflection points in startups well before the market does.</p>
+            </div>
 
-    <!-- Why We're Different Section -->
-    <section class="bg-brand-navy text-white py-20 px-8 animate-fade-in-up">
-        <div class="max-w-6xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8">💼 Why We're Different</h2>
-            <p class="text-center text-xl mb-12 text-brand-cyan">A Smarter, More Explainable Approach to Startup Discovery</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
-                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left">
-                    <div class="text-2xl text-brand-purple mt-1">✓</div>
-                    <div>
-                        <strong>LLM-powered reasoning</strong> — not just filtering
-                    </div>
+            <!-- CapMap highlighted card -->
+            <div class="feature-card" style="border-color:rgba(0,210,255,0.35);background:linear-gradient(135deg,rgba(0,210,255,0.07),rgba(15,21,71,0.9));grid-column:span 1;">
+                <div class="feature-icon" style="background:rgba(0,210,255,0.18);">
+                    <span style="font-size:1.4rem;">🗺️</span>
                 </div>
-                
-                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left" style="animation-delay: 0.1s;">
-                    <div class="text-2xl text-brand-purple mt-1">✓</div>
-                    <div>
-                        <strong>Built specifically for private market workflows</strong>
-                    </div>
+                <div style="display:inline-flex;align-items:center;gap:0.4rem;margin-bottom:0.75rem;">
+                    <h3 style="margin-bottom:0;">CapMap Agent</h3>
+                    <span style="font-size:0.65rem;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;padding:0.15rem 0.55rem;border-radius:9999px;background:rgba(0,210,255,0.15);color:var(--cyan);border:1px solid rgba(0,210,255,0.3);">Advanced &amp; Pro</span>
                 </div>
-                
-                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left" style="animation-delay: 0.2s;">
-                    <div class="text-2xl text-brand-purple mt-1">✓</div>
-                    <div>
-                        <strong>Explains why each startup is a good match</strong>
-                    </div>
-                </div>
-                
-                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left" style="animation-delay: 0.3s;">
-                    <div class="text-2xl text-brand-purple mt-1">✓</div>
-                    <div>
-                        <strong>Uses real investment, network, and team data</strong> — not just keywords
-                    </div>
-                </div>
-                
-                <div class="flex items-start gap-4 p-6 bg-brand-purple/10 rounded-xl animate-fade-in-left col-span-1 md:col-span-2 justify-center" style="animation-delay: 0.4s;">
-                    <div class="text-2xl text-brand-purple mt-1">✓</div>
-                    <div>
-                        <strong>Designed by experts in venture and AI</strong>
-                    </div>
-                </div>
+                <p>CapMap is a dedicated AI agent that queries <strong style="color:rgba(255,255,255,0.85);">live Crunchbase data</strong> in real-time and brings the results directly into your conversation. Ask about a startup, a sector, or a funding round — CapMap fetches the data, summarises it, and helps you act on it instantly. No tab-switching, no manual lookups.</p>
             </div>
-        </div>
-    </section>
 
-    <!-- Final CTA Section -->
-    <section class="bg-gradient-to-br from-gray-800 to-brand-navy text-white text-center py-20 px-8">
-        <div class="max-w-4xl mx-auto">
-            <h2 class="text-2xl md:text-4xl font-bold mb-8">📣 Join other forward-thinking investors using AI to sharpen their sourcing and decisions</h2>
-            <div class="flex gap-6 justify-center flex-wrap">
-                <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-purple to-purple-600 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-purple/40 no-underline">
-                    Request Early Access
-                </a>
-                <a href="/chat" class="px-8 py-4 bg-gradient-to-r from-brand-cyan to-blue-500 text-white rounded-full font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-cyan/40 no-underline">
-                    Book a Demo
-                </a>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(121,16,255,0.15);">💬</div>
+                <h3>Conversational Reasoning</h3>
+                <p>Ask Luira anything about your deal flow in plain language. Get structured, explainable answers — not just data dumps.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,210,255,0.12);">🔒</div>
+                <h3>Private &amp; Secure</h3>
+                <p>Your investment data and conversations stay private. Enterprise-grade security with full session isolation from the ground up.</p>
             </div>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="bg-brand-darker text-white py-12 px-8 text-center">
-        <div class="max-w-6xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div>
-                    <h3 class="text-brand-purple text-lg font-semibold mb-4">📬 Contact</h3>
-                    <p class="mb-2"><a href="mailto:cem@amorelabs.co" class="text-brand-cyan hover:opacity-80 transition-opacity no-underline">cem@amorelabs.co</a></p>
-                    <p><a href="mailto:onur@amorelabs.co" class="text-brand-cyan hover:opacity-80 transition-opacity no-underline">onur@amorelabs.co</a></p>
-                </div>
-                <div>
-                    <h3 class="text-brand-purple text-lg font-semibold mb-4">Socials</h3>
-                    <p><a href="#" target="_blank" class="text-brand-cyan hover:opacity-80 transition-opacity no-underline">LinkedIn</a></p>
-                </div>
+        <!-- Chat demo -->
+        <div class="chat-demo">
+            <div class="chat-header">
+                <div class="chat-dot" style="background:#ef4444;"></div>
+                <div class="chat-dot" style="background:#f59e0b;"></div>
+                <div class="chat-dot" style="background:#22c55e;"></div>
+                <span style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-left:0.5rem;">Luira Copilot</span>
+            </div>
+            <div class="msg-user">"Which pre-seed AI startups align with our past investments in digital health?"</div>
+            <div class="msg-ai">"Based on your 14 digital health investments and co-investor network, here are 3 startups that match your thesis — with strong hiring momentum and a familiar co-investor lead…"</div>
+            <div class="msg-user">"Can you rank them by team growth signal in the last 90 days?"</div>
+            <div class="msg-ai">"Sure. <strong>Startup A</strong> leads with +47% headcount growth, followed by <strong>Startup B</strong> (+31%) which also shares 2 co-investors from your Series A deals in 2022."</div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing preview -->
+<section id="pricing" class="pricing-section">
+    <div class="section-inner" style="text-align:center;">
+        <div class="section-label">Pricing</div>
+        <h2 class="section-title">Simple, transparent pricing</h2>
+        <p class="section-sub" style="margin:0 auto;">Scale your analysis with access to state-of-the-art models and higher monthly limits. No hidden fees.</p>
+
+        <div class="pricing-grid" style="text-align:left;">
+            <!-- Free -->
+            <div class="price-card">
+                <div class="price-name">Free</div>
+                <div class="price-amount">€0</div>
+                <div class="price-period">per month</div>
+                <div class="price-divider"></div>
+                <ul class="price-features">
+                    <li><span class="check">✓</span> 30 requests per month</li>
+                    <li><span class="check">✓</span> Core AI models</li>
+                    <li style="color:rgba(255,255,255,0.3);"><span style="color:rgba(255,255,255,0.2);">✗</span> CapMap model access</li>
+                    <li style="color:rgba(255,255,255,0.3);"><span style="color:rgba(255,255,255,0.2);">✗</span> Advanced AI models</li>
+                </ul>
+                <a href="/register" class="price-cta outline">Get Started</a>
+            </div>
+
+            <!-- Advanced -->
+            <div class="price-card popular">
+                <div class="price-name">Advanced</div>
+                <div class="price-amount gradient-text">€10</div>
+                <div class="price-period">per month</div>
+                <div class="price-divider"></div>
+                <ul class="price-features">
+                    <li><span class="check">✓</span> 200 requests per month</li>
+                    <li><span class="check">✓</span> Advanced models unlocked</li>
+                    <li><span class="check">✓</span> CapMap model access</li>
+                    <li><span class="check">✓</span> Priority response speed</li>
+                </ul>
+                <a href="/register" class="price-cta filled">Start Free Trial</a>
+            </div>
+
+            <!-- Pro -->
+            <div class="price-card">
+                <div class="price-name">Pro</div>
+                <div class="price-amount">€20</div>
+                <div class="price-period">per month</div>
+                <div class="price-divider"></div>
+                <ul class="price-features">
+                    <li><span class="check">✓</span> 500 requests per month</li>
+                    <li><span class="check">✓</span> All AI models unlocked</li>
+                    <li><span class="check">✓</span> CapMap model access</li>
+                    <li><span class="check">✓</span> Highest priority access</li>
+                </ul>
+                <a href="/register" class="price-cta outline">Get Started</a>
             </div>
         </div>
-    </footer>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="section-inner" style="text-align:center;">
+        <h2 class="section-title" style="max-width:22ch;margin:0 auto 1rem;">Ready to sharpen your deal flow with AI?</h2>
+        <p class="section-sub" style="margin:0 auto 2.5rem;">Join forward-thinking investors using Luira to find better opportunities, faster.</p>
+        <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+            <a href="/register" class="btn-primary">Create Free Account</a>
+            <a href="/login" class="btn-secondary">Sign In</a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-inner">
+        <div class="nav-logo">
+            <div class="nav-logo-icon">
+                <svg width="16" height="16" fill="none" stroke="white" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+            </div>
+            Luira
+        </div>
+        <div class="footer-links">
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="/login">Sign In</a>
+            <a href="/register">Register</a>
+            <a href="mailto:cem@amorelabs.co">Contact</a>
+        </div>
+        <div class="footer-copy">© 2026 Luira · Amore Labs</div>
+    </div>
+</footer>
+
 </body>
 </html>

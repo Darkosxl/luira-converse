@@ -15,8 +15,6 @@
     <meta property="og:description" content="Create your Luira account – join the AI-powered conversation platform.">
     <meta property="og:site_name" content="Luira">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Create Account – Luira">
-    <meta name="twitter:description" content="Create your Luira account – join the AI-powered conversation platform.">
 
     <!-- JSON-LD Schema -->
     <script type="application/ld+json">
@@ -27,17 +25,12 @@
       "url": "https://luira.amoredit.com",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "provider": {
-        "@type": "Organization",
-        "name": "Luira",
-        "url": "https://luira.amoredit.com"
-      }
+      "provider": { "@type": "Organization", "name": "Luira", "url": "https://luira.amoredit.com" }
     }
     </script>
 
     <link rel="stylesheet" href="/output.css">
     <style>
-        /* Brand colors */
         :root {
             --brand-navy:   #050a30;
             --brand-purple: #7910ff;
@@ -67,48 +60,11 @@
             background-size: 50px 50px;
             pointer-events: none;
         }
-        /* Orbs — blur reduced 80px → 40px (M-1) */
+
+        /* Orbs */
         .orb { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.4; will-change: transform; }
 
-        /* Code digit boxes */
-        .digit-box {
-            width: 48px; height: 56px;
-            background: rgba(5,10,48,0.5);
-            border: 1.5px solid rgba(121,16,255,0.3);
-            border-radius: 12px;
-            color: white;
-            font-size: 22px;
-            font-weight: 700;
-            text-align: center;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-            caret-color: #00d2ff;
-        }
-        .digit-box:focus {
-            border-color: #7910ff;
-            box-shadow: 0 0 18px rgba(121,16,255,0.3);
-            transform: scale(1.05);
-        }
-        .digit-box.filled { border-color: #00d2ff; }
-        .digit-box.error  { border-color: #ef4444 !important; box-shadow: 0 0 12px rgba(239,68,68,0.3) !important; animation: shake 0.4s ease; }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%       { transform: translateX(-5px); }
-            40%       { transform: translateX(5px); }
-            60%       { transform: translateX(-4px); }
-            80%       { transform: translateX(4px); }
-        }
-
-        /* Send code button states */
-        .send-btn-idle    { background: rgba(121,16,255,0.15); border: 1.5px solid rgba(121,16,255,0.4); color: #a78bfa; }
-        .send-btn-loading { background: rgba(121,16,255,0.08); border: 1.5px solid rgba(121,16,255,0.2); color: #6b7280; cursor: not-allowed; }
-        .send-btn-sent    { background: rgba(0,210,255,0.12); border: 1.5px solid rgba(0,210,255,0.3); color: #67e8f9; }
-
-        /* Countdown */
-        #countdown { font-variant-numeric: tabular-nums; }
-    </style>
-</head>
+        /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50%       { transform: translateY(-10px); }
@@ -122,8 +78,8 @@
             to   { opacity: 1; }
         }
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px) scale(0.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes glowPulse {
             from { opacity: 0.4; }
@@ -136,12 +92,12 @@
             60%       { transform: translateX(-4px); }
             80%       { transform: translateX(4px); }
         }
-        .anim-float { animation: float 8s ease-in-out infinite; }
+        .anim-float      { animation: float 8s ease-in-out infinite; }
         .anim-fade-in-up { animation: fadeInUp 0.9s ease-out both; }
         .anim-fade-in    { animation: fadeIn 0.4s ease-out both; }
-        .anim-slide-down { animation: slideDown 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+        .anim-slide-down { animation: slideDown 0.3s ease-out both; }
 
-        /* Card — backdrop-blur reduced from 24px → 8px (M-2) */
+        /* Card */
         .card {
             background: linear-gradient(135deg, rgba(15,21,71,0.92), rgba(31,41,55,0.92));
             backdrop-filter: blur(8px);
@@ -155,7 +111,6 @@
             z-index: 10;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
         }
-        /* Pulse glow via opacity on ::after — avoids main-thread box-shadow repaints (H-6) */
         .card::after {
             content: '';
             position: absolute;
@@ -165,6 +120,8 @@
             pointer-events: none;
             animation: glowPulse 2s ease-in-out infinite alternate;
         }
+
+        /* Logo icon */
         .logo-icon {
             width: 4rem; height: 4rem;
             border-radius: 1rem;
@@ -172,7 +129,8 @@
             display: flex; align-items: center; justify-content: center;
             margin: 0 auto 1.5rem;
         }
-        /* Heading — solid fallback so Chrome picks as LCP candidate (L-6) */
+
+        /* Heading */
         .heading-gradient {
             color: white;
             background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
@@ -184,7 +142,8 @@
             text-align: center;
             margin-bottom: 0.5rem;
         }
-        /* Inputs — 16px minimum (M-6) */
+
+        /* Labels */
         .field-label {
             display: block;
             font-size: 1rem;
@@ -192,6 +151,8 @@
             color: #d1d5db;
             margin-bottom: 0.5rem;
         }
+
+        /* Inputs */
         .field-input {
             width: 100%;
             padding: 1rem 1rem 1rem 3rem;
@@ -217,6 +178,8 @@
         }
         .input-icon svg { width: 1.25rem; height: 1.25rem; color: #6b7280; }
         .form-space { margin-bottom: 1.25rem; }
+
+        /* Error banner */
         .error-banner {
             background: rgba(239, 68, 68, 0.15);
             border: 1px solid rgba(239, 68, 68, 0.5);
@@ -277,7 +240,6 @@
         .btn-submit:focus { outline: none; box-shadow: 0 0 0 4px rgba(0,210,255,0.3); }
         .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        /* Countdown */
         #countdown { font-variant-numeric: tabular-nums; }
 
         /* Footer */
@@ -288,7 +250,6 @@
             text-align: center;
         }
         .footer-text { color: #9ca3af; font-size: 1rem; }
-        /* Min 48px tap target for register link (M-7) */
         .footer-link {
             display: inline-block;
             padding: 0.75rem 0.5rem;
@@ -302,12 +263,11 @@
         }
         .footer-link:hover { color: white; }
 
-        /* prefers-reduced-motion (L-5) */
+        /* prefers-reduced-motion */
         @media (prefers-reduced-motion: reduce) {
             .anim-float, .anim-fade-in-up, .anim-fade-in, .anim-slide-down, .card::after { animation: none; }
             .orb { opacity: 0.2; }
         }
-        /* Mobile layout (M-8) */
         @media (max-width: 480px) {
             .card { padding: 2rem 1.5rem; }
             body { padding: 1rem; }
@@ -315,6 +275,7 @@
     </style>
 </head>
 <body>
+    <!-- Decorative orbs -->
     <div class="orb anim-float" style="width:24rem;height:24rem;background:var(--brand-cyan);top:-12rem;right:-12rem;animation-delay:0s;"></div>
     <div class="orb anim-float" style="width:20rem;height:20rem;background:var(--brand-purple);bottom:-10rem;left:-10rem;animation-delay:-4s;"></div>
 
@@ -331,7 +292,7 @@
             <p style="color:#9ca3af;font-size:1rem;">Verify your email to get started</p>
         </div>
 
-        <!-- Error / success banners -->
+        <!-- Error banner -->
         <% if @error %>
             <div id="server-error" class="error-banner anim-fade-in" role="alert">
                 <svg style="width:1.25rem;height:1.25rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -339,9 +300,9 @@
             </div>
         <% end %>
 
-        <form id="register-form" method="POST" action="/register" onsubmit="return validateBeforeSubmit()" style="margin-top:0;">
+        <form id="register-form" method="POST" action="/register" onsubmit="return validateBeforeSubmit()">
 
-            <!-- Email row with Send Code button -->
+            <!-- Email + Send Code -->
             <div class="form-space">
                 <label for="email" class="field-label">Email Address</label>
                 <div style="display:flex;gap:0.5rem;">
@@ -372,8 +333,8 @@
                 <p id="send-status" style="margin-top:0.375rem;font-size:0.75rem;color:#6b7280;display:none;"></p>
             </div>
 
-            <!-- 6-digit code section (hidden until code sent) -->
-            <div id="code-section" style="display:none;" class="anim-slide-down form-space">
+            <!-- Verification code -->
+            <div id="code-section" style="display:none;" class="form-space anim-slide-down">
                 <label class="field-label">Verification Code</label>
                 <div style="display:flex;gap:0.5rem;justify-content:center;margin-bottom:0.5rem;" id="digit-inputs">
                     <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="0" id="d0" autocomplete="one-time-code">
@@ -383,7 +344,6 @@
                     <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="4" id="d4" autocomplete="off">
                     <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="5" id="d5" autocomplete="off">
                 </div>
-                <!-- Hidden input that carries the assembled code -->
                 <input type="hidden" name="verification_code" id="verification_code">
                 <p style="text-align:center;font-size:0.75rem;color:#6b7280;">
                     Didn't get it? <button type="button" id="resend-btn" onclick="sendCode(true)" style="color:var(--brand-cyan);text-decoration:underline;background:none;border:none;cursor:pointer;transition:color 0.2s;" disabled>
@@ -419,7 +379,7 @@
                 </div>
             </div>
 
-            <!-- Client-side error -->
+            <!-- Client error -->
             <div id="client-error" style="display:none;" class="error-banner anim-fade-in" role="alert">
                 <svg style="width:1.25rem;height:1.25rem;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <p style="font-size:0.875rem;font-weight:500;" id="client-error-text"></p>
@@ -442,17 +402,14 @@
 let codeSent = false;
 let resendTimer = null;
 
-// ── Digit box behaviour ──────────────────────────────────────────────────────
 document.querySelectorAll('.digit-box').forEach((box, i, boxes) => {
     box.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace') {
             if (box.value === '' && i > 0) boxes[i - 1].focus();
             box.classList.remove('filled');
         }
-        // Allow only digits
         if (e.key.length === 1 && !/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
     });
-
     box.addEventListener('input', () => {
         if (box.value.length === 1) {
             box.classList.add('filled');
@@ -461,35 +418,25 @@ document.querySelectorAll('.digit-box').forEach((box, i, boxes) => {
         }
         assembleCode();
     });
-
-    // Paste handler — spread digits across boxes
     box.addEventListener('paste', (e) => {
         e.preventDefault();
         const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
         digits.split('').forEach((d, j) => {
-            if (boxes[i + j]) {
-                boxes[i + j].value = d;
-                boxes[i + j].classList.add('filled');
-            }
+            if (boxes[i + j]) { boxes[i + j].value = d; boxes[i + j].classList.add('filled'); }
         });
-        const next = Math.min(i + digits.length, boxes.length - 1);
-        boxes[next].focus();
+        boxes[Math.min(i + digits.length, boxes.length - 1)].focus();
         assembleCode();
     });
 });
 
 function assembleCode() {
-    const code = Array.from(document.querySelectorAll('.digit-box')).map(b => b.value).join('');
-    document.getElementById('verification_code').value = code;
+    document.getElementById('verification_code').value =
+        Array.from(document.querySelectorAll('.digit-box')).map(b => b.value).join('');
 }
 
-// ── Send / resend code ───────────────────────────────────────────────────────
 async function sendCode(isResend = false) {
     const email = document.getElementById('email').value.trim();
-    if (!email || !email.includes('@')) {
-        showClientError('Please enter a valid email address first.');
-        return;
-    }
+    if (!email || !email.includes('@')) { showClientError('Please enter a valid email address first.'); return; }
 
     const btn = document.getElementById('send-code-btn');
     const status = document.getElementById('send-status');
@@ -505,24 +452,16 @@ async function sendCode(isResend = false) {
             body: `email=${encodeURIComponent(email)}`
         });
         const data = await res.json();
-
         if (res.ok) {
             codeSent = true;
             btn.className = 'send-btn-sent';
             btn.textContent = '✓ Sent';
-
             status.textContent = `Code sent to ${email} — check your inbox (and spam).`;
             status.style.color = '#00d2ff';
-
-            // Show code section
-            const section = document.getElementById('code-section');
-            section.style.display = 'block';
+            status.style.display = 'block';
+            document.getElementById('code-section').style.display = 'block';
             setTimeout(() => document.getElementById('d0').focus(), 100);
-
-            // Lock email field
             document.getElementById('email').readOnly = true;
-
-            // Start 60s resend countdown
             startResendTimer();
         } else {
             throw new Error(data.error || 'Failed to send code.');
@@ -540,56 +479,40 @@ function startResendTimer() {
     const countdownEl = document.getElementById('countdown');
     resendBtn.disabled = true;
     let secs = 60;
-
     if (resendTimer) clearInterval(resendTimer);
     resendTimer = setInterval(() => {
         secs--;
         countdownEl.textContent = `(${secs}s)`;
-        if (secs <= 0) {
-            clearInterval(resendTimer);
-            resendBtn.disabled = false;
-            countdownEl.textContent = '';
-        }
+        if (secs <= 0) { clearInterval(resendTimer); resendBtn.disabled = false; countdownEl.textContent = ''; }
     }, 1000);
 }
 
-// ── Form validation before submit ───────────────────────────────────────────
 function validateBeforeSubmit() {
     hideClientError();
-
     const code = document.getElementById('verification_code').value;
     if (!codeSent || code.length !== 6) {
         showClientError('Please verify your email first — enter the 6-digit code sent to your inbox.');
-        // Flash the digit boxes
         document.querySelectorAll('.digit-box').forEach(b => {
             b.classList.add('error');
             setTimeout(() => b.classList.remove('error'), 600);
         });
-        // Show the code section if hidden
         document.getElementById('code-section').style.display = 'block';
         return false;
     }
-
-    const pw  = document.getElementById('password').value;
+    const pw = document.getElementById('password').value;
     const pw2 = document.getElementById('password_confirm').value;
-    if (pw !== pw2) {
-        showClientError('Passwords do not match.');
-        return false;
-    }
-
+    if (pw !== pw2) { showClientError('Passwords do not match.'); return false; }
     return true;
 }
 
 function showClientError(msg) {
-    const el = document.getElementById('client-error');
     document.getElementById('client-error-text').textContent = msg;
-    el.style.display = 'flex';
+    document.getElementById('client-error').style.display = 'flex';
 }
 function hideClientError() {
     document.getElementById('client-error').style.display = 'none';
 }
 
-// If server returned an error, re-show the code section (user may have had a wrong code)
 <% if @error && @prefill_email %>
 document.addEventListener('DOMContentLoaded', () => {
     codeSent = true;
