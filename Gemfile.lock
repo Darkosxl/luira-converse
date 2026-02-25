@@ -121,6 +121,7 @@ GEM
       expectation
       sinatra
     sqlite3 (2.7.3-x86_64-linux-gnu)
+    stripe (18.3.1)
     tilt (2.6.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
@@ -150,6 +151,7 @@ DEPENDENCIES
   sinatra
   sinatra-sse
   sqlite3
+  stripe
 
 BUNDLED WITH
    2.7.1

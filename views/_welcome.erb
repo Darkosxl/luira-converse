@@ -3,7 +3,7 @@
   <div class="inline-flex items-center justify-center p-3 mb-6 bg-white rounded-2xl shadow-sm border border-gray-100">
     <img src="/logo.svg" alt="Logo" class="w-10 h-10">
   </div>
-  <h1 class="text-3xl font-bold text-gray-900 mb-3 tracking-tight">Hello Wealt Team!</h1>
+  <h1 class="text-3xl font-bold text-gray-900 mb-3 tracking-tight">Hello, <%= @current_user[:email].split('@').first.capitalize %>!</h1>
   <p class="text-gray-500 max-w-md mx-auto">How can I help you today?</p>
   
   <!-- Suggested Prompts -->

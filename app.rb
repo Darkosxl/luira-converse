@@ -8,6 +8,7 @@ require 'redcarpet'
 require 'json'
 require 'net/http'
 require 'rack/attack'
+require 'stripe'
 
 require_relative 'models/stream'
 require_relative 'models/database'
@@ -113,8 +114,10 @@ class SinatraRouter < Sinatra::Base
         headers['Referrer-Policy'] = 'no-referrer'
         headers['Access-Control-Allow-Origin'] = 'none'
         
-        # Skip auth for login/health/landing routes
-        pass if request.path_info =~ /^\/(login|logout|health|register)$/
+        @database = @@database
+        @conversation = @@conversation
+        # Skip auth for login/health/landing/register routes
+        pass if request.path_info =~ /^\/(login|logout|health|register(\/send-code)?|stripe\/webhook)$/
 
         # Require authentication for everything else
         unless session[:user_id]
@@ -123,8 +126,7 @@ class SinatraRouter < Sinatra::Base
         end
         
         # Use shared instances instead of creating new ones per request
-        @database = @@database
-        @conversation = @@conversation
+        
     end
     get '/health' do
         'OK'
@@ -153,14 +155,87 @@ class SinatraRouter < Sinatra::Base
     get '/register' do
       erb :'register'
     end
+
+    # Send a 6-digit verification code to the given email via Resend.
+    # Stores the code in Redis with a 15-minute TTL keyed by email.
+    post '/register/send-code' do
+      content_type :json
+      email = params[:email].to_s.strip.downcase
+
+      unless email.match?(/\A[^@]+@[^@]+\.[^@]+\z/)
+        halt 422, { error: 'Invalid email address.' }.to_json
+      end
+
+      code = rand(100_000..999_999).to_s
+
+      # Store in Redis — key: verify:<email>, value: code, TTL: 900s
+      redis = Redis.new(
+        url: "redis://#{ENV['REDIS_USERNAME']}:#{ENV['REDIS_PASSWORD']}@#{ENV['REDIS_URL']}"
+      )
+      redis.set("verify:#{email}", code, ex: 900)
+
+      # Send via Resend
+      uri = URI('https://api.resend.com/emails')
+      req = Net::HTTP::Post.new(uri)
+      req['Authorization'] = "Bearer #{ENV['RESEND_API_KEY']}"
+      req['Content-Type']  = 'application/json'
+      req.body = {
+        from:    ENV['EMAIL_FROM'],
+        to:      [email],
+        subject: 'Your Luira verification code',
+        html:    <<~HTML
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#050a30;color:#fff;border-radius:16px">
+            <h2 style="margin:0 0 8px;font-size:22px">Verify your email</h2>
+            <p style="color:#9ca3af;margin:0 0 24px">Enter this code on the registration page. It expires in 15 minutes.</p>
+            <div style="letter-spacing:12px;font-size:40px;font-weight:700;text-align:center;padding:20px;background:rgba(121,16,255,0.15);border-radius:12px;border:1px solid rgba(121,16,255,0.3)">
+              #{code}
+            </div>
+            <p style="color:#6b7280;font-size:12px;margin:24px 0 0">If you didn't request this, you can safely ignore this email.</p>
+          </div>
+        HTML
+      }.to_json
+
+      Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) { |http| http.request(req) }
+
+      { ok: true }.to_json
+    rescue StandardError
+      halt 500, { error: 'Failed to send email. Please try again.' }.to_json
+    end
+
     post '/register' do
-      user_id = @database.create_user(params[:email], params[:password])
-      if user_id == "User already exists"
+      email    = params[:email].to_s.strip.downcase
+      code     = params[:verification_code].to_s.strip
+      password = params[:password].to_s
+
+      # 1. Validate code against Redis before touching the DB
+      redis = Redis.new(
+        url: "redis://#{ENV['REDIS_USERNAME']}:#{ENV['REDIS_PASSWORD']}@#{ENV['REDIS_URL']}"
+      )
+      stored = redis.get("verify:#{email}")
+
+      if stored.nil?
+        @error = 'Verification code expired or not sent. Please request a new one.'
+        @prefill_email = email
+        next erb :register
+      end
+
+      unless stored == code
+        @error = 'Incorrect verification code. Please try again.'
+        @prefill_email = email
+        next erb :register
+      end
+
+      # 2. Code is valid — delete it so it can't be reused
+      redis.del("verify:#{email}")
+
+      # 3. Create the user
+      user_id = @database.create_user(email, password)
+      if user_id == 'User already exists'
         @error = user_id
         erb :register
       else
-        session[:user_id] = user_id 
-        redirect '/chat' 
+        session[:user_id] = user_id
+        redirect '/chat'
       end
     end
     get '/' do
@@ -173,6 +248,7 @@ class SinatraRouter < Sinatra::Base
         @left_sidebar_open = session[:left_sidebar_open] || false
         @right_sidebar_open = session[:right_sidebar_open] || false
         @current_user = @database.get_user_by_id(session[:user_id])
+        @request_info = @database.get_request_info(session[:user_id])
         erb :'chat'
     end
     get '/chat/available_sectors' do
@@ -188,7 +264,44 @@ class SinatraRouter < Sinatra::Base
     #USER INITITATES CHAT, OR SENDS MESSAGES, THOSE GET SAVED, AND THEY CALL THE BACKEND TO GET THE AI RESPONSE
     post '/chat/messages' do
         user_message = params[:message]
-        model_key = params[:model] || 'capmap'
+        model_key = params[:model] || 'z-ai/glm-5'
+
+        # --- Model tier access gate ---
+        MODEL_TIERS = {
+          'claude-opus-4-6'          => 'pro',
+          'openai/gpt-5.2-codex'     => 'pro',
+          'capmap'                   => 'advanced',
+          'openai/gpt-5.2'           => 'advanced',
+          'claude-sonnet-4-6'        => 'advanced',
+          'gemini-3-pro'             => 'advanced',
+          'gemini-3.1-pro'           => 'advanced',
+          'openai/gpt-5.1-codex-max' => 'advanced',
+          'minimax/minimax-m2.5'     => 'advanced',
+          'moonshotai/kimi-k2.5'     => 'advanced',
+          'gemini-3-flash'           => 'free',
+          'qwen/qwen3.5-plus-02-15'  => 'free',
+          'z-ai/glm-5'              => 'free',
+        }.freeze unless defined?(MODEL_TIERS)
+
+        TIER_RANK = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }.freeze unless defined?(TIER_RANK)
+
+        user       = @database.get_user_by_id(session[:user_id])
+        acct       = @database.effective_account_type(user)
+        model_tier = MODEL_TIERS[model_key] || 'free'
+
+        if TIER_RANK[model_tier] > TIER_RANK[acct]
+          upgrade_to = model_tier == 'pro' ? 'Pro' : 'Advanced'
+          content_type :json
+          halt 403, { error: "#{model_key.split('/').last} requires a #{upgrade_to} plan. Please upgrade to use this model." }.to_json
+        end
+
+        # --- Rate limit check (weighted by model cost) ---
+        rate = @database.check_and_increment_requests(session[:user_id], model_key)
+        unless rate[:allowed]
+          content_type :json
+          halt 429, { error: "Not enough requests remaining. This model costs #{rate[:cost]} request(s) and you have #{rate[:remaining]} left. Upgrade your plan for more.", remaining: rate[:remaining] }.to_json
+        end
+
         chat_id = @database.update_or_create_chat("private", user_message, session[:current_chat_id], 'user', session[:user_id])
         session[:current_chat_id] = chat_id
         session[:first_visit] = false
@@ -270,37 +383,90 @@ class SinatraRouter < Sinatra::Base
     
     post '/create-checkout-session' do
       content_type 'application/json'
-      require 'stripe'
-      Stripe.api_key = ENV['STRIPE_API_KEY']
-      
-      # Get plan type from request
+      production = ENV['RACK_ENV'] == 'production'
+      Stripe.api_key = production ? ENV['STRIPE_API_KEY'] : ENV['STRIPE_DEV_API_KEY']
+
       plan = params[:plan] || 'advanced'
-      
-      # Map plans to Stripe price IDs (set these in your .env)
-      price_ids = {
-        'advanced' => ENV['LUIRA_ADVANCED_PRICE_ID'],
-        'pro' => ENV['LUIRA_PRO_PRICE_ID']
-      }
-      
+
+      price_ids = if production
+        {
+          'advanced' => ENV['LUIRA_ADVANCED_PRICE_ID'],
+          'pro'      => ENV['LUIRA_PRO_PRICE_ID']
+        }
+      else
+        {
+          'advanced' => ENV['LUIRA_ADVANCED_TEST_PRICE_ID'],
+          'pro'      => ENV['LUIRA_PRO_TEST_PRICE_ID']
+        }
+      end
+
       price_id = price_ids[plan] || price_ids['advanced']
-      
+      current_user_record = @database.get_user_by_id(session[:user_id])
+
       checkout_session = Stripe::Checkout::Session.create({
         line_items: [{
-          price: price_id,
-          quantity: 1,
+          price:    price_id,
+          quantity: 1
         }],
-        mode: 'subscription',
-        success_url: "#{request.base_url}/chat?upgrade=#{plan}",
-        cancel_url: "#{request.base_url}/chat",
-        client_reference_id: session[:user_id],
-        customer_email: @database.get_user_by_id(session[:user_id])[:email],
+        mode:                 'subscription',
+        success_url:          "#{request.base_url}/chat?upgrade=#{plan}",
+        cancel_url:           "#{request.base_url}/chat",
+        client_reference_id:  session[:user_id].to_s,
+        customer_email:       current_user_record[:email],
+        # Embed the plan in metadata — we read this back in the webhook
+        # instead of inferring from amount_total, so price changes don't break things.
+        subscription_data: {
+          metadata: { plan: plan, user_id: session[:user_id].to_s }
+        }
       })
-      
+
       redirect checkout_session.url, 303
-    end    
+    end
+
+    # Pricing / plan selection page
+    get '/plans' do
+      @current_user = @database.get_user_by_id(session[:user_id])
+      erb :'plans'
+    end
+
+    # Feedback submission
+    post '/feedback' do
+      return halt 401 unless session[:user_id]
+      user  = @database.get_user_by_id(session[:user_id])
+      return halt 401 unless user
+
+      note = params[:note].to_s.strip
+      return halt 422, { error: 'Note cannot be empty.' }.to_json if note.empty?
+
+      plan = (user[:account_type] || 'free').downcase
+      @database.create_feedback(user[:email], note, plan)
+
+      content_type :json
+      { ok: true }.to_json
+    end
+
+    # Stripe Customer Portal — lets paid users manage/cancel their subscription.
+    # Stripe hosts the entire UI; we just create the session and redirect.
+    post '/billing' do
+      Stripe.api_key = ENV['RACK_ENV'] == 'production' ? ENV['STRIPE_API_KEY'] : ENV['STRIPE_DEV_API_KEY']
+      current_user_record = @database.get_user_by_id(session[:user_id])
+      stripe_customer_id  = current_user_record[:stripe_customer_id]
+
+      if stripe_customer_id.nil? || stripe_customer_id.empty?
+        # Free user with no Stripe record — send them to the plans page instead
+        redirect '/plans'
+      else
+        portal = Stripe::BillingPortal::Session.create({
+          customer:   stripe_customer_id,
+          return_url: "#{request.base_url}/chat"
+        })
+        redirect portal.url, 303
+      end
+    end
+
     # Chat history routes
     get '/chat/history' do
-        chats = @database.get_chats
+        chats = @database.get_chats(session[:user_id])
         grouped_chats = group_chats_by_date(chats)
         
         content_type 'text/html'
@@ -308,30 +474,82 @@ class SinatraRouter < Sinatra::Base
     end
 
     post '/stripe/webhook' do
-      payload = request.body.read
+      payload    = request.body.read
       sig_header = request.env['HTTP_STRIPE_SIGNATURE']
-      begin 
-        event = Stripe::Webhook.construct_event(payload, sig_header, ENV["STRIPE_PROD_WEBHOOK_SECRET"])
+
+      # Use the right API key and webhook secret based on environment
+      production = ENV['RACK_ENV'] == 'production'
+      Stripe.api_key     = production ? ENV['STRIPE_API_KEY'] : ENV['STRIPE_DEV_API_KEY']
+      webhook_secret     = production ? ENV['STRIPE_PROD_WEBHOOK_SECRET'] : ENV['STRIPE_WEBHOOK_SECRET']
+
+      begin
+        event = Stripe::Webhook.construct_event(
+          payload, sig_header, webhook_secret
+        )
+      rescue Stripe::SignatureVerificationError => e
+        halt 400, { error: e.message }.to_json
       rescue => e
-        halt 400, { error: e.message}.to_json
+        halt 400, { error: e.message }.to_json
       end
-      
-      if event['type'] == 'checkout.session.completed'
-        session = event['data']['object']
-        user_id = session['client_reference_id']
-        
-        plan = session['amount_total'] >= 2000 ? 'pro' : 'advanced'
-        @database.change_user_plan(user_id, plan)
+
+      case event['type']
+
+      # ── User successfully subscribed ────────────────────────────────────
+      when 'checkout.session.completed'
+        checkout        = event['data']['object']
+        user_id         = checkout['client_reference_id']
+        subscription_id = checkout['subscription']
+
+        # Only process subscription checkouts with a linked user
+        if user_id && !user_id.empty? && subscription_id
+          subscription = Stripe::Subscription.retrieve(subscription_id)
+          plan         = subscription['metadata']['plan'] || 'advanced'
+          period_end = subscription['current_period_end']
+          ends_at    = period_end ? Time.at(period_end) : nil
+
+          @database.change_user_plan(user_id, plan)
+          @database.store_stripe_customer(
+            user_id,
+            checkout['customer'],
+            subscription_id,
+            ends_at
+          )
+        end
+
+      # ── User cancelled — keep access until period end (grace period) ───
+      when 'customer.subscription.deleted'
+        sub             = event['data']['object']
+        stripe_cust_id  = sub['customer']
+        # current_period_end is when they actually paid up to.
+        grace_ends_at   = Time.at(sub['current_period_end'])
+
+        @database.schedule_downgrade(stripe_cust_id, grace_ends_at)
+
+      # ── Payment failed — downgrade immediately ─────────────────────────
+      # invoice.payment_failed fires on every failed attempt.
+      # We only act on the final failure (next_payment_attempt is nil),
+      # meaning Stripe has given up and the subscription will be cancelled.
+      when 'invoice.payment_failed'
+        invoice        = event['data']['object']
+        stripe_cust_id = invoice['customer']
+
+        if invoice['next_payment_attempt'].nil?
+          # Stripe has exhausted retries — subscription is being killed.
+          # Downgrade immediately, no grace period (they didn't pay).
+          @database.downgrade_to_free_by_stripe_customer(stripe_cust_id)
+        end
+
       end
+
       status 200
     end
     
     delete '/chat/:id' do
         chat_id = params[:id]
-        @database.delete_chat_by_id(chat_id)
+        @database.delete_chat_by_id(chat_id, session[:user_id])
         
         # Return updated chat history
-        chats = @database.get_chats
+        chats = @database.get_chats(session[:user_id])
         grouped_chats = group_chats_by_date(chats)
         
         content_type 'text/html'
@@ -347,6 +565,8 @@ class SinatraRouter < Sinatra::Base
         @show_welcome = false
         @left_sidebar_open = session[:left_sidebar_open] || false
         @right_sidebar_open = session[:right_sidebar_open] || false
+        @current_user = @database.get_user_by_id(session[:user_id])
+        @request_info = @database.get_request_info(session[:user_id])
         
         erb :chat, locals: { messages: messages }
     end

@@ -18,27 +18,20 @@
                     },
                     animation: {
                         'fade-in-up': 'fadeInUp 1s ease-out',
-                        'fade-in': 'fadeIn 1.5s ease-out',
+                        'fade-in': 'fadeIn 0.4s ease-out',
                         'pulse-glow': 'pulseGlow 2s ease-in-out infinite alternate',
                         'float': 'float 6s ease-in-out infinite',
+                        'slide-down': 'slideDown 0.35s cubic-bezier(0.34,1.56,0.64,1)',
                     },
                     keyframes: {
-                        fadeInUp: {
-                            from: { opacity: '0', transform: 'translateY(30px)' },
-                            to: { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        fadeIn: {
-                            from: { opacity: '0' },
-                            to: { opacity: '1' }
-                        },
+                        fadeInUp: { from: { opacity: '0', transform: 'translateY(30px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+                        fadeIn:   { from: { opacity: '0' }, to: { opacity: '1' } },
                         pulseGlow: {
                             from: { boxShadow: '0 0 20px rgba(121, 16, 255, 0.3)' },
-                            to: { boxShadow: '0 0 40px rgba(121, 16, 255, 0.6)' }
+                            to:   { boxShadow: '0 0 40px rgba(121, 16, 255, 0.6)' }
                         },
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0px)' },
-                            '50%': { transform: 'translateY(-10px)' }
-                        }
+                        float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } },
+                        slideDown: { from: { opacity: '0', transform: 'translateY(-10px) scale(0.97)' }, to: { opacity: '1', transform: 'translateY(0) scale(1)' } },
                     }
                 }
             }
@@ -49,7 +42,6 @@
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
-        
         .animate-gradient-text {
             background: linear-gradient(-45deg, #ffffff, #00d2ff, #7910ff, #00d2ff, #ffffff);
             background-size: 400% 400%;
@@ -58,34 +50,60 @@
             -webkit-text-fill-color: transparent;
             animation: gradient-x 3s ease infinite;
         }
-
-        .input-glow:focus {
-            box-shadow: 0 0 20px rgba(121, 16, 255, 0.25);
-        }
-
+        .input-glow:focus { box-shadow: 0 0 20px rgba(121, 16, 255, 0.25); }
         .bg-grid {
-            background-image: 
+            background-image:
                 linear-gradient(rgba(121, 16, 255, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(121, 16, 255, 0.03) 1px, transparent 1px);
             background-size: 50px 50px;
         }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4; animation: float 8s ease-in-out infinite; }
 
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.4;
-            animation: float 8s ease-in-out infinite;
+        /* Code digit boxes */
+        .digit-box {
+            width: 48px; height: 56px;
+            background: rgba(5,10,48,0.5);
+            border: 1.5px solid rgba(121,16,255,0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+            caret-color: #00d2ff;
         }
+        .digit-box:focus {
+            border-color: #7910ff;
+            box-shadow: 0 0 18px rgba(121,16,255,0.3);
+            transform: scale(1.05);
+        }
+        .digit-box.filled { border-color: #00d2ff; }
+        .digit-box.error  { border-color: #ef4444 !important; box-shadow: 0 0 12px rgba(239,68,68,0.3) !important; animation: shake 0.4s ease; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%       { transform: translateX(-5px); }
+            40%       { transform: translateX(5px); }
+            60%       { transform: translateX(-4px); }
+            80%       { transform: translateX(4px); }
+        }
+
+        /* Send code button states */
+        .send-btn-idle    { background: rgba(121,16,255,0.15); border: 1.5px solid rgba(121,16,255,0.4); color: #a78bfa; }
+        .send-btn-loading { background: rgba(121,16,255,0.08); border: 1.5px solid rgba(121,16,255,0.2); color: #6b7280; cursor: not-allowed; }
+        .send-btn-sent    { background: rgba(0,210,255,0.12); border: 1.5px solid rgba(0,210,255,0.3); color: #67e8f9; }
+
+        /* Countdown */
+        #countdown { font-variant-numeric: tabular-nums; }
     </style>
 </head>
 <body class="bg-brand-navy text-white min-h-screen flex items-center justify-center p-8 bg-grid relative overflow-hidden">
-    <!-- Decorative orbs -->
     <div class="orb w-96 h-96 bg-brand-cyan -top-48 -right-48" style="animation-delay: 0s;"></div>
     <div class="orb w-80 h-80 bg-brand-purple -bottom-40 -left-40" style="animation-delay: -4s;"></div>
-    
+
     <div class="bg-gradient-to-br from-brand-dark/90 to-gray-800/90 backdrop-blur-xl p-12 rounded-3xl border border-brand-purple/20 max-w-md w-full animate-fade-in-up shadow-2xl animate-pulse-glow relative z-10">
-        <!-- Logo/Brand -->
+        <!-- Logo -->
         <div class="flex justify-center mb-6">
             <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-cyan to-brand-purple flex items-center justify-center animate-float">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,110 +113,274 @@
         </div>
 
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold mb-2 animate-gradient-text">
-                Create Account
-            </h1>
-            <p class="text-gray-400">
-                Join us and start your journey
-            </p>
+            <h1 class="text-3xl font-bold mb-2 animate-gradient-text">Create Account</h1>
+            <p class="text-gray-400">Verify your email to get started</p>
         </div>
-        
+
+        <!-- Error / success banners -->
         <% if @error %>
-            <div class="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl mb-6 animate-fade-in flex items-center gap-3">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+            <div id="server-error" class="bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl mb-6 animate-fade-in flex items-center gap-3">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <p class="text-sm font-medium"><%= @error %></p>
             </div>
         <% end %>
 
-        <% if @success %>
-            <div class="bg-green-500/20 border border-green-500/50 text-green-300 px-4 py-3 rounded-xl mb-6 animate-fade-in flex items-center gap-3">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <p class="text-sm font-medium"><%= @success %></p>
-            </div>
-        <% end %>
-        
-        <form method="post" class="space-y-5">
+        <form id="register-form" method="POST" action="/register" class="space-y-5" onsubmit="return validateBeforeSubmit()">
+
+            <!-- Email row with Send Code button -->
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/>
-                        </svg>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"/></svg>
+                        </div>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            required
+                            autofocus
+                            value="<%= @prefill_email || '' %>"
+                            class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow"
+                        >
                     </div>
-                    <input 
-                        type="email" 
-                        id="email"
-                        name="email" 
-                        placeholder="you@example.com" 
-                        required 
-                        autofocus
-                        class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow"
-                    >
+                    <button type="button" id="send-code-btn"
+                            onclick="sendCode()"
+                            class="send-btn-idle px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0">
+                        Send Code
+                    </button>
                 </div>
+                <p id="send-status" class="mt-1.5 text-xs text-gray-500 hidden"></p>
             </div>
 
+            <!-- 6-digit code section (hidden until code sent) -->
+            <div id="code-section" class="hidden animate-slide-down">
+                <label class="block text-sm font-medium text-gray-300 mb-3">Verification Code</label>
+                <div class="flex gap-2 justify-center mb-2" id="digit-inputs">
+                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="0" id="d0" autocomplete="off">
+                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="1" id="d1" autocomplete="off">
+                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="2" id="d2" autocomplete="off">
+                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="3" id="d3" autocomplete="off">
+                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="4" id="d4" autocomplete="off">
+                    <input class="digit-box" type="text" inputmode="numeric" maxlength="1" data-index="5" id="d5" autocomplete="off">
+                </div>
+                <!-- Hidden input that carries the assembled code -->
+                <input type="hidden" name="verification_code" id="verification_code">
+                <p class="text-center text-xs text-gray-500">
+                    Didn't get it? <button type="button" id="resend-btn" onclick="sendCode(true)" class="text-brand-cyan hover:text-white transition-colors underline underline-offset-2 disabled:opacity-40" disabled>
+                        Resend <span id="countdown"></span>
+                    </button>
+                </p>
+            </div>
+
+            <!-- Password -->
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                        </svg>
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                     </div>
-                    <input 
-                        type="password" 
-                        id="password"
-                        name="password" 
-                        placeholder="••••••••" 
-                        required 
-                        minlength="8"
-                        class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow"
-                    >
+                    <input type="password" id="password" name="password" placeholder="••••••••" required minlength="8"
+                           class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow">
                 </div>
                 <p class="mt-2 text-xs text-gray-500">Must be at least 8 characters</p>
             </div>
 
+            <!-- Confirm Password -->
             <div>
                 <label for="password_confirm" class="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                        </svg>
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                     </div>
-                    <input 
-                        type="password" 
-                        id="password_confirm"
-                        name="password_confirm" 
-                        placeholder="••••••••" 
-                        required 
-                        minlength="8"
-                        class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow"
-                    >
+                    <input type="password" id="password_confirm" name="password_confirm" placeholder="••••••••" required minlength="8"
+                           class="w-full pl-12 pr-4 py-4 bg-brand-navy/50 border border-brand-purple/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand-purple focus:ring-2 focus:ring-brand-purple/20 transition-all duration-300 input-glow">
                 </div>
             </div>
-            
-            <button 
-                type="submit" 
-                class="w-full px-6 py-4 bg-gradient-to-r from-brand-cyan to-brand-purple text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-cyan/40 focus:outline-none focus:ring-4 focus:ring-brand-cyan/30 mt-2"
-            >
+
+            <!-- Client-side error -->
+            <div id="client-error" class="hidden bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl animate-fade-in flex items-center gap-3">
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="text-sm font-medium" id="client-error-text"></p>
+            </div>
+
+            <button type="submit" id="submit-btn"
+                    class="w-full px-6 py-4 bg-gradient-to-r from-brand-cyan to-brand-purple text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-brand-cyan/40 focus:outline-none focus:ring-4 focus:ring-brand-cyan/30 mt-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:transform-none">
                 Create Account
             </button>
         </form>
-        
+
         <div class="mt-8 pt-6 border-t border-gray-700/50">
             <p class="text-center text-gray-400">
-                Already have an account? 
-                <a href="/login" class="text-brand-purple hover:text-white transition-colors font-medium">
-                    Sign in
-                </a>
+                Already have an account?
+                <a href="/login" class="text-brand-purple hover:text-white transition-colors font-medium">Sign in</a>
             </p>
         </div>
     </div>
+
+<script>
+let codeSent = false;
+let resendTimer = null;
+
+// ── Digit box behaviour ──────────────────────────────────────────────────────
+document.querySelectorAll('.digit-box').forEach((box, i, boxes) => {
+    box.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace') {
+            if (box.value === '' && i > 0) boxes[i - 1].focus();
+            box.classList.remove('filled');
+        }
+        // Allow only digits
+        if (e.key.length === 1 && !/\d/.test(e.key) && !e.ctrlKey && !e.metaKey) e.preventDefault();
+    });
+
+    box.addEventListener('input', () => {
+        if (box.value.length === 1) {
+            box.classList.add('filled');
+            box.classList.remove('error');
+            if (i < boxes.length - 1) boxes[i + 1].focus();
+        }
+        assembleCode();
+    });
+
+    // Paste handler — spread digits across boxes
+    box.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+        digits.split('').forEach((d, j) => {
+            if (boxes[i + j]) {
+                boxes[i + j].value = d;
+                boxes[i + j].classList.add('filled');
+            }
+        });
+        const next = Math.min(i + digits.length, boxes.length - 1);
+        boxes[next].focus();
+        assembleCode();
+    });
+});
+
+function assembleCode() {
+    const code = Array.from(document.querySelectorAll('.digit-box')).map(b => b.value).join('');
+    document.getElementById('verification_code').value = code;
+}
+
+// ── Send / resend code ───────────────────────────────────────────────────────
+async function sendCode(isResend = false) {
+    const email = document.getElementById('email').value.trim();
+    if (!email || !email.includes('@')) {
+        showClientError('Please enter a valid email address first.');
+        return;
+    }
+
+    const btn = document.getElementById('send-code-btn');
+    const status = document.getElementById('send-status');
+
+    btn.disabled = true;
+    btn.className = 'send-btn-loading px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+    btn.textContent = 'Sending…';
+
+    try {
+        const res = await fetch('/register/send-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `email=${encodeURIComponent(email)}`
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+            codeSent = true;
+            btn.className = 'send-btn-sent px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+            btn.textContent = '✓ Sent';
+
+            status.textContent = `Code sent to ${email} — check your inbox (and spam).`;
+            status.className = 'mt-1.5 text-xs text-brand-cyan';
+
+            // Show code section
+            const section = document.getElementById('code-section');
+            section.classList.remove('hidden');
+            setTimeout(() => document.getElementById('d0').focus(), 100);
+
+            // Lock email field
+            document.getElementById('email').readOnly = true;
+
+            // Start 60s resend countdown
+            startResendTimer();
+        } else {
+            throw new Error(data.error || 'Failed to send code.');
+        }
+    } catch (err) {
+        btn.disabled = false;
+        btn.className = 'send-btn-idle px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+        btn.textContent = 'Send Code';
+        showClientError(err.message);
+    }
+}
+
+function startResendTimer() {
+    const resendBtn = document.getElementById('resend-btn');
+    const countdownEl = document.getElementById('countdown');
+    resendBtn.disabled = true;
+    let secs = 60;
+
+    if (resendTimer) clearInterval(resendTimer);
+    resendTimer = setInterval(() => {
+        secs--;
+        countdownEl.textContent = `(${secs}s)`;
+        if (secs <= 0) {
+            clearInterval(resendTimer);
+            resendBtn.disabled = false;
+            countdownEl.textContent = '';
+        }
+    }, 1000);
+}
+
+// ── Form validation before submit ───────────────────────────────────────────
+function validateBeforeSubmit() {
+    hideClientError();
+
+    const code = document.getElementById('verification_code').value;
+    if (!codeSent || code.length !== 6) {
+        showClientError('Please verify your email first — enter the 6-digit code sent to your inbox.');
+        // Flash the digit boxes
+        document.querySelectorAll('.digit-box').forEach(b => {
+            b.classList.add('error');
+            setTimeout(() => b.classList.remove('error'), 600);
+        });
+        // Show the code section if hidden
+        document.getElementById('code-section').classList.remove('hidden');
+        return false;
+    }
+
+    const pw  = document.getElementById('password').value;
+    const pw2 = document.getElementById('password_confirm').value;
+    if (pw !== pw2) {
+        showClientError('Passwords do not match.');
+        return false;
+    }
+
+    return true;
+}
+
+function showClientError(msg) {
+    const el = document.getElementById('client-error');
+    document.getElementById('client-error-text').textContent = msg;
+    el.classList.remove('hidden');
+}
+function hideClientError() {
+    document.getElementById('client-error').classList.add('hidden');
+}
+
+// If server returned an error, re-show the code section (user may have had a wrong code)
+<% if @error && @prefill_email %>
+document.addEventListener('DOMContentLoaded', () => {
+    codeSent = true;
+    document.getElementById('code-section').classList.remove('hidden');
+    document.getElementById('email').readOnly = true;
+    document.getElementById('send-code-btn').className = 'send-btn-sent px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 flex-shrink-0';
+    document.getElementById('send-code-btn').textContent = '✓ Sent';
+});
+<% end %>
+</script>
 </body>
 </html>

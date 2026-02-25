@@ -285,6 +285,26 @@ table tr:hover {
   box-shadow: 0 0 20px rgba(135, 206, 250, 0.5);
   color: #1a1a2e !important;
 }
+/* Upgrade CTA button shimmer */
+.upgrade-cta-btn {
+  position: relative;
+  overflow: hidden;
+}
+.upgrade-cta-btn::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  animation: upgrade-shimmer 2.4s infinite;
+}
+@keyframes upgrade-shimmer {
+  0%   { left: -75%; }
+  60%  { left: 125%; }
+  100% { left: 125%; }
+}
 </style>
 
 <script>
@@ -422,20 +442,29 @@ function startAIStream(aiResponse, aiId) {
         </svg>
       </button>
     </div>
-    <button class="flex items-center gap-3 p-1.5 pr-4 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md rounded-xl transition-all duration-200 group shadow-sm" 
-            hx-post="/toggle-right-sidebar" 
-            hx-target="#agent-sidebar"
-            hx-swap="outerHTML">
-      <div class="p-2 bg-black rounded-lg text-white group-hover:scale-105 transition-transform duration-200 shadow-sm">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+    <div class="flex items-center gap-2">
+      <button class="flex items-center gap-3 p-1.5 pr-4 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md rounded-xl transition-all duration-200 group shadow-sm" 
+              hx-post="/toggle-right-sidebar" 
+              hx-target="#agent-sidebar"
+              hx-swap="outerHTML">
+        <div class="p-2 bg-black rounded-lg text-white group-hover:scale-105 transition-transform duration-200 shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+          </svg>
+        </div>
+        <div class="text-left">
+          <div class="text-sm font-bold text-gray-900 leading-none">Agent Models</div>
+          <div class="text-[10px] text-gray-500 font-medium mt-1">VC Copilot Suite</div>
+        </div>
+      </button>
+      <button class="p-2 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md hover:bg-gray-50 rounded-xl text-gray-600 transition-all duration-200 shadow-sm group"
+              title="Submit Feedback"
+              onclick="document.getElementById('feedback-modal').classList.remove('hidden')">
+        <svg class="w-5 h-5 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
-      </div>
-      <div class="text-left">
-        <div class="text-sm font-bold text-gray-900 leading-none">Agent Models</div>
-        <div class="text-[10px] text-gray-500 font-medium mt-1">VC Copilot Suite</div>
-      </div>
-    </button>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -499,59 +528,113 @@ function startAIStream(aiResponse, aiId) {
   </div>
 </div>
 
-<!-- Input Form - Sticky at bottom -->
-<div class="sticky bottom-0 bg-white px-4 py-6">
-  <div class="max-w-3xl mx-auto flex items-center gap-3">
-    
-    <!-- Model Selector -->
-    <div class="relative">
-      <button type="button"
-              id="model-selector-btn"
-              class="flex items-center gap-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition-colors duration-200 text-sm font-medium"
-              onclick="toggleModelDropdown()">
-        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-        </svg>
-        <span id="selected-model">CapMap</span>
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
-      </button>
 
-      <!-- Dropdown Menu -->
-      <div id="model-dropdown"
-           class="hidden absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-50">
-        <div class="py-1 max-h-80 overflow-y-auto">
-          <% [
-            ['capmap', 'CapMap', true],
-            ['claude-opus-4.5', 'Claude Opus 4.5', false],
-            ['claude-sonnet-4.5', 'Claude Sonnet 4.5', false],
-            ['deepseek-v3.2', 'DeepSeek v3.2', false],
-            ['gemini-3-pro', 'Gemini 3 Pro', false],
-            ['gemini-2.5-flash', 'Gemini 2.5 Flash', false],
-            ['gpt-5.2', 'GPT-5.2', false],
-            ['perplexity-sonar-pro-search', 'Perplexity Sonar Pro', false],
-            ['perplexity-sonar-reasoning-pro', 'Perplexity Reasoning', false],
-            ['qwen3-VL-thinking-235B', 'Qwen3 VL Thinking', false],
-            ['grok-4.1-fast', 'Grok 4.1 Fast', false],
-            ['kimi-k2-thinking', 'Kimi K2 Thinking', false],
-            ['glm-4.6', 'GLM-4.6', false]
-          ].each do |id, name, is_selected| %>
-          <button type="button" 
-                  class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center justify-between group <%= is_selected ? 'text-blue-600 font-medium' : 'text-gray-700' %>"
-                  onclick="selectModel('<%= id %>', '<%= name %>')">
-            <span><%= name %></span>
-            <% if is_selected %>
-                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+<!-- Input Form - Sticky at bottom -->
+<div class="sticky bottom-0 bg-white px-4 pb-6 pt-3">
+  <div class="max-w-3xl mx-auto flex flex-col gap-2">
+
+    <!-- Model Selector Row (above input) -->
+    <!-- Add padding-top to the group to create an invisible bridge so the hover doesn't break when moving to the menu -->
+    <div class="relative self-start group/model pt-4 -mt-4">
+      <!-- Text Pill Button -->
+      <div class="bg-white rounded-full shadow-sm border border-gray-200 px-3 py-1.5 flex items-center hover:shadow-md transition-all duration-300 cursor-pointer">
+        <span id="selected-model-pill" class="text-gray-700 text-sm font-medium group-hover/model:text-blue-600 transition-colors">GLM-5</span>
+        <svg class="w-3.5 h-3.5 text-gray-400 ml-1.5 group-hover/model:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+        </svg>
+      </div>
+
+      <!-- Dropdown Menu — opens upward ON HOVER -->
+      <!-- Uses opacity, visibility, and transform to slide up smoothly when hovering over the container -->
+      <div class="absolute bottom-[calc(100%-8px)] left-0 mb-4 w-72 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden z-[60] opacity-0 invisible translate-y-2 group-hover/model:opacity-100 group-hover/model:visible group-hover/model:translate-y-0 transition-all duration-200 pointer-events-none group-hover/model:pointer-events-auto">
+        
+        <!-- Header to show currently selected model inside the menu -->
+        <div class="bg-gray-50 px-3 py-2.5 border-b border-gray-200">
+          <div class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-0.5">Current Model</div>
+          <div class="text-sm font-semibold text-gray-900" id="selected-model-display">GLM-5</div>
+        </div>
+
+        <div class="px-2 py-2 max-h-[320px] overflow-y-auto">
+
+          <%
+            # [id, display_name, tier, cost]
+            models = [
+              ['claude-opus-4-6',           'Claude Opus 4.6',    'pro',      5],
+              ['openai/gpt-5.2-codex',      'GPT-5.2 Codex',      'pro',      5],
+              ['capmap',                    'CapMap',             'advanced', 8],
+              ['openai/gpt-5.2',            'GPT-5.2 (Base)',     'advanced', 3],
+              ['claude-sonnet-4-6',         'Claude Sonnet 4.6',  'advanced', 3],
+              ['gemini-3-pro',              'Gemini 3 Pro',       'advanced', 3],
+              ['gemini-3.1-pro',            'Gemini 3.1 Pro',     'advanced', 3],
+              ['openai/gpt-5.1-codex-max',  'GPT-5.1 Codex Max',  'advanced', 3],
+              ['minimax/minimax-m2.5',      'MiniMax M2.5',       'advanced', 3],
+              ['moonshotai/kimi-k2.5',      'Kimi K2.5',          'advanced', 3],
+              ['gemini-3-flash',            'Gemini 3 Flash',     'free',     1],
+              ['qwen/qwen3.5-plus-02-15',   'Qwen 3.5 Plus',      'free',     1],
+              ['z-ai/glm-5',                'GLM-5',              'free',     1]
+            ]
+
+            tier_label = { 'free' => 'Free', 'advanced' => 'Advanced', 'pro' => 'Pro' }
+            tier_rank = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }
+
+            acct = ((@current_user || {})[:account_type] || 'free').downcase
+            user_rank = tier_rank[acct] || 0
+
+            prev_tier = nil
+          %>
+
+          <% models.each do |id, name, tier, cost| %>
+            <% if tier != prev_tier %>
+              <%
+                header_text = case tier
+                  when 'pro'      then 'text-purple-600'
+                  when 'advanced' then 'text-amber-600'
+                  else                 'text-gray-400'
+                end
+              %>
+              <div class="px-2 pt-3 pb-1 mt-1 first:mt-0 first:pt-1">
+                <span class="text-[11px] font-bold uppercase tracking-wider <%= header_text %> opacity-80"><%= tier_label[tier] %></span>
+              </div>
+              <% prev_tier = tier %>
             <% end %>
-          </button>
+
+            <%
+              badge_classes = case tier
+                when 'pro'      then 'bg-[#1a0a2e] text-[#c084fc] ring-1 ring-[#c084fc]/20'
+                when 'advanced' then 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/50'
+                else                 'bg-gray-50 text-gray-500 ring-1 ring-gray-200'
+              end
+
+              is_locked = tier_rank[tier] > user_rank
+              btn_classes = if is_locked
+                "w-full text-left px-2.5 py-2 text-sm flex items-center justify-between gap-2 opacity-50 hover:bg-red-50 transition-colors duration-150 rounded-lg group"
+              else
+                "w-full text-left px-2.5 py-2 text-sm flex items-center justify-between gap-2 hover:bg-gray-100/80 transition-colors duration-150 rounded-lg group"
+              end
+              btn_action = is_locked ? "window.location='/plans'" : "document.getElementById('model-input').value='#{id}'; document.getElementById('selected-model-display').innerText='#{name.gsub("'", "\\\\'")}'; document.getElementById('selected-model-pill').innerText='#{name.gsub("'", "\\\\'")}'" 
+            %>
+            <button type="button"
+                    class="<%= btn_classes %>"
+                    onclick="<%= btn_action %>"
+                    title="<%= is_locked ? "Requires upgrade to #{tier_label[tier]}" : "#{cost} req" %>">
+              <!-- Model name -->
+              <span class="text-gray-700 font-medium <%= is_locked ? 'group-hover:text-red-700' : 'group-hover:text-blue-600' %> transition-colors flex-1 truncate">
+                <%= name %>
+                <% if is_locked %>
+                  <svg class="inline w-3 h-3 text-red-400 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <% end %>
+              </span>
+              <!-- Cost chip -->
+              <span class="text-[10px] font-semibold text-gray-400 flex-shrink-0 tabular-nums"><%= cost %>cr</span>
+            </button>
           <% end %>
+
         </div>
       </div>
     </div>
 
-    <!-- Chat Form -->
-    <form class="relative flex-1"
+    <!-- Chat Form — full width below model selector -->
+    <form class="relative w-full"
           hx-post="/chat/messages"
           hx-target=".container"
           hx-swap="beforeend"
@@ -562,7 +645,7 @@ function startAIStream(aiResponse, aiId) {
              placeholder="Send a message..."
              id="message-input"
              autocomplete="off"/>
-      <input type="hidden" name="model" id="model-input" value="capmap"/>
+      <input type="hidden" name="model" id="model-input" value="z-ai/glm-5"/>
       <button class="absolute right-2 top-1/2 transform -translate-y-1/2 w-9 h-9 bg-black hover:scale-105 active:scale-95 text-white rounded-full flex items-center justify-center transition-all duration-200 shadow-md"
               type="submit"
               id="send-button">
@@ -581,6 +664,7 @@ function startAIStream(aiResponse, aiId) {
         </svg>
       </button>
     </form>
+
   </div>
 </div>
 
@@ -612,11 +696,14 @@ function startAIStream(aiResponse, aiId) {
     badge_class = badge_colors[account_type] || badge_colors['free']
   %>
   
-  <div class="fixed bottom-6 left-6 z-50" id="account-widget">
-    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 flex items-center gap-3 hover:shadow-xl transition-shadow duration-300 max-w-xs">
+  <div class="fixed bottom-6 left-4 sm:left-6 z-50 group" id="account-widget">
+    <!-- Smooth width transition. Closed state: 64px wide (just enough for 48px avatar + 8px padding * 2). Open/XL state: 280px -->
+    <div class="bg-white/95 backdrop-blur-sm rounded-full xl:rounded-2xl shadow-lg border border-gray-200 p-2 flex items-center hover:shadow-xl transition-all duration-300 w-[64px] xl:w-[280px] group-hover:w-[280px] group-hover:rounded-2xl overflow-hidden cursor-pointer"
+         onclick="this.classList.toggle('w-[280px]')">
+      
       <!-- Avatar Circle with Gradient -->
       <div class="relative flex-shrink-0">
-        <div id="user-avatar" class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md <%= avatar_class %>" 
+        <div id="user-avatar" class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-sm <%= avatar_class %>" 
              style="<%= avatar_style %>">
           <%= @current_user[:email][0].upcase %>
         </div>
@@ -624,24 +711,72 @@ function startAIStream(aiResponse, aiId) {
         <div class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-white rounded-full"></div>
       </div>
       
-      <!-- User Info -->
-      <div class="flex-1 min-w-0">
-        <div class="text-sm font-semibold text-gray-900 truncate">
-          <%= @current_user[:email] %>
+      <!-- Content Container (fixed width so it doesn't wrap during transition) -->
+      <div class="flex items-center gap-3 pl-3 w-[200px] flex-shrink-0 opacity-0 xl:opacity-100 group-hover:opacity-100 transition-opacity duration-300">
+        
+        <!-- User Info -->
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <div class="text-sm font-semibold text-gray-900 truncate">
+              <%= @current_user[:email] %>
+            </div>
+            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border <%= badge_class %> flex-shrink-0">
+              <%= account_type %>
+            </span>
+          </div>
+          <% if @request_info %>
+            <%
+              pct       = ((@request_info[:count].to_f / @request_info[:limit]) * 100).round
+              remaining = @request_info[:remaining]
+              bar_color  = pct >= 80 ? '#ef4444' : pct >= 50 ? '#f59e0b' : '#22c55e'
+              text_color = pct >= 80 ? 'color:#ef4444' : pct >= 50 ? 'color:#f59e0b' : 'color:#6b7280'
+            %>
+            <div class="mt-1.5">
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-[9px] font-medium" style="<%= text_color %>">
+                  <%= remaining %> / <%= @request_info[:limit] %> requests left
+                </span>
+              </div>
+              <div class="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500"
+                     style="width:<%= [pct, 100].min %>%; background:<%= bar_color %>;"></div>
+              </div>
+            </div>
+          <% end %>
+          <% if account_type == 'free' %>
+            <a href="/plans" class="mt-2 block">
+              <button id="upgrade-btn"
+                      class="upgrade-cta-btn w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+                      style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 60%, #8b5cf6 100%); box-shadow: 0 2px 8px rgba(245,158,11,0.35);">
+                <svg class="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                Upgrade Plan
+              </button>
+            </a>
+          <% else %>
+            <form action="/billing" method="POST" class="mt-2 text-center relative z-10">
+              <button type="submit" id="manage-plan-btn"
+                      class="upgrade-cta-btn w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold text-white transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+                      style="background: <%= account_type == 'pro' ? 'linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)' : 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)' %>; box-shadow: 0 2px 8px rgba(99,102,241,0.3);">
+                <svg class="w-2.5 h-2.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                Manage
+              </button>
+            </form>
+          <% end %>
         </div>
-        <div class="mt-1">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border <%= badge_class %>">
-            <%= account_type.capitalize %>
-          </span>
-        </div>
+        
+        <!-- Settings Icon -->
+        <a href="/logout" class="flex-shrink-0 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 relative z-10" title="Logout">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+          </svg>
+        </a>
+
       </div>
-      
-      <!-- Settings Icon -->
-      <a href="/logout" class="flex-shrink-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200" title="Logout">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-        </svg>
-      </a>
     </div>
   </div>
 <% end %>
@@ -897,5 +1032,60 @@ function startAIStream(aiResponse, aiId) {
 </div>
 
 </div>
+
+<!-- Feedback Modal -->
+<div id="feedback-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="document.getElementById('feedback-modal').classList.add('hidden')"></div>
+  
+  <!-- Card -->
+  <div class="relative bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-md p-6">
+    <button class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors" onclick="document.getElementById('feedback-modal').classList.add('hidden')">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+
+    <h3 class="text-base font-bold text-gray-900 mb-1">Send Feedback</h3>
+    <p class="text-sm text-gray-500 mb-4">Report a bug, request a feature, or share anything on your mind.</p>
+
+    <div id="feedback-success" class="hidden mb-4 px-3 py-2.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 font-medium">Thanks! We got your feedback ✓</div>
+    <div id="feedback-error" class="hidden mb-4 px-3 py-2.5 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 font-medium">Something went wrong. Please try again.</div>
+
+    <textarea id="feedback-note"
+              class="w-full h-28 px-3 py-2.5 text-sm border border-gray-200 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 text-gray-700 placeholder-gray-400 transition"
+              placeholder="Describe the bug or feature you'd like..."></textarea>
+
+    <button onclick="submitFeedback()"
+            class="mt-3 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-gray-900 hover:bg-gray-700 active:scale-[0.98] transition-all duration-200">
+      Send
+    </button>
+  </div>
+</div>
+
+<script>
+function submitFeedback() {
+  const note = document.getElementById('feedback-note').value.trim();
+  const success = document.getElementById('feedback-success');
+  const error   = document.getElementById('feedback-error');
+  success.classList.add('hidden');
+  error.classList.add('hidden');
+  if (!note) return;
+
+  fetch('/feedback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'note=' + encodeURIComponent(note)
+  })
+  .then(r => {
+    if (r.ok) {
+      success.classList.remove('hidden');
+      document.getElementById('feedback-note').value = '';
+      setTimeout(() => document.getElementById('feedback-modal').classList.add('hidden'), 1800);
+    } else {
+      error.classList.remove('hidden');
+    }
+  })
+  .catch(() => error.classList.remove('hidden'));
+}
+</script>
 
 </body>

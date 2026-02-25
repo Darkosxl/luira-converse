@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plans & Pricing — Luira</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            gray: {
+              50: '#f9fafb',
+              100: '#f3f4f6',
+              200: '#e5e7eb',
+              300: '#d1d5db',
+              400: '#9ca3af',
+              500: '#6b7280',
+              600: '#4b5563',
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #111827;
+      min-height: 100vh;
+    }
+
+    /* Gradient Text */
+    .gradient-text {
+      background: linear-gradient(135deg, #111827 0%, #4b5563 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Cards */
+    .plan-card {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .plan-card:hover {
+      box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-4px);
+    }
+
+    /* Current Plan Styling */
+    .plan-card.current {
+      background-color: #f9fafb;
+      border: 2px solid #e5e7eb;
+    }
+    .plan-card.advanced-card.current {
+      border: 2px solid #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+    .plan-card.pro-card.current {
+      border: 2px solid #8b5cf6;
+      box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+    }
+
+    /* Popular Badge */
+    .popular-badge {
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Button Styling */
+    .btn-upgrade {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    
+    .btn-upgrade:active {
+      transform: translateY(1px);
+    }
+
+    .btn-advanced {
+      background-color: #111827;
+      color: #ffffff;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    .btn-advanced:hover {
+      background-color: #1f2937;
+      box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-pro {
+      background: linear-gradient(135deg, #111827 0%, #4b5563 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .btn-pro:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      opacity: 0.95;
+    }
+
+    .btn-current {
+      background-color: #f3f4f6;
+      color: #6b7280;
+      border-color: #e5e7eb;
+      cursor: default;
+    }
+    .btn-current:active {
+      transform: none;
+    }
+
+    .btn-manage {
+      background-color: #ffffff;
+      color: #374151;
+      border-color: #d1d5db;
+    }
+    .btn-manage:hover {
+      background-color: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    /* Current Tag */
+    .current-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .current-tag.free { background-color: #f3f4f6; color: #4b5563; }
+    .current-tag.advanced { background-color: #eff6ff; color: #2563eb; }
+    .current-tag.pro { background-color: #f3e8ff; color: #7e22ce; }
+
+    /* Icons */
+    .check-icon { color: #111827; }
+    .cross-icon { color: #d1d5db; }
+  </style>
+</head>
+<body class="antialiased selection:bg-gray-200">
+
+<div class="min-h-screen flex flex-col items-center px-4 py-12 sm:py-20 lg:py-24 max-w-7xl mx-auto">
+
+  <!-- Header Section -->
+  <div class="w-full text-center mb-16 max-w-3xl mx-auto">
+    <div class="mb-8 hidden sm:block">
+      <a href="/chat" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors px-4 py-2 rounded-lg hover:bg-gray-50">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        Back to Chat
+      </a>
+    </div>
+
+    <!-- Mobile back button (left aligned) -->
+    <div class="mb-8 sm:hidden flex justify-start">
+        <a href="/chat" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors p-2 -ml-2 rounded-lg hover:bg-gray-50">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Back
+        </a>
+    </div>
+
+    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6">
+      <span class="gradient-text">Simple, transparent pricing</span>
+    </h1>
+    <p class="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto">
+      Scale your analysis with access to state-of-the-art models and higher monthly limits. No hidden fees.
+    </p>
+  </div>
+
+  <%
+    account_type = (@current_user[:account_type] || 'free').downcase
+    # Respect grace period
+    ends_at = @current_user[:subscription_ends_at]
+    if ends_at && Time.now > ends_at
+      account_type = 'free'
+    end
+    has_stripe = @current_user[:stripe_customer_id] && !@current_user[:stripe_customer_id].empty?
+  %>
+
+  <!-- Pricing Cards Grid -->
+  <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+
+    <!-- FREE PLAN -->
+    <div class="plan-card <%= account_type == 'free' ? 'current' : '' %> p-8 sm:p-10">
+      <% if account_type == 'free' %>
+        <div class="mb-6">
+          <span class="current-tag free border border-gray-200">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
+            Your current plan
+          </span>
+        </div>
+      <% end %>
+      
+      <div class="mb-8">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Free</h3>
+        <div class="flex items-baseline gap-1 mb-2">
+          <span class="text-4xl font-extrabold tracking-tight text-gray-900">€0</span>
+          <span class="text-gray-500 font-medium">/mo</span>
+        </div>
+        <p class="text-sm text-gray-500">Perfect for exploring the platform.</p>
+      </div>
+      
+      <div class="h-px bg-gray-100 w-full mb-8"></div>
+      
+      <ul class="space-y-4 mb-8 flex-1">
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 check-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-600 text-sm font-medium">30 requests per month</span>
+        </li>
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 cross-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <span class="text-gray-400 text-sm">CapMap model access</span>
+        </li>
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 cross-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          <span class="text-gray-400 text-sm">Advanced AI models</span>
+        </li>
+      </ul>
+
+      <div class="mt-auto">
+        <button class="btn-upgrade btn-current" disabled>Current Plan</button>
+      </div>
+    </div>
+
+    <!-- ADVANCED PLAN -->
+    <div class="plan-card advanced-card <%= account_type == 'advanced' ? 'current' : '' %> p-8 sm:p-10 shadow-lg border-gray-300">
+      <div class="popular-badge">Most Popular</div>
+      
+      <% if account_type == 'advanced' %>
+        <div class="mb-6">
+          <span class="current-tag advanced">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
+            Your current plan
+          </span>
+        </div>
+      <% end %>
+      
+      <div class="mb-8">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Advanced</h3>
+        <div class="flex items-baseline gap-1 mb-2">
+          <span class="text-4xl font-extrabold tracking-tight text-gray-900">€10</span>
+          <span class="text-gray-500 font-medium">/mo</span>
+        </div>
+        <p class="text-sm text-gray-500">For daily professional analysis.</p>
+      </div>
+      
+      <div class="h-px bg-gray-100 w-full mb-8"></div>
+      
+      <ul class="space-y-4 mb-8 flex-1">
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 check-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-900 font-semibold text-sm">200 requests per month</span>
+        </li>
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 check-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-700 font-medium text-sm">Advanced models unlocked</span>
+        </li>
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 check-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-700 font-medium text-sm">CapMap model access</span>
+        </li>
+      </ul>
+
+      <div class="mt-auto">
+        <% if account_type == 'advanced' %>
+          <form action="/billing" method="POST">
+            <button class="btn-upgrade btn-manage" type="submit">Manage Subscription</button>
+          </form>
+        <% elsif account_type == 'free' %>
+          <form action="/create-checkout-session" method="POST">
+            <input type="hidden" name="plan" value="advanced">
+            <button class="btn-upgrade btn-advanced" type="submit">Upgrade to Advanced</button>
+          </form>
+        <% else %>
+          <!-- Pro user -->
+          <form action="/billing" method="POST">
+            <button class="btn-upgrade btn-manage" type="submit">Manage in Portal</button>
+          </form>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- PRO PLAN -->
+    <div class="plan-card pro-card <%= account_type == 'pro' ? 'current' : '' %> p-8 sm:p-10">
+      <% if account_type == 'pro' %>
+        <div class="mb-6">
+          <span class="current-tag pro border border-purple-100">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
+            Your current plan
+          </span>
+        </div>
+      <% end %>
+      
+      <div class="mb-8">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Pro</h3>
+        <div class="flex items-baseline gap-1 mb-2">
+          <span class="text-4xl font-extrabold tracking-tight text-gray-900">€20</span>
+          <span class="text-gray-500 font-medium">/mo</span>
+        </div>
+        <p class="text-sm text-gray-500">Maximum limits for heavy users.</p>
+      </div>
+      
+      <div class="h-px bg-gray-100 w-full mb-8"></div>
+      
+      <ul class="space-y-4 mb-8 flex-1">
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 check-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-900 font-semibold text-sm">500 requests per month</span>
+        </li>
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 check-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-700 font-medium text-sm">All AI models unlocked</span>
+        </li>
+        <li class="flex items-start gap-4">
+          <svg class="w-5 h-5 check-icon flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span class="text-gray-700 font-medium text-sm">CapMap model access</span>
+        </li>
+      </ul>
+
+      <div class="mt-auto">
+        <% if account_type == 'pro' %>
+          <form action="/billing" method="POST">
+            <button class="btn-upgrade btn-manage" type="submit">Manage Subscription</button>
+          </form>
+        <% else %>
+          <form action="/create-checkout-session" method="POST">
+            <input type="hidden" name="plan" value="pro">
+            <button class="btn-upgrade btn-pro" type="submit">Upgrade to Pro</button>
+          </form>
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Grace period notice -->
+  <% if @current_user[:subscription_ends_at] && Time.now < @current_user[:subscription_ends_at] && account_type != (@current_user[:account_type] || 'free').downcase %>
+    <div class="w-full max-w-3xl mb-12">
+      <div class="flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4 rounded-xl border border-yellow-200 bg-yellow-50 text-yellow-800 text-sm">
+        <svg class="w-5 h-5 flex-shrink-0 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+        <p>Your subscription is cancelled but you retain access until <strong class="font-semibold"><%= @current_user[:subscription_ends_at].strftime('%B %-d, %Y') %></strong>.</p>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Footer -->
+  <div class="w-full text-center border-t border-gray-200 pt-8 mt-4">
+    <p class="text-gray-500 text-sm">
+      Secure payment processing via Stripe. Cancel anytime.
+      <% if has_stripe %>
+        <br class="sm:hidden">
+        <span class="hidden sm:inline mx-2 text-gray-300">|</span>
+        <a href="#" onclick="document.preventDefault(); document.getElementById('billing-form').submit()" class="font-medium text-gray-900 hover:text-blue-600 transition-colors">Manage billing & invoices</a>
+        <form id="billing-form" action="/billing" method="POST" class="hidden"></form>
+      <% end %>
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>
