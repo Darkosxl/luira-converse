@@ -71,6 +71,25 @@ end
 # Authentication User class
 
 class SinatraRouter < Sinatra::Base
+
+    MODEL_TIERS = {
+      'claude-opus-4-6'          => 'pro',
+      'openai/gpt-5.2-codex'     => 'pro',
+      'capmap'                   => 'advanced',
+      'openai/gpt-5.2'           => 'advanced',
+      'claude-sonnet-4-6'        => 'advanced',
+      'gemini-3-pro'             => 'advanced',
+      'gemini-3.1-pro'           => 'advanced',
+      'openai/gpt-5.1-codex-max' => 'advanced',
+      'minimax/minimax-m2.5'     => 'advanced',
+      'moonshotai/kimi-k2.5'     => 'advanced',
+      'gemini-3-flash'           => 'free',
+      'qwen/qwen3.5-plus-02-15'  => 'free',
+      'z-ai/glm-5'               => 'free',
+    }.freeze
+
+    TIER_RANK = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }.freeze
+
     set :bind, '0.0.0.0'
     set :port, 4567
     set :server, 'puma'
@@ -267,23 +286,6 @@ class SinatraRouter < Sinatra::Base
         model_key = params[:model] || 'z-ai/glm-5'
 
         # --- Model tier access gate ---
-        MODEL_TIERS = {
-          'claude-opus-4-6'          => 'pro',
-          'openai/gpt-5.2-codex'     => 'pro',
-          'capmap'                   => 'advanced',
-          'openai/gpt-5.2'           => 'advanced',
-          'claude-sonnet-4-6'        => 'advanced',
-          'gemini-3-pro'             => 'advanced',
-          'gemini-3.1-pro'           => 'advanced',
-          'openai/gpt-5.1-codex-max' => 'advanced',
-          'minimax/minimax-m2.5'     => 'advanced',
-          'moonshotai/kimi-k2.5'     => 'advanced',
-          'gemini-3-flash'           => 'free',
-          'qwen/qwen3.5-plus-02-15'  => 'free',
-          'z-ai/glm-5'              => 'free',
-        }.freeze unless defined?(MODEL_TIERS)
-
-        TIER_RANK = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }.freeze unless defined?(TIER_RANK)
 
         user       = @database.get_user_by_id(session[:user_id])
         acct       = @database.effective_account_type(user)

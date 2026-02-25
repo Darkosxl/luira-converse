@@ -1,4 +1,4 @@
-# Gunicorn configuration for capmapai.com production deployment
+# Gunicorn configuration for production deployment
 import os
 import multiprocessing
 

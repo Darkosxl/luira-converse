@@ -851,53 +851,7 @@ function startUpgradeCelebration(plan) {
 let currentEventSource = null;
 let statusInterval = null;
 
-function toggleModelDropdown() {
-    const dropdown = document.getElementById('model-dropdown');
-    dropdown.classList.toggle('hidden');
-}
-
-function selectModel(id, name) {
-    // Update hidden input
-    document.getElementById('model-input').value = id;
-    
-    // Update button text
-    document.getElementById('selected-model').textContent = name;
-    
-    // Update selected state in dropdown (visual only, quick toggle)
-    const buttons = document.querySelectorAll('#model-dropdown button');
-    buttons.forEach(btn => {
-        const span = btn.querySelector('span');
-        const isSelected = span.textContent === name;
-        
-        btn.className = `w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center justify-between group ${isSelected ? 'text-blue-600 font-medium' : 'text-gray-700'}`;
-        
-        // Remove existing checkmark if any
-        const existingCheck = btn.querySelector('svg');
-        if (existingCheck) existingCheck.remove();
-        
-        // Add checkmark if selected
-        if (isSelected) {
-            btn.innerHTML = `<span>${name}</span><svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>`;
-        } else {
-             btn.innerHTML = `<span>${span.textContent}</span>`;
-        }
-    });
-
-    // Close dropdown
-    document.getElementById('model-dropdown').classList.add('hidden');
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    const dropdown = document.getElementById('model-dropdown');
-    const button = document.getElementById('model-selector-btn');
-    
-    if (!dropdown.classList.contains('hidden') && 
-        !button.contains(event.target) && 
-        !dropdown.contains(event.target)) {
-        dropdown.classList.add('hidden');
-    }
-});
+// (model dropdown is hover-based; no click handler needed)
 
 // Stop generation logic
 function stopGeneration() {
