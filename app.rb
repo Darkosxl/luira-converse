@@ -75,7 +75,7 @@ class SinatraRouter < Sinatra::Base
       'z-ai/glm-5'               => 'free',
     }.freeze
 
-    TIER_RANK = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }.freezens something in your app is trying to use ActiveSupport (a Rails component) without it being properly required. Let me look at your app.rb to find the culprit.
+    TIER_RANK = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }.freeze
 
     set :bind, '0.0.0.0'
     set :port, 4567
