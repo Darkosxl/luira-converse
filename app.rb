@@ -8,6 +8,7 @@ require 'redcarpet'
 require 'json'
 require 'net/http'
 require 'rack/attack'
+require 'active_support/cache'
 require 'stripe'
 
 require_relative 'models/stream'
@@ -19,7 +20,7 @@ require_relative 'models/conversation'
 # ==========================================
 Dotenv.load
 
-# Rack::Attack uses its built-in in-memory cache store
+Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
 
 # Rate limiting rules (periods in seconds)
 Rack::Attack.throttle('req/ip', limit: 100, period: 60) { |req| req.ip }
