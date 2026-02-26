@@ -8,7 +8,6 @@ require 'redcarpet'
 require 'json'
 require 'net/http'
 require 'rack/attack'
-require 'active_support/cache'
 require 'stripe'
 
 require_relative 'models/stream'
@@ -20,7 +19,7 @@ require_relative 'models/conversation'
 # ==========================================
 Dotenv.load
 
-Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+Rack::Attack.cache.store = Rack::Attack::Store::ActiveSupportCacheStoreAdapter.new(ActiveSupport::Cache::MemoryStore.new) rescue Rack::Attack::Cache.new
 
 # Rate limiting rules (periods in seconds)
 Rack::Attack.throttle('req/ip', limit: 100, period: 60) { |req| req.ip }
@@ -76,7 +75,7 @@ class SinatraRouter < Sinatra::Base
       'z-ai/glm-5'               => 'free',
     }.freeze
 
-    TIER_RANK = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }.freeze
+    TIER_RANK = { 'free' => 0, 'advanced' => 1, 'pro' => 2 }.freezens something in your app is trying to use ActiveSupport (a Rails component) without it being properly required. Let me look at your app.rb to find the culprit.
 
     set :bind, '0.0.0.0'
     set :port, 4567
